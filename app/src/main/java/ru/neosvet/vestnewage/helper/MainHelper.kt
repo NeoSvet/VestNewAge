@@ -296,7 +296,7 @@ class MainHelper(private val act: MainActivity) {
     }
 
     private fun showTip() {
-        TipUtils.showTipIfNeed(TipUtils.Type.MAIN_STAR)
+        TipUtils.showTipIfNeed(TipUtils.Type.MAIN)
     }
 
     fun setBottomMenu(menu: List<Section>) {

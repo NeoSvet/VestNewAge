@@ -194,12 +194,10 @@ class HelpToiler : ViewModel() {
     private fun clickTip(index: Int) {
         when (index) {
             TIP_MAIN ->
-                TipActivity.showTip(TipUtils.Type.MAIN_STAR)
+                TipActivity.showTip(TipUtils.Type.MAIN)
 
-            TIP_BROWSER -> {
-                TipActivity.showTip(TipUtils.Type.BROWSER_FULLSCREEN)
-                TipActivity.showTip(TipUtils.Type.BROWSER_PANEL)
-            }
+            TIP_BROWSER ->
+                TipActivity.showTip(TipUtils.Type.BROWSER)
 
             TIP_SEARCH ->
                 TipActivity.showTip(TipUtils.Type.SEARCH)

@@ -9,6 +9,7 @@
         android:id="@+id/iv_tip"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginVertical="@dimen/half_indent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -35,7 +36,7 @@
         android:id="@+id/btn_off_all"
         android:layout_width="wrap_content"
         android:layout_height="0dp"
-        android:layout_marginStart="6dp"
+        android:layout_marginStart="@dimen/half_indent"
         android:gravity="center_vertical"
         android:paddingStart="@dimen/double_indent"
         android:paddingEnd="@dimen/double_indent"
@@ -49,7 +50,7 @@
         android:id="@+id/btn_ok"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="6dp"
+        android:layout_margin="@dimen/half_indent"
         android:paddingStart="@dimen/double_indent"
         android:paddingTop="@dimen/def_indent"
         android:paddingEnd="@dimen/double_indent"

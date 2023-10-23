@@ -139,8 +139,7 @@ class BrowserActivity : AppCompatActivity(), WebClient.Parent, NeoInterface.Pare
         initWords()
         if (savedInstanceState == null) {
             initArguments()
-            TipUtils.showTipIfNeed(TipUtils.Type.BROWSER_FULLSCREEN)
-            TipUtils.showTipIfNeed(TipUtils.Type.BROWSER_PANEL)
+            TipUtils.showTipIfNeed(TipUtils.Type.BROWSER)
         }
         runObserve()
         onBackPressedDispatcher.addCallback(this, onBackPressedCallback)

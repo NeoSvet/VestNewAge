@@ -13,6 +13,10 @@ import ru.neosvet.vestnewage.helper.MainHelper
 import ru.neosvet.vestnewage.storage.DataBase
 import ru.neosvet.vestnewage.view.activity.BrowserActivity.Companion.openReader
 import ru.neosvet.vestnewage.view.activity.MainActivity
+import java.io.BufferedReader
+import java.io.BufferedWriter
+import java.io.FileReader
+import java.io.FileWriter
 
 class LaunchUtils(context: Context) {
     companion object {
@@ -69,6 +73,7 @@ class LaunchUtils(context: Context) {
             if (file.exists()) file.delete()
         }
         if (previousVer < 71) {
+            refTips()
             var pref = App.context.getSharedPreferences(
                 TipUtils.TAG, Context.MODE_PRIVATE
             )
@@ -92,6 +97,35 @@ class LaunchUtils(context: Context) {
                 if (it.exists()) it.delete()
             }
         }
+    }
+
+    private fun refTips() {
+        val f = Files.parent("/shared_prefs/tip.xml")
+        if (!f.exists()) return
+        val a = listOf("MAIN_STAR", "BROWSER_PANEL", "BROWSER_FULLSCREEN")
+        val b = listOf(
+            TipUtils.Type.MAIN.toString(), TipUtils.Type.BROWSER.toString(), ""
+        )
+        val br = BufferedReader(FileReader(f))
+        val sb = StringBuilder()
+        var need: Boolean
+        br.forEachLine {
+            need = true
+            for (i in b.indices) {
+                if (it.contains(a[i])) {
+                    if (b[i].isNotEmpty())
+                        sb.append(it.replace(a[i], b[i]))
+                    need = false
+                }
+            }
+            if (need) sb.append(it)
+            sb.append(Const.N)
+        }
+        br.close()
+        f.delete()
+        val bw = BufferedWriter(FileWriter(f))
+        bw.write(sb.toString())
+        bw.close()
     }
 
     private fun showNotifDownloadAll() {
