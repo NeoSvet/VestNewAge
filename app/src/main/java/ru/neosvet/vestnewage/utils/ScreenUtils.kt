@@ -3,10 +3,9 @@ package ru.neosvet.vestnewage.utils
 import android.app.Activity
 import android.graphics.Point
 import android.os.Build
-import ru.neosvet.vestnewage.R
 
 object ScreenUtils {
-    enum class Type {
+    enum class Type{
         PHONE_PORT, PHONE_LAND, TABLET_PORT, TABLET_LAND
     }
 
@@ -34,35 +33,26 @@ object ScreenUtils {
             1 else 2
 
     fun init(activity: Activity) {
-        type = when (activity.resources.getInteger(R.integer.screen_mode)) {
-            activity.resources.getInteger(R.integer.screen_phone_port) ->
-                Type.PHONE_PORT
-            activity.resources.getInteger(R.integer.screen_phone_land) ->
-                Type.PHONE_LAND
-            activity.resources.getInteger(R.integer.screen_tablet_land) ->
-                Type.TABLET_LAND
-            activity.resources.getInteger(R.integer.screen_tablet_port) ->
-                Type.TABLET_PORT
-            else ->
-                Type.PHONE_PORT
-        }
-        if (type != Type.PHONE_LAND) {
-            isWide = isTabletLand
-            return
-        }
         val width: Int
         val height: Int
+        val density = activity.resources.displayMetrics.density
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             val d = activity.windowManager.currentWindowMetrics
-            width = d.bounds.width()
-            height = d.bounds.height()
+            width = (d.bounds.width() / density).toInt()
+            height = (d.bounds.height() / density).toInt()
         } else {
             val p = Point(0, 0)
             activity.windowManager.defaultDisplay.getRealSize(p)
-            width = p.x
-            height = p.y
+            width = (p.x / density).toInt()
+            height = (p.y / density).toInt()
         }
         val ratio = width / height.toFloat()
-        isWide = ratio > 1.8f
+        isWide = ratio > 1.5f
+        type = when {
+            width > 1000 && width > height -> Type.TABLET_LAND
+            height > 1000 -> Type.TABLET_PORT
+            width > height -> Type.PHONE_LAND
+            else -> Type.PHONE_PORT
+        }
     }
 }

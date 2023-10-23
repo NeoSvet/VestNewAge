@@ -8,11 +8,6 @@
     <dimen name="margin_side">5dp</dimen>
     <dimen name="margin_top">0dp</dimen>
     <integer name="top_minus">180</integer>
-    <integer name="screen_phone_port">0</integer>
-    <integer name="screen_phone_land">1</integer>
-    <integer name="screen_tablet_port">2</integer>
-    <integer name="screen_tablet_land">3</integer>
-    <integer name="screen_mode">0</integer>
     <dimen name="title_margin_bottom">57dp</dimen>
     <dimen name="content_margin_bottom">80dp</dimen>
     <dimen name="bottom_bar_height">56dp</dimen>

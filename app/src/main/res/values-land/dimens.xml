@@ -6,7 +6,6 @@
     <dimen name="margin_side">85dp</dimen>
     <dimen name="margin_top">48dp</dimen>
     <integer name="top_minus">90</integer>
-    <integer name="screen_mode">1</integer>
     <dimen name="head_height">100dp</dimen>
     <dimen name="list_height">200dp</dimen>
     <dimen name="content_margin_bottom">60dp</dimen>
