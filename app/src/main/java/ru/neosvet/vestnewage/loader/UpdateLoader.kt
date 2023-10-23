@@ -168,13 +168,12 @@ class UpdateLoader(private val client: NeoClient) : Loader {
 
     fun checkCalendar(): String? {
         val loader = CalendarLoader(client)
-        val link1 = loader.getLinkList().last()
         loader.load()
-        val link2 = loader.getLinkList().last()
-        if (link1 == link2) return null
+        val list = loader.getLinkList()
+        val link = if(list.isEmpty()) "" else list.last()
         val today = DateUnit.initMskNow().toShortDateString()
-        if (link2.contains(today))
-            return link2
+        if (link.contains(today))
+            return link
         return null
     }
 
