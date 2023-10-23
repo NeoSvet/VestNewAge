@@ -9,18 +9,10 @@ import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.data.Section
-import ru.neosvet.vestnewage.helper.BrowserHelper
 import ru.neosvet.vestnewage.helper.MainHelper
-import ru.neosvet.vestnewage.helper.SearchHelper
 import ru.neosvet.vestnewage.storage.DataBase
-import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.view.activity.BrowserActivity.Companion.openReader
 import ru.neosvet.vestnewage.view.activity.MainActivity
-import ru.neosvet.vestnewage.view.list.RequestAdapter
-import java.io.BufferedReader
-import java.io.BufferedWriter
-import java.io.FileReader
-import java.io.FileWriter
 
 class LaunchUtils(context: Context) {
     companion object {
@@ -64,14 +56,6 @@ class LaunchUtils(context: Context) {
             showSummaryNotif()
             return
         }
-        if (previousVer < 63) checkSearchDates()
-        if (previousVer < 64) {
-            refTips()
-            Thread {
-                checkSearchRequests()
-                sortBase()
-            }.start()
-        }
         if (previousVer < 65) {
             val file = Files.parent("/cache/file")
             if (file.exists()) file.delete()
@@ -89,7 +73,7 @@ class LaunchUtils(context: Context) {
                 TipUtils.TAG, Context.MODE_PRIVATE
             )
             var editor = pref.edit()
-            editor.remove( "CALENDAR")
+            editor.remove("CALENDAR")
             editor.apply()
             pref = App.context.getSharedPreferences(
                 MainHelper.TAG, Context.MODE_PRIVATE
@@ -107,117 +91,6 @@ class LaunchUtils(context: Context) {
             ).forEach {
                 if (it.exists()) it.delete()
             }
-        }
-    }
-
-    private fun refTips() {
-        val f = Files.parent("/shared_prefs/calendar.xml")
-        f.delete()
-        val pref = App.context.getSharedPreferences(TipUtils.TAG, Context.MODE_PRIVATE)
-        val editor = pref.edit()
-
-        var p = App.context.getSharedPreferences(MainHelper.TAG, Context.MODE_PRIVATE)
-        if (!p.getBoolean(TipUtils.TAG, true))
-            editor.putBoolean(TipUtils.Type.MAIN_STAR.toString(), false)
-        p.edit().remove(TipUtils.TAG).apply()
-
-        p = App.context.getSharedPreferences(BrowserHelper.TAG, Context.MODE_PRIVATE)
-        if (!p.getBoolean(TipUtils.TAG, true))
-            editor.putBoolean(TipUtils.Type.BROWSER_PANEL.toString(), false)
-        p.edit().remove(TipUtils.TAG).apply()
-
-        editor.apply()
-    }
-
-    private fun sortBase() {
-        try {
-            val storage = PageStorage()
-            val list = mutableListOf<Pair<Int, String>>()
-            var d = DateUnit.initToday()
-            val max = d.timeInDays + 1
-            d = DateUnit.putYearMonth(2017, 1)
-            var n: Int
-            while (d.timeInDays < max) {
-                if (Files.dateBase(d.my).exists()) {
-                    storage.open(d.my)
-                    val cursor = storage.getListAll()
-                    if (cursor.moveToFirst()) {
-                        val l = cursor.getColumnIndex(Const.LINK)
-                        val i = cursor.getColumnIndex(DataBase.ID)
-                        while (cursor.moveToNext())
-                            list.add(Pair(cursor.getInt(i), cursor.getString(l)))
-                    }
-                    cursor.close()
-                    list.sortBy { it.second }
-                    var x = 900
-                    var i = 0
-                    while (i < list.size) {
-                        val a = list[i].first
-                        val b = i + 2
-                        if (a == b) {
-                            i++
-                            continue
-                        }
-                        val r = list.find { p -> p.first == b }
-                        if (r == null) {
-                            storage.changeId(a, b)
-                        } else {
-                            n = list.indexOf(r)
-                            if (n + 2 == a) {
-                                storage.replaceId(a, b)
-                                list.removeAt(n)
-                            } else {
-                                while (list.find { p -> p.first == x } != null)
-                                    x++
-                                storage.changeId(r.first, x)
-                                n = list.indexOf(r)
-                                list.removeAt(n)
-                                list.add(n, Pair(x, r.second))
-                                x++
-                                storage.changeId(a, b)
-                            }
-                        }
-                        i++
-                    }
-                    storage.close()
-                    list.clear()
-                }
-                d.changeMonth(1)
-            }
-        } catch (ignore: Exception) {
-        }
-    }
-
-    private fun checkSearchRequests() {
-        val f = Files.slash(Const.SEARCH)
-        if (!f.exists()) return
-        val list = mutableListOf<String>()
-        val br = BufferedReader(FileReader(f))
-        br.forEachLine {
-            if (!list.contains(it)) {
-                list.add(it)
-                if (list.size == RequestAdapter.LIMIT) return@forEachLine
-            }
-        }
-        br.close()
-        f.delete()
-        val bw = BufferedWriter(FileWriter(f))
-        list.forEach {
-            bw.write(it + Const.N)
-        }
-        bw.close()
-    }
-
-    private fun checkSearchDates() {
-        val pref = App.context.getSharedPreferences(SearchHelper.TAG, Context.MODE_PRIVATE)
-        val a = pref.getInt(Const.START, 0)
-        val b = pref.getInt(Const.END, 0)
-        if (a > b) {
-            val editor = pref.edit()
-            editor.putInt(Const.START, b)
-            editor.putInt(Const.END, a)
-            editor.putBoolean(SearchHelper.INVERT, true)
-            editor.apply()
         }
     }
 
