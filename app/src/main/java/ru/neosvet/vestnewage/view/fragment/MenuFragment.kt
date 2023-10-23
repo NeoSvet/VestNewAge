@@ -130,6 +130,6 @@ class MenuFragment : Fragment() {
         if (item.isSelect) return
         if (isFullScreen.not())
             iSelect = index
-        act?.setSection(mMenu[index], false)
+        act?.setSection(mMenu[index], !ScreenUtils.isTablet)
     }
 }
