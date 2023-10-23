@@ -95,7 +95,7 @@ class UpdateLoader(private val client: NeoClient) : Loader {
         return loader.checkUpdate()
     }
 
-    fun checkSummary(updateUnread: Boolean = false): NeoList<Pair<String, String>> {
+    fun checkSummary(updateUnread: Boolean): NeoList<Pair<String, String>> {
         val list = NeoList<Pair<String, String>>()
         val stream = client.getStream(Urls.RSS)
         val br = BufferedReader(InputStreamReader(stream), 1000)

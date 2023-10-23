@@ -58,7 +58,7 @@ class CheckService : LifecycleService() {
         val loader = UpdateLoader(NeoClient())
         try {
             Urls.restore()
-            val list = loader.checkSummary()
+            val list = loader.checkSummary(true)
             val pref = getSharedPreferences(SummaryHelper.TAG, Context.MODE_PRIVATE)
             if (pref.getBoolean(Const.MODE, true)) {
                 if (loader.checkAddition())

@@ -250,7 +250,7 @@ class HomeToiler : NeoToiler() {
         val i = indexSummary
         if (i == -1) return
         postState(HomeState.Loading(i))
-        val list = loader.checkSummary()
+        val list = loader.checkSummary(true)
         val isRss = if (list.isNotEmpty) {
             titleSummary = strings.new + ": " + list.first().first
             linkSummary = list.first().second
