@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:tools="http://schemas.android.com/tools"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -9,6 +9,7 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
     <uses-permission android:name="com.android.alarm.permission.SET_ALARM" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
@@ -37,17 +38,17 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
-                <data android:scheme="https"/>
-                <data android:scheme="http"/>
-                <data android:pathPrefix="/"/>
-                <data android:host="blagayavest.info"/>
-                <data android:host="otkroveniya.com"/>
-                <data android:host="www.otkroveniya.com"/>
-                <data android:host="www.otkroveniya.info"/>
-                <data android:host="www.otkroveniya.eu"/>
-                <data android:host="www.otkroveniya.ru"/>
-                <data android:host="otkroveniya.ru"/>
-                <data android:host="chenneling.info"/>
+                <data android:scheme="https" />
+                <data android:scheme="http" />
+                <data android:pathPrefix="/" />
+                <data android:host="blagayavest.info" />
+                <data android:host="otkroveniya.com" />
+                <data android:host="www.otkroveniya.com" />
+                <data android:host="www.otkroveniya.info" />
+                <data android:host="www.otkroveniya.eu" />
+                <data android:host="www.otkroveniya.ru" />
+                <data android:host="otkroveniya.ru" />
+                <data android:host="chenneling.info" />
             </intent-filter>
         </activity>
         <activity
@@ -66,13 +67,19 @@
 
         <service
             android:name=".service.CheckService"
+            android:foregroundServiceType="shortService"
             android:icon="@drawable/ic_summary"
             android:label="@string/check_summary"
             android:process=":check" />
         <service
             android:name=".service.LoaderService"
+            android:foregroundServiceType="specialUse"
             android:icon="@drawable/ic_download"
-            android:label="@string/load" />
+            android:label="@string/load">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Loading data. Launched exclusively by the user within the application." />
+        </service>
 
         <receiver android:name=".utils.PromUtils$Rec" />
         <receiver android:name=".helper.SummaryHelper$Rec" />
