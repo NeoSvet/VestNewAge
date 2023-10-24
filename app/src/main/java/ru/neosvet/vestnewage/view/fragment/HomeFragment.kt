@@ -30,7 +30,7 @@ import ru.neosvet.vestnewage.viewmodel.state.ListState
 import ru.neosvet.vestnewage.viewmodel.state.NeoState
 
 class HomeFragment : NeoFragment(), HomeAdapter.Events {
-    private lateinit var adapter: HomeAdapter
+    private var adapter: HomeAdapter? = null
     private val toiler: HomeToiler
         get() = neotoiler as HomeToiler
     override val title: String
@@ -40,10 +40,10 @@ class HomeFragment : NeoFragment(), HomeAdapter.Events {
     private val listHelper: HomeListHelper by lazy {
         HomeListHelper { i, up ->
             if (up) {
-                adapter.moveUp(i)
+                adapter?.moveUp(i)
                 toiler.moveUp(i)
             } else {
-                adapter.moveDown(i)
+                adapter?.moveDown(i)
                 toiler.moveDown(i)
             }
         }
@@ -82,11 +82,11 @@ class HomeFragment : NeoFragment(), HomeAdapter.Events {
             openedReader = false
         }
         if (initAdapter)
-            adapter.restoreTimer()
+            adapter?.restoreTimer()
     }
 
     override fun onPause() {
-        adapter.stopTimer()
+        adapter?.stopTimer()
         super.onPause()
     }
 
@@ -98,8 +98,10 @@ class HomeFragment : NeoFragment(), HomeAdapter.Events {
     }
 
     override fun setStatus(load: Boolean) {
-        if (!load && adapter.loadingIndex > -1) //if error
-            adapter.finishLoading()
+        adapter?.let {
+            if (!load && it.loadingIndex > -1) //if error
+                it.finishLoading()
+        }
     }
 
     override fun onChangedOtherState(state: NeoState) {
@@ -108,11 +110,13 @@ class HomeFragment : NeoFragment(), HomeAdapter.Events {
                 initPrimary(state)
 
             is ListState.Update<*> ->
-                adapter.update(state.index, state.item as HomeItem)
+                adapter?.update(state.index, state.item as HomeItem)
 
-            is HomeState.Loading -> if (adapter.loadingIndex == state.index)
-                adapter.finishLoading() else
-                adapter.startLoading(state.index)
+            is HomeState.Loading -> adapter?.let {
+                if (it.loadingIndex == state.index)
+                    it.finishLoading() else
+                    it.startLoading(state.index)
+            }
 
             is HomeState.Status -> if (state.openedReader)
                 toiler.updateJournal()
@@ -121,7 +125,7 @@ class HomeFragment : NeoFragment(), HomeAdapter.Events {
                 initMenuEdit(state.list)
 
             is HomeState.ChangeHomeItem ->
-                adapter.changeMenu(state.index, state.section)
+                adapter?.changeMenu(state.index, state.section)
 
             is HomeState.ChangeMainItem ->
                 act?.changeMenu(state.index, state.item)
@@ -143,7 +147,7 @@ class HomeFragment : NeoFragment(), HomeAdapter.Events {
     }
 
     private fun initPrimary(state: HomeState.Primary) {
-        if (initAdapter) adapter.stopTimer()
+        if (initAdapter) adapter?.stopTimer()
         adapter = HomeAdapter(
             events = this, isEditor = state.isEditor,
             items = state.list, menu = state.menu
@@ -162,7 +166,7 @@ class HomeFragment : NeoFragment(), HomeAdapter.Events {
                 val i = state.list.indexOfFirst {
                     it.type == HomeItem.Type.MENU
                 } + 1
-                adapter.isTall = i < state.list.size || i % 2 == 0
+                adapter?.isTall = i < state.list.size || i % 2 == 0
             } else
                 rvList.layoutManager = GridLayoutManager(requireContext(), 1)
         }
@@ -228,7 +232,7 @@ class HomeFragment : NeoFragment(), HomeAdapter.Events {
     }
 
     override fun onMenuClick(index: Int, section: Section) {
-        if (adapter.isEditor) {
+        if (adapter?.isEditor == true) {
             toiler.editMenu(index, false)
             return
         }
@@ -255,7 +259,7 @@ class HomeFragment : NeoFragment(), HomeAdapter.Events {
     override fun onBackPressed(): Boolean {
         when {
             rvMenu.isVisible -> closeEditMenu()
-            adapter.isEditor -> {
+            adapter?.isEditor == true -> {
                 toiler.restore()
                 act?.finishEditMenu()
             }
