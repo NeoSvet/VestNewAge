@@ -67,7 +67,6 @@ class MarkersToiler : NeoToiler() {
             pos_n = context.getString(R.string.pos_n),
             par_n = context.getString(R.string.par_n),
             page_entirely = context.getString(R.string.page_entirely),
-            not_load_page = context.getString(R.string.not_load_page),
             unuse_dot = context.getString(R.string.unuse_dot),
             cancel_rename = context.getString(R.string.cancel_rename),
             help_edit = context.getString(R.string.help_edit)

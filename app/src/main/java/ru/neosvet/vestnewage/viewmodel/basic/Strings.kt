@@ -91,7 +91,6 @@ data class MarkersStrings(
     val pos_n: String,
     val par_n: String,
     val page_entirely: String,
-    val not_load_page: String,
     val unuse_dot: String,
     val cancel_rename: String,
     val help_edit: String
