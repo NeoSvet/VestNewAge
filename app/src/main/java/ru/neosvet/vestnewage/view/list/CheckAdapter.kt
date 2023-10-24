@@ -20,6 +20,7 @@ class CheckAdapter(
 ) : RecyclerView.Adapter<CheckAdapter.ViewHolder>() {
     companion object {
         const val ACTION_NONE = -1
+        const val ACTION_UPDATE_ALL = -2
     }
 
     var sizeCorrector: Byte = 0
@@ -58,10 +59,15 @@ class CheckAdapter(
                 list[index].isChecked = isChecked
                 notifyItemChanged(index)
                 index = onChecked.invoke(index, isChecked)
-                if (index != ACTION_NONE) {
-                    if (index == layoutPosition)
+                when (index) {
+                    ACTION_NONE -> {}
+                    ACTION_UPDATE_ALL -> notifyDataSetChanged()
+                    layoutPosition -> {
                         list[index].isChecked = !isChecked
-                    notifyItemChanged(index)
+                        notifyItemChanged(index)
+                    }
+
+                    else -> notifyItemChanged(index)
                 }
             }
         }

@@ -150,14 +150,12 @@ class SearchDialog(
         rv.adapter = adapter
     }
 
-    @SuppressLint("NotifyDataSetChanged")
     private fun checkOption(index: Int, checked: Boolean): Int {
         if (index == SearchHelper.I_BY_WORDS) if (checked)
             adapter.sizeCorrector = 0
         else adapter.sizeCorrector = 3
-        adapter.notifyDataSetChanged()
         options[index] = checked
-        return CheckAdapter.ACTION_NONE
+        return CheckAdapter.ACTION_UPDATE_ALL
     }
 
     override fun onRestoreInstanceState(state: Bundle) {

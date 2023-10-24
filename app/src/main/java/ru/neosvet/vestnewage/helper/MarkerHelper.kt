@@ -37,27 +37,27 @@ class MarkerHelper(private val strings: MarkerStrings) {
     }
 
     fun checkPars(index: Int, isChecked: Boolean): Int {
-        if (index > 0) {
-            parsList[index].isChecked = isChecked
-            if (isChecked.not() && parsList[0].isChecked) {
-                parsList[0].isChecked = false
-                return 0
-            } else {
-                var k = 0
-                parsList.forEach { item ->
-                    if (item.isChecked) k++
-                }
-                if (k == parsList.size - 1) {
-                    parsList[0].isChecked = true
-                    return 0
-                }
+        if (index == 0) {
+            parsList.forEach { item ->
+                item.isChecked = isChecked
             }
-            return CheckAdapter.ACTION_NONE
+            return CheckAdapter.ACTION_UPDATE_ALL
         }
-        parsList.forEach { item ->
-            item.isChecked = isChecked
+        parsList[index].isChecked = isChecked
+        if (isChecked.not() && parsList[0].isChecked) {
+            parsList[0].isChecked = false
+            return 0
+        } else {
+            var k = 0
+            parsList.forEach { item ->
+                if (item.isChecked) k++
+            }
+            if (k == parsList.size - 1) {
+                parsList[0].isChecked = true
+                return 0
+            }
         }
-        return -1
+        return CheckAdapter.ACTION_NONE
     }
 
     fun checkCols(index: Int, isChecked: Boolean): Int {
