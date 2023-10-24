@@ -447,11 +447,14 @@ class HomeToiler : NeoToiler() {
 
         var title = strings.nothing
         if (timeItem > 0L) {
-            val today = DateUnit.initToday().timeInSeconds
-            val diff = today - timeItem / DateUnit.SEC_IN_MILLS
-            title = when {
-                diff < 0 -> strings.new_today
-                diff < DateUnit.DAY_IN_SEC -> strings.last + strings.yesterday
+            val today = DateUnit.initToday()
+            title = when (DateUnit.putMills(timeItem).toShortDateString()) {
+                today.toShortDateString() ->
+                    strings.new_today
+
+                today.apply { changeDay(-1) }.toShortDateString() ->
+                    strings.last + strings.yesterday
+
                 else -> {
                     val date = DateUnit.putMills(timeItem)
                     strings.last + strings.from + date.toDateString()
