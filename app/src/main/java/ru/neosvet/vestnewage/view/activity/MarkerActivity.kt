@@ -21,11 +21,11 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.R
-import ru.neosvet.vestnewage.storage.DataBase
 import ru.neosvet.vestnewage.data.MarkerScreen
 import ru.neosvet.vestnewage.databinding.MarkerActivityBinding
 import ru.neosvet.vestnewage.helper.MarkerHelper
 import ru.neosvet.vestnewage.network.Urls
+import ru.neosvet.vestnewage.storage.DataBase
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.fromHTML
@@ -149,10 +149,9 @@ class MarkerActivity : AppCompatActivity() {
 
     private fun onChangedState(state: NeoState) {
         when (state) {
-            BasicState.NotLoaded -> {
-                hasError = true
+            BasicState.Loading -> {
                 toast.autoHide = false
-                toast.show(getString(R.string.not_load_page))
+                toast.show(getString(R.string.load))
             }
 
             is BasicState.Message ->
@@ -177,6 +176,12 @@ class MarkerActivity : AppCompatActivity() {
 
             is MarkerState.Status ->
                 restoreStatus(state)
+
+            BasicState.NotLoaded -> {
+                hasError = true
+                toast.autoHide = false
+                toast.show(getString(R.string.not_load_page))
+            }
 
             is BasicState.Error -> {
                 hasError = true
@@ -428,14 +433,13 @@ class MarkerActivity : AppCompatActivity() {
     }
 
     private fun showData(state: MarkerState.Primary) = binding.content.run {
+        toast.hide()
         helper = state.helper
         if (tvTitle == null)
             supportActionBar?.title = getString(R.string.marker) + ": " + state.title
         else tvTitle.text = state.title
-        if (state.isPar)
-            rPar.isChecked = true
-        else
-            rPos.isChecked = true
+        if (state.isPar) rPar.isChecked = true
+        else rPos.isChecked = true
         tvSel.text = state.sel
         etDes.setText(state.des)
         tvCol.text = state.cols

@@ -7,10 +7,13 @@ import androidx.work.Data
 import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.CheckItem
-import ru.neosvet.vestnewage.storage.DataBase
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.data.MarkerScreen
 import ru.neosvet.vestnewage.helper.MarkerHelper
+import ru.neosvet.vestnewage.loader.page.PageLoader
+import ru.neosvet.vestnewage.network.NeoClient
+import ru.neosvet.vestnewage.network.OnlineObserver
+import ru.neosvet.vestnewage.storage.DataBase
 import ru.neosvet.vestnewage.storage.MarkersStorage
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.utils.Const
@@ -117,10 +120,8 @@ class MarkerToiler : NeoToiler() {
                 return@launch
             }
             openCols()
-            if (id == -1)
-                newMarker()
-            else
-                openMarker()
+            if (id == -1) newMarker()
+            else openMarker()
             postState(
                 MarkerState.Primary(
                     helper = helper,
@@ -168,16 +169,20 @@ class MarkerToiler : NeoToiler() {
             val row = getMarkerValues(des)
             if (id > -1) //edit helper
                 updateMarker(id, row)
-            else
-                addMarker(row)
+            else addMarker(row)
             postState(BasicState.Ready)
         }
     }
 
-    private fun openPage() {
+    private suspend fun openPage() {
         task = Type.OPEN_PAGE
         val storage = PageStorage()
         storage.open(link)
+        if (OnlineObserver.isOnline.value && !storage.existsPage(link)) {
+            postState(BasicState.Loading)
+            val loader = PageLoader(NeoClient())
+            loader.download(link, true)
+        }
         val s = storage.getContentPage(link, false) ?: ""
         storage.close()
         helper.setContent(s)
@@ -240,10 +245,8 @@ class MarkerToiler : NeoToiler() {
             sel = strings.sel_pos + s
         } else {
             isPar = true
-            sel = if (s == "0")
-                strings.page_entirely
-            else
-                strings.sel_par + s.replace(Const.COMMA, ", ")
+            sel = if (s == "0") strings.page_entirely
+            else strings.sel_par + s.replace(Const.COMMA, ", ")
             restoreParList()
         }
     }
