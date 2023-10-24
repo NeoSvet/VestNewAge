@@ -599,7 +599,6 @@ class MainActivity : AppCompatActivity(), ItemClicker {
         when (state) {
             is MainState.Ads -> {
                 utils.updateTime()
-                utils.reInitProm(state.timediff)
                 if (state.timediff.absoluteValue > LIMIT_DIFF_SEC || state.hasNew)
                     frWelcome = WelcomeFragment.newInstance(state.hasNew, state.timediff)
                 if (state.warnIndex > -1)

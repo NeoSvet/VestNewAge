@@ -179,17 +179,6 @@ class LaunchUtils(context: Context) {
         notifUtils!!.notify(START_ID, notifBuilder)
     }
 
-    fun reInitProm(timeDiff: Int) {
-        val pref = App.context.getSharedPreferences(PromUtils.TAG, Context.MODE_PRIVATE)
-        if (timeDiff != pref.getInt(Const.TIMEDIFF, 0)) {
-            val editor = pref.edit()
-            editor.putInt(Const.TIMEDIFF, timeDiff)
-            editor.apply()
-            val prom = PromUtils(null)
-            prom.initNotif(timeDiff)
-        }
-    }
-
     fun openLink(intent: Intent): InputData? {
         if (intent.getBooleanExtra(Const.ADS, false))
             return InputData(2, Section.SITE)

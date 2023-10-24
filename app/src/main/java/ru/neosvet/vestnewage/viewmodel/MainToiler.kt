@@ -18,6 +18,7 @@ import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.service.LoaderService
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.utils.Const
+import ru.neosvet.vestnewage.utils.PromUtils
 import ru.neosvet.vestnewage.utils.WordsUtils
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
 import ru.neosvet.vestnewage.viewmodel.state.BasicState
@@ -150,7 +151,22 @@ class MainToiler : NeoToiler() {
         val timeServer = DateUnit.parse(s).timeInSeconds
         response.close()
         val timeDevice = DateUnit.initNow().timeInSeconds
-        return (timeDevice - timeServer).toInt()
+        val diff = (timeDevice - timeServer).toInt()
+        reInitProm(diff)
+        return diff
+    }
+
+    private fun reInitProm(timeDiff: Int) {
+        val pref = App.context.getSharedPreferences(PromUtils.TAG, Context.MODE_PRIVATE)
+        if (timeDiff != pref.getInt(Const.TIMEDIFF, 0)) {
+            val editor = pref.edit()
+            editor.putInt(Const.TIMEDIFF, timeDiff)
+            editor.apply()
+            if (pref.getInt(Const.TIME, Const.TURN_OFF) != Const.TURN_OFF) {
+                val prom = PromUtils(null)
+                prom.initNotif(timeDiff)
+            }
+        }
     }
 
     fun setArgument(withSplash: Boolean) {
