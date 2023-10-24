@@ -15,6 +15,7 @@ import ru.neosvet.vestnewage.storage.NewsStorage
 import ru.neosvet.vestnewage.utils.AdsUtils
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Files
+import ru.neosvet.vestnewage.view.list.BasicAdapter
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
 import ru.neosvet.vestnewage.viewmodel.basic.SiteStrings
 import ru.neosvet.vestnewage.viewmodel.state.BasicState
@@ -43,8 +44,9 @@ class SiteToiler : NeoToiler() {
     override fun init(context: Context) {
         strings = SiteStrings(
             novosti = context.getString(R.string.novosti),
-            new = context.getString(R.string.new_section) + ":",
             mark_read = context.getString(R.string.mark_read),
+            today = context.getString(R.string.new_today),
+            unread = context.getString(R.string.unread),
             timekeeping = context.getString(R.string.Timekeeping_Spiritual_Wave),
             path = context.getString(R.string.The_Path_of_the_impulse)
         )
@@ -75,12 +77,19 @@ class SiteToiler : NeoToiler() {
     }
 
     private suspend fun openDev() {
-        val list = if (devStorage.unreadCount > 0) {
-            (ads.getFullList() as MutableList<BasicItem>).apply {
-                add(0, BasicItem(strings.mark_read))
+        if (devStorage.unreadCount > 0) {
+            val list = ads.getFullList() as MutableList<BasicItem>
+            list.forEach {
+                if (it.des[0] == BasicAdapter.LABEL_SEPARATOR)
+                    it.des = BasicAdapter.LABEL_SEPARATOR + strings.unread + it.des
             }
-        } else ads.getFullList()
-        postState(ListState.Primary(devStorage.getTime(), list))
+            list.add(0, BasicItem(strings.mark_read))
+            postState(ListState.Primary(devStorage.getTime(), list))
+        } else {
+            val list = ads.getFullList()
+            if (loadIfNeed && list.isEmpty()) reLoad()
+            else postState(ListState.Primary(devStorage.getTime(), list))
+        }
     }
 
     fun openList(loadIfNeed: Boolean, tab: Int = -1) {
@@ -107,10 +116,15 @@ class SiteToiler : NeoToiler() {
             val iLink = cursor.getColumnIndex(Const.LINK)
             val iTime = cursor.getColumnIndex(Const.TIME)
             time = cursor.getLong(iTime)
+            val today = DateUnit.initToday().toShortDateString()
             while (cursor.moveToNext()) {
                 val link = cursor.getString(iLink)
                 val item = BasicItem(cursor.getString(iTitle))
                 item.des = fixDes(cursor.getString(iDes))
+                val date = DateUnit.putMills(cursor.getLong(iTime)).toShortDateString()
+                if (today == date)
+                    item.des = BasicAdapter.LABEL_SEPARATOR + strings.today +
+                            BasicAdapter.LABEL_SEPARATOR + item.des
                 if (link.contains(Const.N)) {
                     link.lines().forEach { s ->
                         if (line != null) line?.let {
@@ -192,10 +206,13 @@ class SiteToiler : NeoToiler() {
             reLoad()
     }
 
-    fun markAsRead(item: BasicItem) {
-        if (item.title.indexOf(strings.new) != 0) return
-        item.title = item.title.substring(item.title.indexOf(" ") + 1)
-        devStorage.setRead(item.title, item.des)
+    fun markAsRead(index: Int, item: BasicItem) {
+        if (item.des[0] != BasicAdapter.LABEL_SEPARATOR) return
+        scope.launch {
+            item.des = item.des.substring(item.des.indexOf(BasicAdapter.LABEL_SEPARATOR, 2) + 1)
+            devStorage.setRead(item.title, item.des)
+            postState(ListState.Update(index, item))
+        }
     }
 
     fun setArgument(tab: Int) {
@@ -211,7 +228,12 @@ class SiteToiler : NeoToiler() {
     fun allMarkAsRead() {
         scope.launch {
             val list = ads.getFullList()
-            list.forEach { markAsRead(it) }
+            list.forEach {
+                if (it.des[0] == BasicAdapter.LABEL_SEPARATOR) {
+                    it.des = it.des.substring(1)
+                    devStorage.setRead(it.title, it.des)
+                }
+            }
             postState(ListState.Primary(devStorage.getTime(), list))
         }
     }

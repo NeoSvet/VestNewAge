@@ -137,6 +137,9 @@ class SiteFragment : NeoFragment() {
             is SiteState.Status ->
                 restoreStatus(state)
 
+            is ListState.Update<*> ->
+                adapter.update(state.index, state.item as BasicItem)
+
             is ListState.Primary -> {
                 binding?.run {
                     setUpdateTime(state.time, tvUpdate)
@@ -176,11 +179,11 @@ class SiteFragment : NeoFragment() {
                         toiler.allMarkAsRead()
                         return
                     }
-                    if (item.hasFewLinks())
+                    toiler.markAsRead(index, item)
+                    if (item.hasFewLinks()) {
                         adapter.openLinksFor(index)
-                    else if (item.link.isNotEmpty()) openPage(item.link)
-                    toiler.markAsRead(item)
-                    adapter.notifyItemChanged(index)
+                        adapter.notifyItemChanged(index)
+                    } else if (item.link.isNotEmpty()) openPage(item.link)
                 }
             }
         }

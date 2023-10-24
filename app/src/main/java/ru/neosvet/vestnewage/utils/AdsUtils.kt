@@ -10,6 +10,7 @@ import ru.neosvet.vestnewage.data.SimpleItem
 import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.storage.DevStorage
 import ru.neosvet.vestnewage.view.dialog.MessageDialog
+import ru.neosvet.vestnewage.view.list.BasicAdapter
 import ru.neosvet.vestnewage.viewmodel.basic.DevStrings
 
 class AdsUtils(
@@ -31,7 +32,6 @@ class AdsUtils(
             url_on_google = context.getString(R.string.url_on_google),
             url_on_huawei = context.getString(R.string.url_on_huawei),
             open_link = context.getString(R.string.open_link),
-            new_section = context.getString(R.string.new_section),
             access_new_version = context.getString(R.string.access_new_version),
             current_version = context.getString(R.string.current_version)
         )
@@ -117,8 +117,6 @@ class AdsUtils(
                 des = null,
                 mode = cursor.getInt(iMode)
             )?.let { item ->
-                if (cursor.getInt(iUnread) == 1)
-                    item.title = strings.new_section + ": " + item.title
                 val des = cursor.getString(iDes)
                 if (item.link == UPDATE) {
                     item.clear()
@@ -129,6 +127,8 @@ class AdsUtils(
                     item.addLink(it)
                     item.des = if (des.isNullOrEmpty()) it else des
                 }
+                if (cursor.getInt(iUnread) == 1)
+                    item.des = BasicAdapter.LABEL_SEPARATOR + item.des
                 list.add(0, item)
             }
         } while (cursor.moveToNext())

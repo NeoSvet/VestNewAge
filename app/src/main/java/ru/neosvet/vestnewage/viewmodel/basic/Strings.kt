@@ -25,8 +25,9 @@ data class BrowserStrings(
 
 data class SiteStrings(
     val novosti: String,
-    val new: String,
     val mark_read: String,
+    val today: String,
+    val unread: String,
     val timekeeping: String,
     val path: String
 )
@@ -37,7 +38,6 @@ data class DevStrings(
     val url_on_google: String,
     val url_on_huawei: String,
     val open_link: String,
-    val new_section: String,
     val access_new_version: String,
     val current_version: String
 )
