@@ -266,8 +266,12 @@ class SummaryFragment : NeoFragment(), PagingAdapter.Parent, NeoScrollBar.Host {
             when (pTab.selectedIndex) {
                 SummaryTab.RSS.value -> {
                     MarkerActivity.addByPar(
-                        requireContext(),
-                        item.link, "", item.des.substring(item.des.indexOf(Const.N))
+                        context = requireContext(),
+                        link = item.link,
+                        par = "",
+                        des = item.des.substring(
+                            item.des.indexOf(BasicAdapter.LABEL_SEPARATOR, 2) + 1
+                        )
                     )
                 }
 

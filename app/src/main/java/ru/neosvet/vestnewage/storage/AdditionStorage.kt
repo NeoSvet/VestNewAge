@@ -10,6 +10,7 @@ import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.fromHTML
+import ru.neosvet.vestnewage.view.list.BasicAdapter
 import ru.neosvet.vestnewage.view.list.paging.NeoPaging
 
 class AdditionStorage : DataBase.Parent {
@@ -106,7 +107,8 @@ class AdditionStorage : DataBase.Parent {
             do {
                 val item = BasicItem(cursor.getString(iTitle), cursor.getInt(iLink).toString())
                 item.addHead(cursor.getInt(iID).toString())
-                item.des = getDate(cursor.getString(iTime)) + "$" + cursor.getString(iDes)
+                item.des = BasicAdapter.LABEL_SEPARATOR + getDate(cursor.getString(iTime)) +
+                        BasicAdapter.LABEL_SEPARATOR + cursor.getString(iDes)
                 if (item.des.contains(LINK))
                     addLinks(item.des, item)
                 list.add(item)

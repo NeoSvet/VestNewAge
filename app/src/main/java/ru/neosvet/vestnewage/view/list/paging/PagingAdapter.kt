@@ -86,7 +86,7 @@ class PagingAdapter(
                 parent::onItemClick, parent::onItemLongClick
             )
 
-            withTime -> LayoutInflater.from(host.context).inflate(R.layout.item_time, null)
+            withTime -> LayoutInflater.from(host.context).inflate(R.layout.item_label, null)
             viewType == TYPE_SIMPLE -> LayoutInflater.from(host.context)
                 .inflate(R.layout.item_text, null)
 

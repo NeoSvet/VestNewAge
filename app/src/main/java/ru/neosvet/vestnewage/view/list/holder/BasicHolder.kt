@@ -6,6 +6,7 @@ import androidx.core.text.HtmlCompat
 import androidx.recyclerview.widget.RecyclerView
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.BasicItem
+import ru.neosvet.vestnewage.view.list.BasicAdapter
 
 abstract class BasicHolder(root: View) : RecyclerView.ViewHolder(root) {
 
@@ -21,8 +22,6 @@ class BaseHolder(
     private val longClicker: ((Int, BasicItem) -> Boolean)?
 ) : BasicHolder(root) {
     private val tvTitle: TextView = root.findViewById(R.id.text_item)
-    private val tvTime: TextView? = root.findViewById(R.id.time_item)
-    private val tvDes: TextView? = root.findViewById(R.id.des_item)
 
     init {
         val item: View = root.findViewById(R.id.item_bg)
@@ -32,15 +31,14 @@ class BaseHolder(
     override fun setItem(item: BasicItem) {
         tvTitle.text = if (item.title.contains("<"))
             item.title.fromHTML else item.title
-
-        val des = tvTime?.let { //for addition
-            val i = item.des.indexOf("$")
-            it.text = item.des.substring(0, i)
+        val des = root.findViewById<TextView>(R.id.label_item)?.let {
+            val i = item.des.indexOf(BasicAdapter.LABEL_SEPARATOR, 2)
+            it.text = item.des.substring(1, i)
             item.des.substring(i + 1)
         } ?: item.des
 
-        tvDes?.text = if (des.contains("<"))
-            des.fromHTML else des
+        root.findViewById<TextView>(R.id.des_item)?.text =
+            if (des.contains("<")) des.fromHTML else des
 
         root.setOnClickListener {
             clicker.invoke(layoutPosition, item)

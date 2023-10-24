@@ -61,7 +61,7 @@
 
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/line2"
-            style="@style/Time"
+            style="@style/SmallLabel"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingStart="@dimen/def_indent"

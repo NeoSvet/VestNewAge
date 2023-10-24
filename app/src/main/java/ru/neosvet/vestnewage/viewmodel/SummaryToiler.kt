@@ -25,6 +25,7 @@ import ru.neosvet.vestnewage.storage.DataBase
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Files
 import ru.neosvet.vestnewage.utils.percent
+import ru.neosvet.vestnewage.view.list.BasicAdapter
 import ru.neosvet.vestnewage.view.list.paging.AdditionFactory
 import ru.neosvet.vestnewage.view.list.paging.NeoPaging
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
@@ -174,7 +175,9 @@ class SummaryToiler : NeoToiler(), NeoPaging.Parent {
             item.des = if (now - time > DateUnit.MONTH_IN_MILLS)
                 DateUnit.putMills(time).toDateString()
             else DateUnit.getDiffDate(now, time) + sBack
-            if (d.isNotEmpty()) item.des += Const.N + d
+            if (d.isNotEmpty())
+                item.des = BasicAdapter.LABEL_SEPARATOR +
+                        item.des + BasicAdapter.LABEL_SEPARATOR + d
             list.add(item)
             s = br.readLine()
         }

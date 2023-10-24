@@ -15,10 +15,12 @@ class BasicAdapter(
     private val longClicker: ((Int, BasicItem) -> Boolean)? = null
 ) : RecyclerView.Adapter<BasicHolder>() {
     companion object {
+        const val LABEL_SEPARATOR = '$'
         private const val TYPE_TITLE = 0
         private const val TYPE_SIMPLE = 1
         private const val TYPE_DETAIL = 2
         private const val TYPE_LIST = 3
+        private const val TYPE_LABEL = 4
     }
 
     private val data = mutableListOf<BasicItem>()
@@ -41,6 +43,11 @@ class BasicAdapter(
         notifyDataSetChanged()
     }
 
+    fun update(index: Int, item: BasicItem) {
+        data[index] = item
+        notifyItemChanged(index)
+    }
+
     @SuppressLint("NotifyDataSetChanged")
     fun clear() {
         indexLink = -1
@@ -54,6 +61,7 @@ class BasicAdapter(
         indexLink == position -> TYPE_LIST
         data[position].link == "#" -> TYPE_TITLE
         data[position].des.isEmpty() -> TYPE_SIMPLE
+        data[position].des[0] == LABEL_SEPARATOR -> TYPE_LABEL
         else -> TYPE_DETAIL
     }
 
@@ -67,6 +75,9 @@ class BasicAdapter(
 
             TYPE_DETAIL ->
                 LayoutInflater.from(parent.context).inflate(R.layout.item_detail, null)
+
+            TYPE_LABEL ->
+                LayoutInflater.from(parent.context).inflate(R.layout.item_label, null)
 
             else ->
                 return ListHolder(

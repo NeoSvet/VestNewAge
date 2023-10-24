@@ -17,7 +17,7 @@ class ListHolder(
     private val longClicker: ((Int, BasicItem) -> Boolean)?
 ) : BasicHolder(root) {
     private val tvTitle: TextView = root.findViewById(R.id.text_item)
-    private val tvTime: TextView = root.findViewById(R.id.time_item)
+    private val tvTime: TextView = root.findViewById(R.id.label_item)
     private val tvDes: TextView = root.findViewById(R.id.des_item)
     private val rvList: RecyclerView = root.findViewById(R.id.list_item)
 
@@ -30,10 +30,10 @@ class ListHolder(
         tvTitle.text = if (item.title.contains("<"))
             item.title.fromHTML else item.title
 
-        val i = item.des.indexOf("$")
-        val des = if (i > -1) {
+        val des = if (item.des[0] == BasicAdapter.LABEL_SEPARATOR) {
+            val i = item.des.indexOf(BasicAdapter.LABEL_SEPARATOR, 2)
             tvTime.isVisible = true
-            tvTime.text = item.des.substring(0, i)
+            tvTime.text = item.des.substring(1, i)
             item.des.substring(i + 1)
         } else {
             tvTime.isVisible = false

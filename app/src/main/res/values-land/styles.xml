@@ -8,7 +8,7 @@
     <style name="Des" parent="Label">
         <item name="android:textSize">16sp</item>
     </style>
-    <style name="Time" parent="Label">
+    <style name="SmallLabel" parent="Label">
         <item name="android:textSize">14sp</item>
     </style>
     <style name="Title">
