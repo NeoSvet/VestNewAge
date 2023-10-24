@@ -1,5 +1,6 @@
 package ru.neosvet.vestnewage.view.fragment
 
+import android.app.AlarmManager
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
@@ -14,6 +15,8 @@ import android.view.ViewGroup
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.TextView
+import androidx.annotation.RequiresApi
+import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
@@ -34,6 +37,7 @@ import ru.neosvet.vestnewage.utils.PromUtils
 import ru.neosvet.vestnewage.utils.ScreenUtils
 import ru.neosvet.vestnewage.view.activity.MainActivity
 import ru.neosvet.vestnewage.view.basic.NeoFragment
+import ru.neosvet.vestnewage.view.dialog.MessageDialog
 import ru.neosvet.vestnewage.view.dialog.SetNotifDialog
 import ru.neosvet.vestnewage.view.list.CheckAdapter
 import ru.neosvet.vestnewage.view.list.SettingsAdapter
@@ -499,9 +503,35 @@ class SettingsFragment : NeoFragment() {
     private fun saveProm(value: Int) {
         val editor = prefProm.edit()
         editor.putInt(Const.TIME, if (value == PROM_MAX) Const.TURN_OFF else value)
+        editor.apply()
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+            setAlarmNew(value)
+        else setAlarm(value)
+    }
+
+    private fun setAlarm(value: Int) {
         val prom = PromUtils(null)
         prom.initNotif(value)
-        editor.apply()
+    }
+
+    @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+    private fun setAlarmNew(value: Int) {
+        val manager = ContextCompat.getSystemService(requireContext(), AlarmManager::class.java)
+        if (manager?.canScheduleExactAlarms() == false) {
+            val alert = MessageDialog(requireActivity()).apply {
+                setTitle(getString(R.string.notif_prom))
+                setMessage(getString(R.string.how_give_permission_alarm))
+                setRightButton(getString(android.R.string.ok)) {
+                    Intent().also {
+                        it.action = Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM
+                        startActivity(it)
+                    }
+                    dismiss()
+                }
+            }
+            alert.show(null)
+        } else setAlarm(value)
     }
 
     private fun setCheckTime(label: TextView, value: Int) {

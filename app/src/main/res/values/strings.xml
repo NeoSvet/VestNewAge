@@ -267,6 +267,7 @@
     <string name="info_battery">Так же рекомендуется отключить энергосбережение для данного приложения (особенно для Android 9+). И то может быть задержка до 6 минут.</string>
     <string name="default_">По умолчанию</string>
     <string name="select">Выбрать</string>
+    <string name="how_give_permission_alarm">После нажатия на «ОК» откроется список приложений. В нём надо найти «Весть Века», выдать ему разрешение на установку напоминаний. Вернувшись обратно, необходимо назначить напоминание заново.</string>
     <!--JournalFragment-->
     <string name="finish_list">Список закончился</string>
     <string name="clearing">Очистка</string>
