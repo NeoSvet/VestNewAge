@@ -5,7 +5,7 @@ import android.graphics.Point
 import android.os.Build
 
 object ScreenUtils {
-    enum class Type{
+    enum class Type {
         PHONE_PORT, PHONE_LAND, TABLET_PORT, TABLET_LAND
     }
 
@@ -46,8 +46,7 @@ object ScreenUtils {
             width = (p.x / density).toInt()
             height = (p.y / density).toInt()
         }
-        val ratio = width / height.toFloat()
-        isWide = ratio > 1.5f
+        isWide = width > 600
         type = when {
             width > 1000 && width > height -> Type.TABLET_LAND
             height > 1000 -> Type.TABLET_PORT
