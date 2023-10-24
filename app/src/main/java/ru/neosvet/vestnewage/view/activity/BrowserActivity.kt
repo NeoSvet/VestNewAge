@@ -557,7 +557,7 @@ class BrowserActivity : AppCompatActivity(), WebClient.Parent, NeoInterface.Pare
     private fun setHeadBar(isDoctrine: Boolean) = binding.run {
         if (ivHeadBack.isVisible) return@run
         if (isDoctrine) {
-            if (ScreenUtils.isTablet && isBigHead)
+            if (ScreenUtils.isWide && isBigHead)
                 ivHeadBack.setImageResource(R.drawable.head_back_tablet_d)
             else if (ScreenUtils.isLand)
                 ivHeadBack.setImageResource(R.drawable.head_back_land_d)
@@ -565,7 +565,7 @@ class BrowserActivity : AppCompatActivity(), WebClient.Parent, NeoInterface.Pare
             if (link.isDoctrineBook)
                 ivHeadFront.setImageResource(R.drawable.head_front_db)
             else ivHeadFront.setImageResource(R.drawable.head_front_d)
-        } else if (ScreenUtils.isTablet && isBigHead)
+        } else if (ScreenUtils.isWide && isBigHead)
             ivHeadBack.setImageResource(R.drawable.head_back_tablet)
         else if (ScreenUtils.isLand)
             ivHeadBack.setImageResource(R.drawable.head_back_land)

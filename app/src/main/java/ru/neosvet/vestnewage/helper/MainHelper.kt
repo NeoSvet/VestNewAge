@@ -102,9 +102,8 @@ class MainHelper(private val act: MainActivity) {
             else
                 act.onAction(TAG)
         }
+
         val ivHeadBack = act.findViewById<ImageView>(R.id.ivHeadBack)
-        if (ScreenUtils.type == ScreenUtils.Type.TABLET_PORT)
-            ivHeadBack.setImageResource(R.drawable.head_back_tablet)
         ivHeadBack.setOnClickListener {
             Urls.openInBrowser(Urls.Site)
         }
@@ -120,6 +119,8 @@ class MainHelper(private val act: MainActivity) {
 
             if (ScreenUtils.isLand)
                 ivHeadBack.setImageResource(R.drawable.head_back_land)
+            else if (ScreenUtils.isWide)
+                ivHeadBack.setImageResource(R.drawable.head_back_tablet)
         }
     }
 
