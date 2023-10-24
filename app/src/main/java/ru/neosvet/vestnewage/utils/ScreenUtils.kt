@@ -46,7 +46,7 @@ object ScreenUtils {
             width = (p.x / density).toInt()
             height = (p.y / density).toInt()
         }
-        isWide = width > 600
+        isWide = width > 415
         type = when {
             width > 1000 && width > height -> Type.TABLET_LAND
             height > 1000 -> Type.TABLET_PORT
