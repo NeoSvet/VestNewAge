@@ -29,8 +29,7 @@ object ScreenUtils {
     val isTablet: Boolean
         get() = type >= Type.TABLET_PORT
     val span: Int
-        get() = if (type == Type.PHONE_PORT)
-            1 else 2
+        get() = if (isWide) 2 else 1
 
     fun init(activity: Activity) {
         val width: Int
