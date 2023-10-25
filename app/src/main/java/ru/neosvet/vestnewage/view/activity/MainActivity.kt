@@ -29,7 +29,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
-import ru.neosvet.vestnewage.storage.DataBase
 import ru.neosvet.vestnewage.data.MenuItem
 import ru.neosvet.vestnewage.data.Section
 import ru.neosvet.vestnewage.data.SiteTab
@@ -38,6 +37,7 @@ import ru.neosvet.vestnewage.helper.MainHelper
 import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.service.LoaderService
+import ru.neosvet.vestnewage.storage.DataBase
 import ru.neosvet.vestnewage.storage.DevStorage
 import ru.neosvet.vestnewage.utils.*
 import ru.neosvet.vestnewage.view.activity.BrowserActivity.Companion.openReader
@@ -270,6 +270,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
     }
 
     fun setFragment(fragment: NeoFragment) {
+        title = fragment.title
         curFragment = fragment
         helper.svMain?.post {
             fragment.updateRoot(helper.svMain!!.height)
@@ -346,7 +347,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
         super.onSaveInstanceState(outState)
     }
 
-    override fun onRestoreInstanceState(savedInstanceState: Bundle) { //for support DeX
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) { //for support DeX / resize window
         val isSizeMenu = savedInstanceState.getBoolean(Const.LIST)
         val sec = savedInstanceState.getString(Const.MODE)?.let {
             Section.valueOf(it)
@@ -360,6 +361,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
             setSection(sec, false)
             helper.bottomBar?.isVisible = true
         }
+        if (sec == Section.MENU) title = getString(R.string.app_name)
         super.onRestoreInstanceState(savedInstanceState)
     }
 
@@ -387,6 +389,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
                 helper.frMenu = MenuFragment().also {
                     fragmentTransaction.replace(R.id.my_fragment, it)
                 }
+                title = getString(R.string.app_name)
             }
 
             Section.HOME -> {

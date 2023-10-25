@@ -79,7 +79,6 @@ class MenuFragment : Fragment() {
                 bottomMargin = resources.getDimension(R.dimen.content_margin_bottom).toInt()
             }
             isFullScreen = true
-            act!!.title = getString(R.string.app_name)
         }
         initList()
     }

@@ -70,9 +70,8 @@ abstract class NeoFragment : Fragment() {
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        act = (activity as MainActivity).apply {
-            setFragment(this@NeoFragment)
-            title = this@NeoFragment.title
+        act = (activity as MainActivity).also {
+            it.setFragment(this)
         }
     }
 
