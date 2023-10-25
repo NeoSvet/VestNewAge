@@ -19,6 +19,7 @@ import ru.neosvet.vestnewage.view.activity.BrowserActivity.Companion.openReader
 import ru.neosvet.vestnewage.view.activity.MarkerActivity.Companion.addByPar
 import ru.neosvet.vestnewage.view.basic.NeoFragment
 import ru.neosvet.vestnewage.view.basic.NeoScrollBar
+import ru.neosvet.vestnewage.view.basic.onSizeChange
 import ru.neosvet.vestnewage.view.list.paging.NeoPaging
 import ru.neosvet.vestnewage.view.list.paging.PagingAdapter
 import ru.neosvet.vestnewage.viewmodel.JournalToiler
@@ -97,7 +98,9 @@ class JournalFragment : NeoFragment(), PagingAdapter.Parent, NeoScrollBar.Host {
             toiler.openList(it)
         }
         pTab.setItems(tabs, tab)
-        if (ScreenUtils.isLand) pTab.limitedWidth(lifecycleScope)
+        rvList.onSizeChange {
+            if (ScreenUtils.isLand) pTab.limitedWidth()
+        }
     }
 
     override fun swipeLeft() {

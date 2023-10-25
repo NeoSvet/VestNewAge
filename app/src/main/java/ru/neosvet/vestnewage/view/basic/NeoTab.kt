@@ -7,14 +7,13 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.LinearLayout
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.view.children
 import androidx.core.view.updateLayoutParams
-import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.view.list.TabAdapter
 
@@ -137,25 +136,32 @@ class NeoTab @JvmOverloads constructor(
 
     fun fixWidth(m: Float) {
         if (isHorizontal) return
-        val w = ((btnPrev.measuredWidth + btnNext.measuredWidth) * m).toInt()
-        root.updateLayoutParams<ViewGroup.LayoutParams> {
-            width = w
+        rvTab.onSizeChange {
+            val w = ((btnPrev.measuredWidth + btnNext.measuredWidth) * m).toInt()
+            updateWidth(root, w)
+            updateWidth(rvTab, w)
+            rvTab.children.forEach {
+                updateWidth(it, w)
+            }
         }
-        rvTab.updateLayoutParams<ViewGroup.LayoutParams> {
+    }
+
+    private fun updateWidth(view: View, w: Int) {
+        view.updateLayoutParams<ViewGroup.LayoutParams> {
             width = w
         }
     }
 
-    fun limitedWidth(scope: LifecycleCoroutineScope) {
-        scope.launch {
-            delay(50)
-            var w = context.fromDpi(R.dimen.update_width_land) +
-                    context.fromDpi(R.dimen.def_indent) + context.fromDpi(R.dimen.half_indent)
-            w = (root.parent as ViewGroup).measuredWidth - w
-            if (root.measuredWidth > w)
-                root.updateLayoutParams<ViewGroup.LayoutParams> {
-                    width = w
-                }
+    fun limitedWidth() {
+        var w = btnNext.measuredWidth + btnPrev.measuredWidth + context.fromDpi(R.dimen.half_indent)
+        rvTab.children.forEach {
+            w += it.measuredWidth
         }
+        w -= context.convertDpi(2)
+        if (root.measuredWidth > w)
+            root.updateLayoutParams<ConstraintLayout.LayoutParams> {
+                width = w
+                endToStart = -1
+            }
     }
 }

@@ -7,7 +7,6 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.BasicItem
@@ -23,6 +22,7 @@ import ru.neosvet.vestnewage.utils.ScreenUtils
 import ru.neosvet.vestnewage.view.activity.BrowserActivity.Companion.openReader
 import ru.neosvet.vestnewage.view.activity.MarkerActivity
 import ru.neosvet.vestnewage.view.basic.NeoFragment
+import ru.neosvet.vestnewage.view.basic.onSizeChange
 import ru.neosvet.vestnewage.view.dialog.MessageDialog
 import ru.neosvet.vestnewage.view.dialog.DownloadDialog
 import ru.neosvet.vestnewage.view.list.BasicAdapter
@@ -117,7 +117,6 @@ class BookFragment : NeoFragment() {
         }
         pTab.setItems(tabs, tab)
         checkChangeTab()
-        if (ScreenUtils.isLand) pTab.limitedWidth(lifecycleScope)
 
         pMonth.setOnChangeListener {
             toiler.openList(month = it)
@@ -133,6 +132,11 @@ class BookFragment : NeoFragment() {
         }
         pMonth.setDescription(getString(R.string.to_prev_month), getString(R.string.to_next_month))
         pYear.setDescription(getString(R.string.to_prev_year), getString(R.string.to_next_year))
+        pMonth.fixWidth(1.3f)
+        pYear.fixWidth(1f)
+        rvBook.onSizeChange {
+            if (ScreenUtils.isLand) pTab.limitedWidth()
+        }
     }
 
     private fun checkChangeTab() = binding?.run {
@@ -176,8 +180,6 @@ class BookFragment : NeoFragment() {
                 }
                 pMonth.setItems(state.months, state.selected.y)
                 pYear.setItems(state.years, state.selected.x)
-                pMonth.fixWidth(1.3f)
-                pYear.fixWidth(1f)
                 if (state.list.isEmpty() && state.time > 0L)
                     act?.showStaticToast(getString(R.string.empty_list))
                 else {

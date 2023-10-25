@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.BasicItem
@@ -16,6 +15,7 @@ import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.utils.*
 import ru.neosvet.vestnewage.view.activity.BrowserActivity.Companion.openReader
 import ru.neosvet.vestnewage.view.basic.NeoFragment
+import ru.neosvet.vestnewage.view.basic.onSizeChange
 import ru.neosvet.vestnewage.view.list.BasicAdapter
 import ru.neosvet.vestnewage.viewmodel.SiteToiler
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
@@ -92,7 +92,9 @@ class SiteFragment : NeoFragment() {
             toiler.openList(true, it)
         }
         pTab.setItems(tabs, tab)
-        if (ScreenUtils.isLand) pTab.limitedWidth(lifecycleScope)
+        rvList.onSizeChange {
+            if (ScreenUtils.isLand) pTab.limitedWidth()
+        }
     }
 
     @SuppressLint("ClickableViewAccessibility")

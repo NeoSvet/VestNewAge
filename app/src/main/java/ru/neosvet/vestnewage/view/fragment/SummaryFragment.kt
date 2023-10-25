@@ -22,6 +22,7 @@ import ru.neosvet.vestnewage.view.activity.BrowserActivity.Companion.openReader
 import ru.neosvet.vestnewage.view.activity.MarkerActivity
 import ru.neosvet.vestnewage.view.basic.NeoFragment
 import ru.neosvet.vestnewage.view.basic.NeoScrollBar
+import ru.neosvet.vestnewage.view.basic.onSizeChange
 import ru.neosvet.vestnewage.view.dialog.ShareDialog
 import ru.neosvet.vestnewage.view.list.BasicAdapter
 import ru.neosvet.vestnewage.view.list.paging.NeoPaging
@@ -150,7 +151,9 @@ class SummaryFragment : NeoFragment(), PagingAdapter.Parent, NeoScrollBar.Host {
             toiler.openList(true, it)
         }
         pTab.setItems(tabs, tab)
-        if (ScreenUtils.isLand) pTab.limitedWidth(lifecycleScope)
+        rvList.onSizeChange {
+            if (ScreenUtils.isLand) pTab.limitedWidth()
+        }
     }
 
     override fun onChangedOtherState(state: NeoState) {

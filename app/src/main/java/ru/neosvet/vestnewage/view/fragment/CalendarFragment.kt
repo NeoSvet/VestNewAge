@@ -89,6 +89,8 @@ class CalendarFragment : NeoFragment() {
         pMonth.btnNext.setOnClickListener { openMonth(true) }
         pMonth.setDescription(getString(R.string.to_prev_month), getString(R.string.to_next_month))
         pYear.setDescription(getString(R.string.to_prev_year), getString(R.string.to_next_year))
+        pMonth.fixWidth(1.3f)
+        pYear.fixWidth(1f)
     }
 
     private fun openLink(link: String) {
@@ -180,8 +182,6 @@ class CalendarFragment : NeoFragment() {
                     showView(rvCalendar)
                 pMonth.setItems(state.months, state.selected.y)
                 pYear.setItems(state.years, state.selected.x)
-                pMonth.fixWidth(1.3f)
-                pYear.fixWidth(1f)
                 if (state.isUpdateUnread)
                     act?.updateNew()
             }
