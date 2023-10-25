@@ -12,10 +12,10 @@ import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
-import ru.neosvet.vestnewage.storage.DataBase
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.loader.basic.LinksProvider
 import ru.neosvet.vestnewage.network.Urls
+import ru.neosvet.vestnewage.storage.DataBase
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Files
@@ -30,8 +30,6 @@ class SummaryHelper : LinksProvider {
     companion object {
         const val TAG = "Summary"
         private const val TEN_MIN_IN_MILLS = 600000
-        private val FLAGS = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S)
-            PendingIntent.FLAG_UPDATE_CURRENT else PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
 
         fun postpone(des: String, link: String) {
             Toast.makeText(
@@ -42,7 +40,8 @@ class SummaryHelper : LinksProvider {
             val intent = Intent(App.context, Rec::class.java)
             intent.putExtra(Const.DESCTRIPTION, des)
             intent.putExtra(Const.LINK, link)
-            val piPostpone = PendingIntent.getBroadcast(App.context, 3, intent, FLAGS)
+            val piPostpone =
+                PendingIntent.getBroadcast(App.context, 3, intent, NotificationUtils.FLAGS)
             NotificationUtils.setAlarm(piPostpone, TEN_MIN_IN_MILLS + System.currentTimeMillis())
         }
     }
@@ -89,7 +88,7 @@ class SummaryHelper : LinksProvider {
     fun preparingNotification() {
         notifUtils = NotificationUtils()
         intent = Intent(App.context, MainActivity::class.java)
-        piEmpty = PendingIntent.getActivity(App.context, 0, Intent(), FLAGS)
+        piEmpty = PendingIntent.getActivity(App.context, 0, Intent(), NotificationUtils.FLAGS)
         notifId = NotificationUtils.NOTIF_SUMMARY + 1
     }
 
@@ -97,7 +96,7 @@ class SummaryHelper : LinksProvider {
         val url = if (!link.contains("://") && !link.contains(Files.RSS))
             Urls.Site + link else link
         intent.data = Uri.parse(url)
-        val piSummary = PendingIntent.getActivity(App.context, 0, intent, FLAGS)
+        val piSummary = PendingIntent.getActivity(App.context, 0, intent, NotificationUtils.FLAGS)
         val piPostpone = notifUtils.getPostponeSummaryNotif(notifId, text, url)
         val title = App.context.getString(R.string.app_name)
         notifBuilder = notifUtils.getNotification(
@@ -124,7 +123,7 @@ class SummaryHelper : LinksProvider {
     fun groupNotification() {
         intent.data = Uri.parse(Urls.Site + Files.RSS)
         intent.putExtra(DataBase.ID, notifId)
-        val piSummary = PendingIntent.getActivity(App.context, 0, intent, FLAGS)
+        val piSummary = PendingIntent.getActivity(App.context, 0, intent, NotificationUtils.FLAGS)
         notifBuilder = notifUtils.getSummaryNotif(
             App.context.getString(R.string.appeared_new_some),
             NotificationUtils.CHANNEL_SUMMARY

@@ -79,9 +79,6 @@ class LoaderService : LifecycleService(), LoadHandler {
     private val manager: NotificationManager by lazy {
         getSystemService(NOTIFICATION_SERVICE) as NotificationManager
     }
-    private val FLAGS =
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) PendingIntent.FLAG_UPDATE_CURRENT
-        else PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
     private var scope = initScope()
     private fun initScope() = CoroutineScope(Dispatchers.IO
             + CoroutineExceptionHandler { _, throwable ->
@@ -234,8 +231,8 @@ class LoaderService : LifecycleService(), LoadHandler {
                 msg = error.message
             }
         }
-        val piMain = PendingIntent.getActivity(this, 0, main, FLAGS)
-        val piEmpty = PendingIntent.getActivity(this, 0, Intent(), FLAGS)
+        val piMain = PendingIntent.getActivity(this, 0, main, NotificationUtils.FLAGS)
+        val piEmpty = PendingIntent.getActivity(this, 0, Intent(), NotificationUtils.FLAGS)
         notif = notifUtils.getNotification(title, msg, NotificationUtils.CHANNEL_TIPS)
             .setContentIntent(piMain)
             .setFullScreenIntent(piEmpty, true)
@@ -247,10 +244,10 @@ class LoaderService : LifecycleService(), LoadHandler {
         manager.cancel(FINAL_ID)
         val notifUtils = NotificationUtils()
         val main = Intent(this, MainActivity::class.java)
-        val piMain = PendingIntent.getActivity(this, 0, main, FLAGS)
+        val piMain = PendingIntent.getActivity(this, 0, main, NotificationUtils.FLAGS)
         val iStop = Intent(this, LoaderService::class.java)
         iStop.putExtra(Const.MODE, STOP)
-        val piStop = PendingIntent.getService(this, 0, iStop, FLAGS)
+        val piStop = PendingIntent.getService(this, 0, iStop, NotificationUtils.FLAGS)
         notif = notifUtils.getNotification(
             getString(R.string.load),
             getString(R.string.start),

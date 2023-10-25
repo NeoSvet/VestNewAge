@@ -12,8 +12,8 @@ import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
-import ru.neosvet.vestnewage.storage.DataBase
 import ru.neosvet.vestnewage.helper.SummaryHelper
+import ru.neosvet.vestnewage.storage.DataBase
 
 //Helper class to manage notification channels, and create notifications.
 class NotificationUtils : ContextWrapper(App.context) {
@@ -30,12 +30,23 @@ class NotificationUtils : ContextWrapper(App.context) {
         const val MODE = "mode"
         const val GROUP_SUMMARY = "group_summary"
         const val GROUP_TIPS = "group_tips"
+
+        val FLAGS = when {
+            Build.VERSION.SDK_INT < Build.VERSION_CODES.S ->
+                PendingIntent.FLAG_CANCEL_CURRENT
+
+            Build.VERSION.SDK_INT < Build.VERSION_CODES.UPSIDE_DOWN_CAKE ->
+                PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_MUTABLE
+
+            else -> PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        }
+
         fun setAlarm(pi: PendingIntent, time: Long) {
             val am = App.context.getSystemService(ALARM_SERVICE) as AlarmManager
             am.cancel(pi)
             if (time == Const.TURN_OFF.toLong()) return
             am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, time, pi)
-        //TODO Error:(37, 13) When scheduling exact alarms, apps should explicitly call `AlarmManager#canScheduleExactAlarms` or handle `SecurityException`s
+            //TODO Error:(37, 13) When scheduling exact alarms, apps should explicitly call `AlarmManager#canScheduleExactAlarms` or handle `SecurityException`s
         }
     }
 
@@ -43,8 +54,6 @@ class NotificationUtils : ContextWrapper(App.context) {
         getSystemService(NOTIFICATION_SERVICE) as NotificationManager
     }
     private var notifList: MutableList<String>? = null
-    private val FLAGS = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S)
-        PendingIntent.FLAG_CANCEL_CURRENT else PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_MUTABLE
 
     //Registers notification channels, which can be used later by individual notifications.
     init {
@@ -136,9 +145,8 @@ class NotificationUtils : ContextWrapper(App.context) {
         return notifBuilder
     }
 
-    fun getSummaryNotif(title: String?, channel: String?): NotificationCompat.Builder {
-        val notifBuilder: NotificationCompat.Builder
-        notifBuilder = NotificationCompat.Builder(this, channel!!)
+    fun getSummaryNotif(title: String, channel: String): NotificationCompat.Builder {
+        val notifBuilder = NotificationCompat.Builder(this, channel)
         val style = NotificationCompat.InboxStyle()
             .setSummaryText(title)
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
