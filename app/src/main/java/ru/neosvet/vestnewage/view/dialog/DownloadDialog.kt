@@ -40,7 +40,7 @@ class DownloadDialog(
     private var todayInDays = 0
     private var curYear = 0
     private var curYearInProc = 0f
-    private var size: Int = 0
+    private var size = 0
     private var midSize: Int = 0
         get() {
             if (field == 0) calcMidSize()
@@ -113,7 +113,11 @@ class DownloadDialog(
             list.clear()
             addOtkrList()
         } else {
-            if (list.isNotEmpty() && list[0].id == 0) return
+            if (list.isNotEmpty() && list[0].id == 0) {
+                val d = DateUnit.initToday()
+                todayInDays = d.timeInDays
+                return
+            }
             list.clear()
             addBasicList()
             if (DateHelper.isLoadedOtkr())
