@@ -53,6 +53,7 @@ class SummaryFragment : NeoFragment(), PagingAdapter.Parent, NeoScrollBar.Host {
         get() = getString(R.string.summary)
     private var openedReader = false
     private var isUserScroll = true
+    private var initAdapter = false
     private var firstPosition = -1
 
     override fun initViewModel(): NeoToiler =
@@ -84,7 +85,7 @@ class SummaryFragment : NeoFragment(), PagingAdapter.Parent, NeoScrollBar.Host {
 
     override fun onSaveInstanceState(outState: Bundle) {
         val tab = binding?.pTab?.selectedIndex ?: 0
-        firstPosition = if (tab == SummaryTab.ADDITION.value)
+        firstPosition = if (tab == SummaryTab.ADDITION.value && initAdapter)
             adPaging.firstPosition
         else -1
         toiler.setStatus(
@@ -207,6 +208,7 @@ class SummaryFragment : NeoFragment(), PagingAdapter.Parent, NeoScrollBar.Host {
     private fun initAddition(max: Int) {
         binding?.tvUpdate?.setText(R.string.link_to_src)
         adPaging = PagingAdapter(this)
+        initAdapter = true
         adPaging.withTime = true
         binding?.rvList?.adapter = adPaging
         act?.initScrollBar(max / NeoPaging.ON_PAGE + 1, this)
