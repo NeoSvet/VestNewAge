@@ -154,6 +154,7 @@ class HomeToiler : NeoToiler() {
     }
 
     override fun onDestroy() {
+        loader.cancel()
         pageStorage?.close()
     }
 

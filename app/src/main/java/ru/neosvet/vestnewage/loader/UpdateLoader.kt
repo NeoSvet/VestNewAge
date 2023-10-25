@@ -17,6 +17,7 @@ import java.io.InputStreamReader
 
 class UpdateLoader(private val client: NeoClient) : Loader {
     private var isRun = false
+
     override fun load() {
         isRun = true
     }
@@ -37,6 +38,7 @@ class UpdateLoader(private val client: NeoClient) : Loader {
             val timeFile = br.readLine().toLong()
             br.close()
 
+            load()
             val stream = client.getStream(Urls.ACADEMY + "/Press/News/")
             br = BufferedReader(InputStreamReader(stream), 1000)
             var s = br.readLine()
@@ -53,6 +55,7 @@ class UpdateLoader(private val client: NeoClient) : Loader {
             }
         }
 
+        if(!isRun) return true
         val loader = SummaryLoader(client)
         loader.loadAcademy()
         return true
@@ -70,6 +73,7 @@ class UpdateLoader(private val client: NeoClient) : Loader {
             val timeFile = br.readLine().toLong()
             br.close()
 
+            load()
             val stream = client.getStream(Urls.DOCTRINE + "feed/")
             br = BufferedReader(InputStreamReader(stream), 1000)
             s = br.readLine()
@@ -85,6 +89,7 @@ class UpdateLoader(private val client: NeoClient) : Loader {
             }
         }
 
+        if(!isRun) return true
         val loader = SummaryLoader(client)
         loader.loadDoctrine()
         return true
@@ -97,6 +102,7 @@ class UpdateLoader(private val client: NeoClient) : Loader {
 
     fun checkSummary(updateUnread: Boolean): NeoList<Pair<String, String>> {
         val list = NeoList<Pair<String, String>>()
+        load()
         val stream = client.getStream(Urls.RSS)
         val br = BufferedReader(InputStreamReader(stream), 1000)
         var s = br.readLine()
@@ -158,6 +164,7 @@ class UpdateLoader(private val client: NeoClient) : Loader {
                 list.add(Pair(title, link))
                 loader.download(link, false)
             }
+            if(!isRun) break
         }
         bw.close()
         loader.finish()
