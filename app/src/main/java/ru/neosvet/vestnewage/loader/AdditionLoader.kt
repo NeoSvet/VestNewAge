@@ -29,12 +29,43 @@ class AdditionLoader(private val client: NeoClient) : Loader {
     fun loadAll(handler: LoadHandlerLite) {
         val storage = AdditionStorage()
         storage.open()
-        if (maxPost == 0) {
-            loadChanges(storage)
+        if (maxPost == 0)
             maxPost = loadMax()
+        var stream = client.getStream("${Urls.Addition}archive/max.txt")
+        var br = BufferedReader(InputStreamReader(stream, Const.ENCODING), 1000)
+        var s: String? = br.readLine()
+        br.close()
+        val max = s?.toInt() ?: 0
+        val des = StringBuilder()
+        var id = 0
+        for (i in 0..max) {
+            stream = client.getStream("${Urls.Addition}archive/$i.txt")
+            br = BufferedReader(InputStreamReader(stream, Const.ENCODING), 1000)
+            s = br.readLine()
+            while (s != null) {
+                val row = ContentValues()
+                id = s.toInt()
+                row.put(DataBase.ID, id)
+                row.put(Const.TITLE, br.readLine())
+                row.put(Const.LINK, br.readLine().toInt())
+                row.put(Const.TIME, br.readLine())
+                s = br.readLine()
+                while (s != null && s != Const.END) {
+                    des.append(s)
+                    des.append(Const.N)
+                    s = br.readLine()
+                }
+                row.put(Const.DESCTRIPTION, des.toString().trim())
+                des.clear()
+                if (!storage.update(id, row))
+                    storage.insert(row)
+                handler.postPercent(100 - id.percent(maxPost))
+                s = br.readLine()
+            }
+            br.close()
         }
         var p = maxPost
-        while (p > 0) {
+        while (p > id) {
             if (storage.hasPost(p).not())
                 loadPost(p)?.let { storage.insert(it) }
             p--
