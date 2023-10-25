@@ -145,7 +145,7 @@ class SiteFragment : NeoFragment() {
             is ListState.Primary -> {
                 binding?.run {
                     setUpdateTime(state.time, tvUpdate)
-                    val span = if (pTab.selectedStart) 1 else ScreenUtils.span
+                    val span = if (pTab.selectedIndex == SiteTab.SITE.value) ScreenUtils.span else 1
                     rvList.layoutManager = GridLayoutManager(requireContext(), span)
                     if (state.list.isEmpty())
                         act?.showStaticToast(getString(R.string.list_empty))
