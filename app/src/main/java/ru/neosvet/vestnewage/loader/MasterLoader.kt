@@ -244,14 +244,13 @@ class MasterLoader : Loader, LoadHandlerLite {
     private fun loadPages(list: List<String>) {
         var p = 0
         val max = list.size
-        list.forEach {
+        for (it in list) {
             loader.download(it, false)
             p++
             if (handler != null)
                 handler.postMessage("$msg (${p.percent(max)}%)")
-            else
-                handlerLite?.postPercent(p.percent(max))
-            if (isRun.not()) return@forEach
+            else handlerLite?.postPercent(p.percent(max))
+            if (isRun.not()) break
         }
         loader.finish()
     }
