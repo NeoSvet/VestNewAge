@@ -1,9 +1,12 @@
 package ru.neosvet.vestnewage.service
 
 import android.content.Context
-import android.content.Intent
-import android.os.Build
-import androidx.lifecycle.LifecycleService
+import androidx.work.Constraints
+import androidx.work.NetworkType
+import androidx.work.PeriodicWorkRequest
+import androidx.work.WorkManager
+import androidx.work.Worker
+import androidx.work.WorkerParameters
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.NeoList
@@ -14,70 +17,77 @@ import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Files
 import ru.neosvet.vestnewage.utils.NotificationUtils
+import java.util.concurrent.TimeUnit
 
-class CheckService : LifecycleService() {
+class CheckWorker(
+    private val context: Context, workerParams: WorkerParameters
+) : Worker(context, workerParams) {
+
     companion object {
+        private const val TAG_PERIODIC = "check periodic"
+
         @JvmStatic
-        fun postCommand(start: Boolean) {
-            val intent = Intent(App.context, CheckService::class.java)
-            intent.putExtra(Const.START, start)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-                App.context.startForegroundService(intent)
-            else App.context.startService(intent)
+        fun set(time: Int) {
+            val work = WorkManager.getInstance(App.context)
+            work.cancelAllWorkByTag(TAG_PERIODIC)
+            if (time == Const.TURN_OFF) return
+            val constraints = Constraints.Builder()
+                .setRequiredNetworkType(NetworkType.CONNECTED)
+                .setRequiresBatteryNotLow(true)
+                .build()
+            val task = PeriodicWorkRequest.Builder(
+                workerClass = CheckWorker::class.java,
+                repeatInterval = time.toLong(),
+                repeatIntervalTimeUnit = TimeUnit.MINUTES
+            )
+                .setInitialDelay(time.toLong(), TimeUnit.MINUTES)
+                .setConstraints(constraints)
+                .addTag(TAG_PERIODIC)
+                .build()
+            work.enqueue(task)
         }
     }
 
-    private var isRun = false
+    private val utils = NotificationUtils()
 
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        if (intent == null || !intent.getBooleanExtra(Const.START, false)) {
-            if (Build.VERSION.SDK_INT == Build.VERSION_CODES.M)
-                stopForeground(true)
-            else stopForeground(STOP_FOREGROUND_REMOVE)
-            return START_NOT_STICKY
-        }
-        if (isRun) return START_NOT_STICKY
-        isRun = true
+    override fun doWork(): Result {
         initNotif()
-        Thread { startLoad() }.start()
-        return super.onStartCommand(intent, flags, startId)
+        startLoad()
+        return Result.success()
     }
 
     private fun initNotif() {
-        val utils = NotificationUtils()
         val notif = utils.getNotification(
-            getString(R.string.app_name),
-            getString(R.string.check_new),
+            context.getString(R.string.app_name),
+            context.getString(R.string.check_new),
             NotificationUtils.CHANNEL_MUTE
         )
             .setProgress(0, 0, true)
-        startForeground(NotificationUtils.NOTIF_CHECK, notif.build())
+        utils.notify(NotificationUtils.NOTIF_CHECK, notif)
     }
 
     private fun startLoad() {
-        val loader = UpdateLoader(NeoClient())
         try {
             Urls.restore()
+            val loader = UpdateLoader(NeoClient())
             val list = loader.checkSummary(true)
-            val pref = getSharedPreferences(SummaryHelper.TAG, Context.MODE_PRIVATE)
+            val pref = context.getSharedPreferences(SummaryHelper.TAG, Context.MODE_PRIVATE)
             if (pref.getBoolean(Const.MODE, true)) {
                 if (loader.checkAddition())
-                    list.add(Pair(getString(R.string.new_in_additionally), Files.RSS + "1"))
+                    list.add(Pair(context.getString(R.string.new_in_additionally), Files.RSS + "1"))
             }
             if (pref.getBoolean(Const.DOCTRINE, false)) {
                 if (loader.checkDoctrine())
-                    list.add(Pair(getString(R.string.new_in_doctrine), Files.RSS + "2"))
+                    list.add(Pair(context.getString(R.string.new_in_doctrine), Files.RSS + "2"))
             }
             if (pref.getBoolean(Const.PLACE, false)) {
                 if (loader.checkAcademy())
-                    list.add(Pair(getString(R.string.new_in_academy), Files.RSS + "3"))
+                    list.add(Pair(context.getString(R.string.new_in_academy), Files.RSS + "3"))
             }
             if (list.isNotEmpty) pushNotification(list)
         } catch (ignored: Exception) {
         }
-        loader.cancel()
-        isRun = false
-        postCommand(false)
+        utils.cancel(NotificationUtils.NOTIF_CHECK)
     }
 
     private fun pushNotification(list: NeoList<Pair<String, String>>) {

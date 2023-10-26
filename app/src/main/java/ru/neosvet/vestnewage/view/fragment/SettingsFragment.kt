@@ -30,7 +30,7 @@ import ru.neosvet.vestnewage.helper.DateHelper
 import ru.neosvet.vestnewage.helper.MainHelper
 import ru.neosvet.vestnewage.helper.SummaryHelper
 import ru.neosvet.vestnewage.network.Urls
-import ru.neosvet.vestnewage.service.CheckStarter
+import ru.neosvet.vestnewage.service.CheckWorker
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.NotificationUtils
 import ru.neosvet.vestnewage.utils.PromUtils
@@ -493,11 +493,10 @@ class SettingsFragment : NeoFragment() {
         if (v < CHECK_MAX) {
             if (v > 2) v = (v - 2) * 4 else v++
             v *= 15
-            if (v == 15) v = 20
         } else v = Const.TURN_OFF
         editor.putInt(Const.TIME, v)
-        CheckStarter.set(v)
         editor.apply()
+        CheckWorker.set(v)
     }
 
     private fun saveProm(value: Int) {
