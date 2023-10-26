@@ -17,6 +17,7 @@ import java.io.InputStreamReader
 
 class AdditionLoader(private val client: NeoClient) : Loader {
     private var maxPost = 0
+    private var isRun = false
 
     override fun load() {
         val storage = AdditionStorage()
@@ -27,6 +28,7 @@ class AdditionLoader(private val client: NeoClient) : Loader {
     override fun cancel() {}
 
     fun loadAll(handler: LoadHandlerLite) {
+        isRun = true
         val storage = AdditionStorage()
         storage.open()
         if (maxPost == 0)
@@ -42,7 +44,7 @@ class AdditionLoader(private val client: NeoClient) : Loader {
             stream = client.getStream("${Urls.Addition}archive/$i.txt")
             br = BufferedReader(InputStreamReader(stream, Const.ENCODING), 1000)
             s = br.readLine()
-            while (s != null) {
+            while (s != null && isRun) {
                 val row = ContentValues()
                 id = s.toInt()
                 row.put(DataBase.ID, id)
@@ -63,18 +65,21 @@ class AdditionLoader(private val client: NeoClient) : Loader {
                 s = br.readLine()
             }
             br.close()
+            if(!isRun) break
         }
         var p = maxPost
-        while (p > id) {
+        while (p > id && isRun) {
             if (storage.hasPost(p).not())
                 loadPost(p)?.let { storage.insert(it) }
             p--
             handler.postPercent(100 - p.percent(maxPost))
         }
         storage.close()
+        isRun = false
     }
 
     fun load(storage: AdditionStorage, startId: Int) {
+        isRun = true
         try {
             if (maxPost == 0) {
                 loadChanges(storage)
@@ -93,9 +98,11 @@ class AdditionLoader(private val client: NeoClient) : Loader {
             for (p in start downTo end) {
                 if (storage.hasPost(p).not())
                     loadPost(p)?.let { storage.insert(it) }
+                if(!isRun) break
             }
         } catch (_: NeoException.SiteNoResponse) {
         }
+        isRun = false
     }
 
     private fun loadPost(id: Int): ContentValues? {
