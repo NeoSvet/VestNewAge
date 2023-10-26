@@ -36,7 +36,7 @@ import ru.neosvet.vestnewage.helper.HomeHelper
 import ru.neosvet.vestnewage.helper.MainHelper
 import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.network.Urls
-import ru.neosvet.vestnewage.service.LoaderService
+import ru.neosvet.vestnewage.service.LoaderWorker
 import ru.neosvet.vestnewage.storage.DataBase
 import ru.neosvet.vestnewage.storage.DevStorage
 import ru.neosvet.vestnewage.utils.*
@@ -773,7 +773,13 @@ class MainActivity : AppCompatActivity(), ItemClicker {
     }
 
     fun download(list: List<Int>) {
-        LoaderService.loadList(list, toast)
+        toast.autoHide = true
+        if (LoaderWorker.isRun) {
+            toast.show(App.context.getString(R.string.load_already_run))
+            return
+        }
+        toast.show(App.context.getString(R.string.load_background))
+        LoaderWorker.load(list)
     }
 
     @SuppressLint("ClickableViewAccessibility")

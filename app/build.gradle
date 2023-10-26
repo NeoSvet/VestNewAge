@@ -41,7 +41,7 @@ dependencies {
     implementation 'me.leolin:ShortcutBadger:1.1.22@aar'
     implementation 'com.jakewharton.threetenabp:threetenabp:1.4.0' //for DateUnit
     implementation 'androidx.work:work-runtime:2.8.1'
-    implementation 'androidx.lifecycle:lifecycle-service:2.6.2'
+    implementation 'androidx.work:work-runtime-ktx:2.8.1'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'androidx.core:core-splashscreen:1.0.1'
     implementation 'androidx.paging:paging-runtime-ktx:3.2.1'

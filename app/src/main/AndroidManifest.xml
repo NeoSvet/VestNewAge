@@ -66,7 +66,7 @@
             android:theme="@style/Theme.MainTheme" />
 
         <service
-            android:name=".service.LoaderService"
+            android:name="androidx.work.impl.foreground.SystemForegroundService"
             android:foregroundServiceType="specialUse"
             android:icon="@drawable/ic_download"
             android:label="@string/load">
@@ -75,6 +75,7 @@
                 android:value="Loading data. Launched exclusively by the user within the application." />
         </service>
 
+        <receiver android:name=".service.LoaderWorker$Rec" />
         <receiver android:name=".utils.PromUtils$Rec" />
         <receiver android:name=".helper.SummaryHelper$Rec" />
         <receiver android:name=".utils.NotificationUtils$Result" />

@@ -15,7 +15,7 @@ import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.CalendarItem
 import ru.neosvet.vestnewage.databinding.CalendarFragmentBinding
 import ru.neosvet.vestnewage.helper.DateHelper
-import ru.neosvet.vestnewage.service.LoaderService
+import ru.neosvet.vestnewage.service.LoaderWorker
 import ru.neosvet.vestnewage.view.activity.BrowserActivity
 import ru.neosvet.vestnewage.view.basic.NeoFragment
 import ru.neosvet.vestnewage.view.dialog.DownloadDialog
@@ -102,7 +102,7 @@ class CalendarFragment : NeoFragment() {
         if (isBlocked) return
         binding?.run {
             if (!plus && pMonth.selectedStart && pYear.selectedStart
-                && !DateHelper.isLoadedOtkr() && !LoaderService.isRun
+                && !DateHelper.isLoadedOtkr() && !LoaderWorker.isRun
             ) {
                 showDownloadDialog()
                 return

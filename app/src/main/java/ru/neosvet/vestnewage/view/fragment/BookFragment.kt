@@ -16,7 +16,7 @@ import ru.neosvet.vestnewage.storage.DataBase
 import ru.neosvet.vestnewage.databinding.BookFragmentBinding
 import ru.neosvet.vestnewage.helper.DateHelper
 import ru.neosvet.vestnewage.network.Urls
-import ru.neosvet.vestnewage.service.LoaderService
+import ru.neosvet.vestnewage.service.LoaderWorker
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.ScreenUtils
 import ru.neosvet.vestnewage.view.activity.BrowserActivity.Companion.openReader
@@ -238,7 +238,7 @@ class BookFragment : NeoFragment() {
         binding?.run {
             if (pTab.selectedIndex == BookTab.EPISTLES.value &&
                 !plus && pMonth.selectedStart && pYear.selectedStart &&
-                !DateHelper.isLoadedOtkr() && !LoaderService.isRun
+                !DateHelper.isLoadedOtkr() && !LoaderWorker.isRun
             ) {
                 showDownloadDialog()
                 return
