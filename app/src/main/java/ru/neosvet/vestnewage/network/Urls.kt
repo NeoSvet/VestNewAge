@@ -23,7 +23,6 @@ object Urls {
     const val DOCTRINE = "https://doktrina.info/"
     const val ACADEMY = "https://akegn.ru"
     const val PROM_LINK = "Posyl-na-Edinenie.html"
-    const val VREMYA_LINK = "Vremya-Posyla.html"
     const val PRECEPT_LINK = "doctrine:174-179"
 
     private val URL = arrayOf(

@@ -99,7 +99,7 @@ class PromUtils(textView: View?) {
             }
         } else { //R.id.tvPromTimeInMenu
             tvPromTime!!.setOnClickListener {
-                openReader(Urls.VREMYA_LINK, null)
+                openReader(Urls.PROM_LINK, null)
             }
         }
     }
@@ -123,7 +123,7 @@ class PromUtils(textView: View?) {
         }
     }
 
-    private suspend fun setPromTime() {
+    private fun setPromTime() {
         isStart = true
         val t = getPromText()
         if (t == null) { //t.contains("-")
