@@ -178,6 +178,7 @@
     <!--SiteFragment-->
     <string name="site">Сайт</string>
     <string name="to_load">Скачать</string>
+    <string name="today_s">Сегодняшнее!</string>
     <string name="image">[изображение]</string>
     <string name="mail">[почта]</string>
     <string name="webpage">[сайт]</string>

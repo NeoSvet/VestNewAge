@@ -45,7 +45,7 @@ class SiteToiler : NeoToiler() {
         strings = SiteStrings(
             novosti = context.getString(R.string.novosti),
             mark_read = context.getString(R.string.mark_read),
-            today = context.getString(R.string.new_today),
+            today = context.getString(R.string.today_s),
             unread = context.getString(R.string.unread),
             timekeeping = context.getString(R.string.Timekeeping_Spiritual_Wave),
             path = context.getString(R.string.The_Path_of_the_impulse)
