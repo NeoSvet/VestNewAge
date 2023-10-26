@@ -39,9 +39,6 @@ class PromUtils(textView: View?) {
     }
 
     private var tvPromTime: TextView? = null
-    private val FLAGS =
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) PendingIntent.FLAG_UPDATE_CURRENT
-        else PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
     private val isPromField: Boolean
         get() = tvPromTime != null
     private val pref: SharedPreferences =
@@ -217,8 +214,8 @@ class PromUtils(textView: View?) {
         val vibration = pref.getBoolean(SetNotifDialog.VIBR, true)
         val intent = Intent(App.context, MainActivity::class.java)
         intent.data = Uri.parse(Urls.Site + Urls.PROM_LINK)
-        val piEmpty = PendingIntent.getActivity(App.context, 0, Intent(), FLAGS)
-        val piProm = PendingIntent.getActivity(App.context, 0, intent, FLAGS)
+        val piEmpty = PendingIntent.getActivity(App.context, 0, Intent(), NotificationUtils.FLAGS)
+        val piProm = PendingIntent.getActivity(App.context, 0, intent, NotificationUtils.FLAGS)
         val notifUtils = NotificationUtils()
         var msg = getPromText()
         if (msg == null) //text.contains("-")
@@ -251,7 +248,7 @@ class PromUtils(textView: View?) {
 
     fun initNotif(param: Int) {
         val intent = Intent(App.context, Rec::class.java)
-        val piProm = PendingIntent.getBroadcast(App.context, 2, intent, FLAGS)
+        val piProm = PendingIntent.getBroadcast(App.context, 2, intent, NotificationUtils.FLAGS)
         if (param == Const.TURN_OFF) {
             NotificationUtils.setAlarm(piProm, param.toLong())
             return
