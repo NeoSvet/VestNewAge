@@ -12,10 +12,11 @@ import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.data.NeoException
 import ru.neosvet.vestnewage.helper.MainHelper
 import ru.neosvet.vestnewage.loader.SiteLoader
+import ru.neosvet.vestnewage.loader.page.PageLoader
+import ru.neosvet.vestnewage.loader.page.StyleLoader
 import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.network.NetConst
 import ru.neosvet.vestnewage.network.Urls
-import ru.neosvet.vestnewage.service.LoaderService
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.PromUtils
@@ -118,6 +119,8 @@ class MainToiler : NeoToiler() {
         var cursor: Cursor
         var s = br.readLine()
         val list = mutableListOf<BasicItem>()
+        val loader = PageLoader(client)
+        var isUpdate = false
         while (s != Const.END) {
             time = s.toLong()
             s = br.readLine() //link
@@ -126,7 +129,8 @@ class MainToiler : NeoToiler() {
             if (cursor.moveToFirst()) {
                 val iTime = cursor.getColumnIndex(Const.TIME)
                 if (time > cursor.getLong(iTime)) {
-                    LoaderService.loadPage(s)
+                    isUpdate = true
+                    loader.download(s, true)
                     val iTitle = cursor.getColumnIndex(Const.TITLE)
                     list.add(BasicItem(cursor.getString(iTitle), s).apply {
                         des = updatedPage
@@ -137,6 +141,10 @@ class MainToiler : NeoToiler() {
             storage.close()
         }
         br.close()
+        if (isUpdate) {
+            val styleLoader = StyleLoader()
+            styleLoader.download(false)
+        }
         if (list.isNotEmpty())
             postState(ListState.Primary(list = list))
     }
