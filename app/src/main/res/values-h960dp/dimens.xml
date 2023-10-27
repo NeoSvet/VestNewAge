@@ -5,6 +5,7 @@
     <!-- tablet port -->
     <dimen name="cell_size">65dp</dimen>
     <dimen name="cell_font">40dp</dimen>
+    <dimen name="fixed_font">24dp</dimen>
     <dimen name="tab_size">47dp</dimen>
     <dimen name="string_size">36dp</dimen>
     <dimen name="margin_top">65dp</dimen>
