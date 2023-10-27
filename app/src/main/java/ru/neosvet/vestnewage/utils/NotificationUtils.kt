@@ -8,6 +8,7 @@ import android.content.ContextWrapper
 import android.content.Intent
 import android.graphics.Color
 import android.os.Build
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import ru.neosvet.vestnewage.App
@@ -45,8 +46,15 @@ class NotificationUtils : ContextWrapper(App.context) {
             val am = App.context.getSystemService(ALARM_SERVICE) as AlarmManager
             am.cancel(pi)
             if (time == Const.TURN_OFF.toLong()) return
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !am.canScheduleExactAlarms()) {
+                Toast.makeText(
+                    App.context,
+                    App.context.getString(R.string.not_allowed_alarm),
+                    Toast.LENGTH_LONG
+                ).show()
+                return
+            }
             am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, time, pi)
-            //TODO Error:(37, 13) When scheduling exact alarms, apps should explicitly call `AlarmManager#canScheduleExactAlarms` or handle `SecurityException`s
         }
     }
 

@@ -51,6 +51,7 @@
     <!--NotificationHelper-->
     <string name="mute_notif">Беззвучные</string>
     <string name="tips">Подсказки</string>
+    <string name="not_allowed_alarm">Нет разрешения на установку уведомления-будильника</string>
     <!--Menu-->
     <string name="new_section">Новое</string>
     <string name="home_screen">Главный</string>
