@@ -199,7 +199,6 @@ class MasterLoader : Loader, LoadHandlerLite {
                 } else if (l != f.length())
                     f.delete()
             }
-            if (isRun.not()) return@forEachLine
         }
         br.close()
         return list
