@@ -53,7 +53,7 @@ class SearchEngine(
     }
 
     var countMatches = 0
-    private set
+        private set
     var countMaterials = 0
         private set
     private var prevMaterials = 0
@@ -490,13 +490,15 @@ class SearchEngine(
     }
 
     private fun removeEnding(w: MutableList<String>): MutableList<String> {
-        var i: Int
-        for (n in w.indices) {
-            endings?.forEach { e ->
-                i = w[n].length - e.length
-                if (i > 2 && w[n].lastIndexOf(e, ignoreCase = true) == i) {
-                    w[n] = w[n].substring(0, i)
-                    return@forEach
+        endings?.let { arr ->
+            var i: Int
+            for (n in w.indices) {
+                for (e in arr) {
+                    i = w[n].length - e.length
+                    if (i > 2 && w[n].lastIndexOf(e, ignoreCase = true) == i) {
+                        w[n] = w[n].substring(0, i)
+                        break
+                    }
                 }
             }
         }
