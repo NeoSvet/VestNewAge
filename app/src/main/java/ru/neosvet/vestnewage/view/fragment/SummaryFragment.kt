@@ -9,7 +9,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.BasicItem
@@ -242,10 +241,7 @@ class SummaryFragment : NeoFragment(), PagingAdapter.Parent, NeoScrollBar.Host {
                 adPaging.submitData(lifecycle, it)
             }
         }
-        lifecycleScope.launch {
-            delay(50)
-            rvList.adapter = adPaging
-        }
+        rvList.adapter = adPaging
     }
 
     override fun onItemClick(index: Int, item: BasicItem) {
