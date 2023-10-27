@@ -216,7 +216,7 @@ class LaunchUtils(context: Context) {
             link.contains("/tolkovaniya") || mLink[0] == "year.html" ->
                 InputData(1, Section.BOOK)
 
-            mLink[1].length == 13 -> { //08.02.16.html
+            mLink.size == 1 || mLink[1].length == 13 -> { //08.02.16.html
                 openReader(link.substring(1), null)
                 InputData(-1, Section.MENU)
             }
