@@ -26,7 +26,7 @@ import ru.neosvet.vestnewage.view.activity.BrowserActivity.Companion.openReader
 import ru.neosvet.vestnewage.view.activity.MainActivity
 import ru.neosvet.vestnewage.view.basic.BottomAnim
 import ru.neosvet.vestnewage.view.dialog.SetNotifDialog
-import java.util.*
+import java.util.Timer
 import kotlin.concurrent.timer
 
 class PromUtils(textView: View?) {
@@ -257,7 +257,7 @@ class PromUtils(textView: View?) {
         var d = prom.getPromDate(false)
         val min = param + 1
         d.changeMinutes(-min)
-        if (d.timeInSeconds < DateUnit.initNow().timeInSeconds) {
+        if (d.timeInSeconds <= DateUnit.initNow().timeInSeconds) {
             d = prom.getPromDate(true)
             d.changeMinutes(-min)
         }
