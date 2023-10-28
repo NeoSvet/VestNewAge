@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <FrameLayout
+        android:id="@+id/item_bg"
+        style="@style/ItemBG"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/item_bg"
+        android:padding="0dp">
+
+        <CheckedTextView
+            android:id="@+id/check_box"
+            style="@style/CheckedTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="0dp"
+            android:checkMark="@drawable/check_selector"
+            android:gravity="center_vertical" />
+
+    </FrameLayout>
+</FrameLayout>

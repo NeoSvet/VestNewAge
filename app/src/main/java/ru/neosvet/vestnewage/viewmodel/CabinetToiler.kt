@@ -1,6 +1,7 @@
 package ru.neosvet.vestnewage.viewmodel
 
 import android.content.Context
+import android.view.inputmethod.EditorInfo
 import androidx.work.Data
 import kotlinx.coroutines.launch
 import okhttp3.FormBody
@@ -16,6 +17,7 @@ import ru.neosvet.vestnewage.network.NetConst
 import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.view.activity.CabinetActivity
+import ru.neosvet.vestnewage.view.list.CabinetAdapter
 import ru.neosvet.vestnewage.viewmodel.basic.CabinetStrings
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
 import ru.neosvet.vestnewage.viewmodel.state.BasicState
@@ -64,6 +66,7 @@ class CabinetToiler : NeoToiler() {
             send_unlivable = context.getString(R.string.send_unlivable)
         )
 
+        addLoginItems(context)
         val m = context.resources.getStringArray(R.array.cabinet_main)
         var i = 0
         while (i < m.size) {
@@ -77,9 +80,50 @@ class CabinetToiler : NeoToiler() {
             cabinetList.add(BasicItem(s))
     }
 
-    override suspend fun defaultState() {
+    private fun addLoginItems(context: Context) {
         val p = helper.getAuthPair()
-        postState(CabinetState.AuthPair(p.first, p.second))
+        val email = BasicItem(
+            context.getString(R.string.email),
+            EditorInfo.IME_ACTION_NEXT.toString() + "33"
+        ).apply {
+            des = p.first
+            addHead(CabinetAdapter.TYPE_INPUT)
+        }
+        loginList.add(email)
+        val pass = BasicItem(
+            context.getString(R.string.password),
+            EditorInfo.IME_ACTION_DONE.toString() + "129"
+        ).apply {
+            des = p.second
+            addHead(CabinetAdapter.TYPE_INPUT)
+        }
+        loginList.add(pass)
+        val remEmail = BasicItem(
+            context.getString(R.string.remember_email),
+            p.first
+        ).apply {
+            addHead(CabinetAdapter.TYPE_CHECK)
+        }
+        loginList.add(remEmail)
+        val remPass = BasicItem(
+            context.getString(R.string.remember_password),
+            p.second
+        ).apply {
+            addHead(CabinetAdapter.TYPE_CHECK)
+        }
+        loginList.add(remPass)
+        val alterPath = BasicItem(
+            context.getString(R.string.alter_path)
+        ).apply {
+            addHead(CabinetAdapter.TYPE_CHECK)
+        }
+        loginList.add(alterPath)
+        loginList.add(BasicItem(context.getString(R.string.additionally) + ":").apply {
+            addHead(CabinetAdapter.TYPE_TITLE)
+        })
+    }
+
+    override suspend fun defaultState() {
         postState(CabinetState.Primary(screen, loginList))
     }
 
@@ -293,10 +337,34 @@ class CabinetToiler : NeoToiler() {
     }
 
     fun forget(login: Boolean, password: Boolean) {
+        if (login) {
+            loginList[0].des = ""
+            loginList[2].let {
+                it.clear()
+                it.addLink(CabinetAdapter.TYPE_CHECK, "")
+            }
+        }
+        if (password) {
+            loginList[1].des = ""
+            loginList[3].let {
+                it.clear()
+                it.addLink(CabinetAdapter.TYPE_CHECK, "")
+            }
+        }
         helper.forget(login, password)
     }
 
     fun save(login: String, password: String) {
+        loginList[0].des = login
+        loginList[1].des = password
+        loginList[2].let {
+            it.clear()
+            it.addLink(CabinetAdapter.TYPE_CHECK, login)
+        }
+        loginList[3].let {
+            it.clear()
+            it.addLink(CabinetAdapter.TYPE_CHECK, password)
+        }
         helper.save(login, password)
     }
 
@@ -307,5 +375,16 @@ class CabinetToiler : NeoToiler() {
             postState(BasicState.Ready)
             CabinetActivity.openPage(link)
         }
+    }
+
+    fun setCheck(index: Int, value: Boolean) {
+        loginList[index].let {
+            it.clear()
+            it.addLink(CabinetAdapter.TYPE_CHECK, if (value) "c" else "")
+        }
+    }
+
+    fun setText(index: Int, value: String) {
+        loginList[index].des = value
     }
 }

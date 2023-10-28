@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/item_bg"
+        style="@style/ItemBG"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/item_bg"
+        android:paddingVertical="0dp">
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/til_item"
+            style="@style/TextInputStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginVertical="0dp"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/et_item"
+                style="@style/EditTextStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginVertical="0dp" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <ImageView
+            android:id="@+id/btn_clear"
+            style="@style/InTextFieldButton"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@id/til_item"
+            app:layout_constraintEnd_toEndOf="@id/til_item"
+            app:layout_constraintTop_toTopOf="@id/til_item" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</FrameLayout>
