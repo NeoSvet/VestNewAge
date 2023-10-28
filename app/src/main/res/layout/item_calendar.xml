@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="@dimen/cell_size"
     android:layout_height="@dimen/cell_size"
     android:layout_margin="0dp"
     android:clickable="true"
     android:focusable="true"
     android:focusableInTouchMode="true"
-    android:orientation="vertical"
     android:padding="3dp">
 
     <com.google.android.material.textview.MaterialTextView
@@ -15,4 +14,4 @@
         android:layout_height="match_parent"
         android:gravity="center"
         android:textSize="@dimen/cell_font" />
-</LinearLayout>
+</FrameLayout>
