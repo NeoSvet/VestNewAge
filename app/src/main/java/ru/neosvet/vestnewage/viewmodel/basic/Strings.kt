@@ -16,6 +16,7 @@ data class BrowserStrings(
     val copyright: String,
     val downloaded: String,
     val doctrine_pages: String,
+    val holy_rus_pages: String,
     val doctrine_future: String,
     val edition_of: String,
     val publication_of: String,

@@ -52,7 +52,8 @@ class LoaderWorker(
         var isRun = false
 
         /**
-         * @param list contains year (YY) for load or 0 - basic (summary and site), 1 - doctrine
+         * @param list contains year (YY) for load or 0 - basic (summary and site),
+         * 1 - other books (doctrine, holy rus)
          */
         @JvmStatic
         fun load(list: List<Int>) {
@@ -75,7 +76,7 @@ class LoaderWorker(
     }
 
     private enum class Task {
-        STARTING, LOAD_BASIC, LOAD_DOCTRINE, LOAD_MONTH
+        STARTING, LOAD_BASIC, LOAD_DOCTRINE, LOAD_HOLY_RUS, LOAD_MONTH
     }
 
     private lateinit var notif: NotificationCompat.Builder
@@ -132,7 +133,7 @@ class LoaderWorker(
         list.forEach {
             when (it) {
                 0 -> loadBasic()
-                1 -> loadDoctrine()
+                1 -> loadOtherBooks()
                 else -> loadYear(it + 2000)
             }
             NeoClient.deleteTempFiles()
@@ -241,10 +242,13 @@ class LoaderWorker(
         }
     }
 
-    private fun loadDoctrine() {
+    private fun loadOtherBooks() {
         task = Task.LOAD_DOCTRINE
         currentLoader = loader
         loader.loadDoctrine()
+        upProg()
+        task = Task.LOAD_HOLY_RUS
+        loader.loadHolyRus()
         upProg()
     }
 
@@ -264,6 +268,7 @@ class LoaderWorker(
         loader.loadSummary()
         if (isRun.not()) return
         loader.loadSite()
+        upProg()
         if (isRun.not()) return
         postMessage(applicationContext.getString(R.string.additionally))
         val additionLoader = AdditionLoader(client)
@@ -285,8 +290,8 @@ class LoaderWorker(
         val y = todayYear - 2000
         list.forEach {
             max += when (it) {
-                in 0..1 -> 1
-                4 -> 5
+                in 0..1 -> 2 //basic and other book
+                4 -> 5 //book 2004
                 y -> todayMonth
                 else -> 12
             }

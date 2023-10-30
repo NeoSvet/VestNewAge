@@ -16,6 +16,7 @@ class PageStorage : DataBase.Parent {
         fun getDatePage(link: String): String {
             return when {
                 link.contains(Const.DOCTRINE) -> DataBase.DOCTRINE
+                link.contains(Const.HOLY_RUS) -> DataBase.HOLY_RUS
                 !link.contains("/") || link.contains("press") -> DataBase.ARTICLES
                 link.contains("pred") || link.hasDate ->
                     link.dateFromLink.my
@@ -44,15 +45,20 @@ class PageStorage : DataBase.Parent {
         get() = name == DataBase.ARTICLES
     val isDoctrine: Boolean
         get() = name == DataBase.DOCTRINE
+    val isHolyRus: Boolean
+        get() = name == DataBase.HOLY_RUS
+    val isOtherBook: Boolean
+        get() = isDoctrine || isHolyRus
     val isBook: Boolean
         get() = !isArticle && patternBook.matcher(name).matches()
 
     fun open(name: String, write: Boolean = false) {
-        val n = if (name.contains(Const.HTML))
-            getDatePage(name)
-        else if (name.contains(Const.DOCTRINE))
-            DataBase.DOCTRINE
-        else name
+        val n = when {
+            name.contains(Const.HTML) -> getDatePage(name)
+            name.contains(Const.DOCTRINE) -> DataBase.DOCTRINE
+            name.contains(Const.HOLY_RUS) -> DataBase.HOLY_RUS
+            else -> name
+        }
         if (isClosed.not()) {
             if (n == this.name)
                 return
@@ -81,7 +87,7 @@ class PageStorage : DataBase.Parent {
     }
 
     fun getPageTitle(title: String, link: String): String {
-        return if (isArticle || isDoctrine || !link.hasDate || title == link) {
+        return if (isArticle || isOtherBook || !link.hasDate || title == link) {
             title
         } else {
             val s = link.date
@@ -158,7 +164,7 @@ class PageStorage : DataBase.Parent {
     }
 
     private fun getCursor(isPoems: Boolean): Cursor? {
-        val cursor = if (isDoctrine) db.query(
+        val cursor = if (isOtherBook) db.query(
             table = Const.TITLE,
             orderBy = DataBase.ID
         ) else if (isOldBook) getListAll()
@@ -171,7 +177,7 @@ class PageStorage : DataBase.Parent {
             cursor.close()
             return null
         }
-        if (isDoctrine)
+        if (isOtherBook)
             cursor.moveToNext()
         return cursor
     }

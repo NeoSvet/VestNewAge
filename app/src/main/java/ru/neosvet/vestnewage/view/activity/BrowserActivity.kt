@@ -21,6 +21,7 @@ import androidx.core.view.updatePadding
 import androidx.core.widget.doAfterTextChanged
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import com.google.android.material.imageview.ShapeableImageView
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -554,27 +555,38 @@ class BrowserActivity : AppCompatActivity(), WebClient.Parent, NeoInterface.Pare
         }
     }
 
-    private fun setHeadBar(isDoctrine: Boolean) = binding.run {
+    private fun setHeadBar(type: BrowserState.Type) = binding.run {
         if (ivHeadBack.isVisible) return@run
-        if (isDoctrine) {
-            if (ScreenUtils.isWide && isBigHead)
-                ivHeadBack.setImageResource(R.drawable.head_back_tablet_d)
-            else if (ScreenUtils.isLand)
-                ivHeadBack.setImageResource(R.drawable.head_back_land_d)
-            else ivHeadBack.setImageResource(R.drawable.head_back_d)
-            if (link.isDoctrineBook)
-                ivHeadFront.setImageResource(R.drawable.head_front_db)
-            else ivHeadFront.setImageResource(R.drawable.head_front_d)
-        } else if (ScreenUtils.isWide && isBigHead)
-            ivHeadBack.setImageResource(R.drawable.head_back_tablet)
-        else if (ScreenUtils.isLand)
-            ivHeadBack.setImageResource(R.drawable.head_back_land)
+        when {
+            type == BrowserState.Type.DOCTRINE -> {
+                setDoctrineBack(ivHeadBack)
+                if (link.isDoctrineBook)
+                    ivHeadFront.setImageResource(R.drawable.head_front_db)
+                else ivHeadFront.setImageResource(R.drawable.head_front_d)
+            }
+
+            type == BrowserState.Type.HOLY_RUS -> {
+                setDoctrineBack(ivHeadBack)
+                ivHeadFront.setImageResource(R.drawable.head_front_r)
+            }
+
+            ScreenUtils.isWide && isBigHead -> ivHeadBack.setImageResource(R.drawable.head_back_tablet)
+            ScreenUtils.isLand -> ivHeadBack.setImageResource(R.drawable.head_back_land)
+        }
         if (headBar.isHided) return@run
         ivHeadBack.isVisible = true
         ivHeadFront.isVisible = true
         ivHeadBack.post {
             headBar.setExpandable(helper.isMiniTop)
         }
+    }
+
+    private fun setDoctrineBack(ivHeadBack: ShapeableImageView) {
+        if (ScreenUtils.isWide && isBigHead)
+            ivHeadBack.setImageResource(R.drawable.head_back_tablet_d)
+        else if (ScreenUtils.isLand)
+            ivHeadBack.setImageResource(R.drawable.head_back_land_d)
+        else ivHeadBack.setImageResource(R.drawable.head_back_d)
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -796,14 +808,22 @@ class BrowserActivity : AppCompatActivity(), WebClient.Parent, NeoInterface.Pare
         link = state.link
         finishLoading()
         binding.content.wvBrowser.loadUrl(state.url)
-        if (state.type == BrowserState.Type.DOCTRINE) {
-            setHeadBar(true)
-            menu.numpar.isVisible = false
-            menu.refresh.isVisible = link.isDoctrineBook
-        } else {
-            setHeadBar(false)
-            menu.numpar.isVisible = link.isPoem
-            menu.refresh.isVisible = state.type != BrowserState.Type.OLD_BOOK
+        setHeadBar(state.type)
+        when (state.type) {
+            BrowserState.Type.DOCTRINE -> {
+                menu.numpar.isVisible = false
+                menu.refresh.isVisible = link.isDoctrineBook
+            }
+
+            BrowserState.Type.HOLY_RUS -> {
+                menu.numpar.isVisible = false
+                menu.refresh.isVisible = true
+            }
+
+            else -> {
+                menu.numpar.isVisible = link.isPoem
+                menu.refresh.isVisible = state.type != BrowserState.Type.OLD_BOOK
+            }
         }
         if (positionForRestore > 0f) snackbar.show(
             view = binding.fabNav,

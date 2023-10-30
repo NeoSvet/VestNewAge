@@ -19,6 +19,7 @@
     <string name="download_">Скачать…</string>
     <string name="download_alert">Выберите пункты для скачивания:</string>
     <string name="summary_site">Сводка и объявления</string>
+    <string name="other_books">Другие книги</string>
     <string name="otkroveniya_year">Откровения (2004 год)</string>
     <string name="format_tolkovaniya_year">Толкования за 20%02d год</string>
     <string name="book_2016">Послания и Катрены за 2016 год</string>
@@ -108,6 +109,7 @@
     <string name="epistles">Послания</string>
     <string name="poems">Катрены</string>
     <string name="doctrine_creator">Доктрина Создателя</string>
+    <string name="holy_rus">Святая Русь</string>
     <string name="link_to_src">Ссылка на источник</string>
     <string name="rnd_verse">«Случайный» стих</string>
     <string name="rnd_epistle">«Случайное» Послание</string>
@@ -212,6 +214,7 @@
     <string name="copyright">Copyright © Leonid Maslov 2004-</string>
     <string name="downloaded">Загружено:&#160;</string>
     <string name="doctrine_pages">Книга «Доктрина Создателя», страницы&#160;</string>
+    <string name="holy_rus_pages">Книга «Святая Русь», страницы&#160;</string>
     <string name="doctrine_future">Сайт «Доктрина Будущего»&#160;</string>
     <string name="edition_of">Редакция от&#160;</string>
     <string name="publication_of">Публикация от&#160;</string>

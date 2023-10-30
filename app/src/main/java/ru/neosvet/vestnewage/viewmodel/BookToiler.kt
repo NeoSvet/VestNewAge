@@ -12,7 +12,6 @@ import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.BasicItem
 import ru.neosvet.vestnewage.data.BookRnd
 import ru.neosvet.vestnewage.data.BookTab
-import ru.neosvet.vestnewage.storage.DataBase
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.helper.BookHelper
 import ru.neosvet.vestnewage.helper.DateHelper
@@ -21,6 +20,7 @@ import ru.neosvet.vestnewage.loader.MasterLoader
 import ru.neosvet.vestnewage.loader.basic.LoadHandlerLite
 import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.network.Urls
+import ru.neosvet.vestnewage.storage.DataBase
 import ru.neosvet.vestnewage.storage.JournalStorage
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.utils.*
@@ -112,10 +112,17 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
             } else loader.loadEpistlesList()
 
             BookTab.DOCTRINE -> {
-                loader.loadDoctrineList()
-                openDoctrine()
-                if (isRun)
-                    loader.loadDoctrineBook(this)
+                loader.loadBookList(false)
+                openOtherBook()
+                if (isRun) loader.loadBook(false, this)
+                postState(BasicState.Success)
+                return
+            }
+
+            BookTab.HOLY_RUS -> {
+                loader.loadBookList(true)
+                openOtherBook()
+                if (isRun) loader.loadBook(true, this)
                 postState(BasicState.Success)
                 return
             }
@@ -134,8 +141,8 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
         if (tab != -1)
             selectedTab = convertTab(tab)
         scope.launch {
-            if (selectedTab == BookTab.DOCTRINE) {
-                openDoctrine()
+            if (selectedTab == BookTab.DOCTRINE || selectedTab == BookTab.HOLY_RUS) {
+                openOtherBook()
                 return@launch
             }
             if (month != -1 || year != -1) {
@@ -231,15 +238,17 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
     private fun getYears(): List<String> =
         if (isPoemsTab) yearsP else yearsE
 
-    private suspend fun openDoctrine() {
+    private suspend fun openOtherBook() {
+        val isRus = selectedTab == BookTab.HOLY_RUS
         val storage = PageStorage()
-        storage.open(DataBase.DOCTRINE)
+        storage.open(if (isRus) DataBase.HOLY_RUS else DataBase.DOCTRINE)
         val cursor = storage.getListAll()
         cursor.moveToFirst()
+        val site = if (isRus) Urls.HolyRusSite else Urls.DoctrineSite
         if (cursor.count == 1) {
             cursor.close()
             storage.close()
-            postState(BookState.Book(Urls.DoctrineSite, listOf()))
+            postState(BookState.Book(site, listOf()))
             reLoad()
             return
         }
@@ -248,7 +257,7 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
         val list = mutableListOf<BasicItem>()
         while (cursor.moveToNext()) {
             val link = cursor.getString(iLink)
-            if (link.isDoctrineBook) {
+            if (isRus || link.isDoctrineBook) {
                 val title = cursor.getString(iTitle)
                 list.add(BasicItem(title, link))
             }
@@ -256,9 +265,9 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
         cursor.close()
         storage.close()
         if (list.isEmpty()) {
-            postState(BookState.Book(Urls.DoctrineSite, listOf()))
+            postState(BookState.Book(site, listOf()))
             reLoad()
-        } else postState(BookState.Book(Urls.DoctrineSite, list))
+        } else postState(BookState.Book(site, list))
     }
 
     @SuppressLint("Range")
@@ -408,6 +417,7 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
     private fun convertTab(tab: Int) = when (tab) {
         BookTab.EPISTLES.value -> BookTab.EPISTLES
         BookTab.DOCTRINE.value -> BookTab.DOCTRINE
+        BookTab.HOLY_RUS.value -> BookTab.HOLY_RUS
         else -> BookTab.POEMS
     }
 

@@ -28,7 +28,7 @@ object Urls {
     private val URL = arrayOf(
         "http://neosvet.ucoz.ru/", "http://neosvet.somee.com/", //URL 0 1
         "https://blagayavest.info/", "https://www.otkroveniya.com/", //SITE 2 3
-        "https://doktrina.info/doktrina-sozdatelya/", ////DOCTRINE_SITE  4
+        "https://doktrina.info/doktrina-sozdatelya/", //DOCTRINE_SITE  4
         "https://t.me/Novosti_ot_SOZDATELYA/", //TELEGRAM_URL 5
         "doctrine/", "vna/doctrine/", //DOCTRINE_BASE 6 7
         "vna/posts/", "", //ADDITION 8 9
@@ -45,7 +45,9 @@ object Urls {
         "print/tolkovaniya.html", "", //EPISTLES 26 27
         "intforum.html", "", //NEWS 28 29
         "novosti.html", "", //ADS 30 31
-        "databases_vna", "vna/databases" //DATABASES 32 33
+        "databases_vna", "vna/databases", //DATABASES 32 33
+        "vna/svyataya-rus/", "", //HOLY_RUS_BASE 34 35
+        "https://doktrina.info/svyataya-rus/"  //HOLY_RUS_SITE 36
     )
 
     @JvmStatic
@@ -67,6 +69,9 @@ object Urls {
     val DoctrineSite: String
         get() = URL[4]
 
+    val HolyRusSite: String
+        get() = URL[36]
+
     val TelegramUrl: String
         get() = URL[5]
 
@@ -78,6 +83,10 @@ object Urls {
     val DoctrineBase: String
         get() = if (isSiteCom) URL[1] + URL[7].ifEmpty { URL[6] }
         else URL[0] + URL[6]
+
+    val HolyRusBase: String
+        get() = if (isSiteCom) URL[1] + URL[35].ifEmpty { URL[34] }
+        else URL[0] + URL[34]
 
     val Addition: String
         get() = if (isSiteCom) URL[1] + URL[9].ifEmpty { URL[8] }

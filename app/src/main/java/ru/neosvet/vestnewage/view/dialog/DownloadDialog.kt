@@ -21,7 +21,7 @@ class DownloadDialog(
         private const val BASIC_SIZE = 165000
         private const val ADDITION_DAY_SIZE = 450
         private const val ADDITION_IN_DAYS = 19078
-        private const val DOCTRINE_SIZE = 215984
+        private const val OTHER_BOOK_SIZE = 564001 //DOCTRINE: 215984 HOLY_RUS: 348017
         private val BOOK_SIZE = arrayOf(
             1133299, 1056687, 1057064, 1010414, 972633, 484820
         )
@@ -127,7 +127,7 @@ class DownloadDialog(
 
     private fun addBasicList() {
         list.add(CheckItem(context.getString(R.string.summary_site), 0, true))
-        list.add(CheckItem(context.getString(R.string.doctrine_creator), 1))
+        list.add(CheckItem(context.getString(R.string.other_books), 1))
         val d = DateUnit.initToday()
         todayInDays = d.timeInDays
         curYear = d.year - 2000
@@ -180,7 +180,7 @@ class DownloadDialog(
             if (it.isChecked)
                 size += when (it.id) {
                     0 -> BASIC_SIZE + ADDITION_DAY_SIZE * (todayInDays - ADDITION_IN_DAYS)
-                    1 -> DOCTRINE_SIZE
+                    1 -> OTHER_BOOK_SIZE
                     curYear -> (midSize * curYearInProc).toInt()
                     else -> {
                         val i = KOEF_INDEX - it.id

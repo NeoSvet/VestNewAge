@@ -23,7 +23,7 @@ class SettingsToiler : NeoToiler() {
         const val CLEAR_CACHE = 0
         const val CLEAR_MARKERS = 1
         const val CLEAR_ARTICLES = 2
-        const val CLEAR_DOCTRINE = 3
+        const val CLEAR_OTHER_BOOKS = 3
         const val CLEAR_OLD_BOOK = 4
         const val CLEAR_NEW_BOOK = 5
         const val CLEAR_NOW_BOOK = 6
@@ -62,7 +62,7 @@ class SettingsToiler : NeoToiler() {
     fun startClear(request: List<Int>) {
         task = "Clear"
         isRun = true
-        val hasDoc = request.contains(CLEAR_DOCTRINE)
+        val hasOtherBooks = request.contains(CLEAR_OTHER_BOOKS)
         scope.launch {
             size = 0
             request.forEach {
@@ -81,11 +81,13 @@ class SettingsToiler : NeoToiler() {
                             size += f.length()
                             f.delete()
                         }
-                        if (!hasDoc) clearDoctrine()
+                        if (!hasOtherBooks) clearDoctrine()
                     }
 
-                    CLEAR_DOCTRINE ->
+                    CLEAR_OTHER_BOOKS -> {
                         deleteBase(DataBase.DOCTRINE)
+                        deleteBase(DataBase.HOLY_RUS)
+                    }
 
                     CLEAR_OLD_BOOK ->
                         clearBook(2004, 2015)

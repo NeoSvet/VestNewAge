@@ -32,8 +32,8 @@ class PageLoader(private val client: NeoClient) : Loader {
         val exists = storage.existsPage(link)
         if (!singlePage && exists)
             return false
-        if (storage.isDoctrine) {
-            downloadDoctrinePage(link)
+        if (storage.isOtherBook) {
+            downloadOtherPage(link)
             if (singlePage) storage.close()
             return true
         }
@@ -63,16 +63,19 @@ class PageLoader(private val client: NeoClient) : Loader {
         return true
     }
 
-    private fun downloadDoctrinePage(link: String) {
+    private fun downloadOtherPage(link: String) {
+        val isRus = link.contains(Const.HOLY_RUS)
         var id = storage.getPageId(link)
         if (id == -1) {
             val loader = BookLoader(client)
-            loader.loadDoctrineList()
+            loader.loadBookList(isRus)
             id = storage.getPageId(link)
         } else storage.deleteParagraphs(id)
 
-        var s: String? = link.substring(Const.DOCTRINE.length) //pages
-        val stream = client.getStream("${Urls.DoctrineBase}$s.txt")
+        val m = if (isRus) arrayOf(Urls.HolyRusBase, Const.HOLY_RUS)
+        else arrayOf(Urls.DoctrineBase, Const.DOCTRINE)
+        var s: String? = link.substring(m[1].length) //pages
+        val stream = client.getStream("${m[0]}$s.txt")
         val br = BufferedReader(InputStreamReader(stream, Const.ENCODING), 1000)
         storage.updateTime(link, br.readLine().toLong())
         s = br.readLine()

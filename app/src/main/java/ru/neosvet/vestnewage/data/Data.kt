@@ -7,7 +7,7 @@ enum class Section(val value: Int) {
 }
 
 enum class BookTab(val value: Int) {
-    POEMS(0), EPISTLES(1), DOCTRINE(2)
+    POEMS(0), EPISTLES(1), DOCTRINE(2), HOLY_RUS(3)
 }
 
 enum class BookRnd {

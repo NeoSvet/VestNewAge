@@ -12,19 +12,19 @@ import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.BasicItem
 import ru.neosvet.vestnewage.data.BookRnd
 import ru.neosvet.vestnewage.data.BookTab
-import ru.neosvet.vestnewage.storage.DataBase
 import ru.neosvet.vestnewage.databinding.BookFragmentBinding
 import ru.neosvet.vestnewage.helper.DateHelper
 import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.service.LoaderWorker
+import ru.neosvet.vestnewage.storage.DataBase
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.ScreenUtils
 import ru.neosvet.vestnewage.view.activity.BrowserActivity.Companion.openReader
 import ru.neosvet.vestnewage.view.activity.MarkerActivity
 import ru.neosvet.vestnewage.view.basic.NeoFragment
 import ru.neosvet.vestnewage.view.basic.onSizeChange
-import ru.neosvet.vestnewage.view.dialog.MessageDialog
 import ru.neosvet.vestnewage.view.dialog.DownloadDialog
+import ru.neosvet.vestnewage.view.dialog.MessageDialog
 import ru.neosvet.vestnewage.view.list.BasicAdapter
 import ru.neosvet.vestnewage.viewmodel.BookToiler
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
@@ -56,7 +56,7 @@ class BookFragment : NeoFragment() {
     private var shownDwnDialog = false
     private var linkToSrc = ""
     private val hasDatePicker: Boolean
-        get() = binding?.pTab?.selectedIndex != BookTab.DOCTRINE.value
+        get() = (binding?.pTab?.selectedIndex ?: 0) < BookTab.DOCTRINE.value
 
 
     override fun onCreateView(
@@ -109,7 +109,8 @@ class BookFragment : NeoFragment() {
         val tabs = listOf(
             getString(R.string.poems),
             getString(R.string.epistles),
-            getString(R.string.doctrine_creator)
+            getString(R.string.doctrine_creator),
+            getString(R.string.holy_rus)
         )
         pTab.setOnChangeListener {
             toiler.openList(tab = it)

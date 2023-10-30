@@ -6,7 +6,6 @@ import androidx.work.Data
 import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
-import ru.neosvet.vestnewage.storage.DataBase
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.helper.BrowserHelper
 import ru.neosvet.vestnewage.helper.DateHelper
@@ -14,6 +13,7 @@ import ru.neosvet.vestnewage.loader.page.PageLoader
 import ru.neosvet.vestnewage.loader.page.StyleLoader
 import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.network.Urls
+import ru.neosvet.vestnewage.storage.DataBase
 import ru.neosvet.vestnewage.storage.JournalStorage
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.utils.Const
@@ -50,6 +50,7 @@ class BrowserToiler : NeoToiler() {
     private val history = Stack<String>()
     private var isRefresh = false
     private var isDoctrine = false
+    private var isHolyRus = false
     private var isNumPar = false
     private var isPaging = false
     private var withOutPosition = false
@@ -73,6 +74,7 @@ class BrowserToiler : NeoToiler() {
             copyright = "<br> " + context.getString(R.string.copyright),
             downloaded = context.getString(R.string.downloaded),
             doctrine_pages = context.getString(R.string.doctrine_pages),
+            holy_rus_pages = context.getString(R.string.holy_rus_pages),
             doctrine_future = context.getString(R.string.doctrine_future),
             edition_of = context.getString(R.string.edition_of),
             publication_of = context.getString(R.string.publication_of),
@@ -107,7 +109,7 @@ class BrowserToiler : NeoToiler() {
 
     fun openLink(url: String, addHistory: Boolean) {
         if (url.isEmpty()) return
-        if (!url.contains(Const.HTML) && !url.contains("http:") && !isDoctrine) {
+        if (!isDoctrine && !isHolyRus && !url.contains(Const.HTML) && !url.contains("http:")) {
             Urls.openInApps(url)
             return
         }
@@ -134,11 +136,21 @@ class BrowserToiler : NeoToiler() {
                     loadIfNeed = link == Urls.PRED_LINK
                 }
             }
-            isDoctrine = storage.isDoctrine
-            if (isDoctrine) {
-                type = BrowserState.Type.DOCTRINE
-                isPaging = link.isDoctrineBook
-            } else isPaging = storage.isBook
+            when {
+                storage.isDoctrine -> {
+                    type = BrowserState.Type.DOCTRINE
+                    isDoctrine = true
+                    isPaging = link.isDoctrineBook
+                }
+
+                storage.isHolyRus -> {
+                    type = BrowserState.Type.HOLY_RUS
+                    isHolyRus = true
+                    isPaging = true
+                }
+
+                else -> isPaging = storage.isBook
+            }
             if (storage.existsPage(link).not()) {
                 if (loadIfNeed) {
                     isRefresh = false
@@ -253,22 +265,35 @@ class BrowserToiler : NeoToiler() {
             bw.write(Const.BR)
             bw.flush()
         }
-        if (isDoctrine) {
-            if (link.isDoctrineBook) bw.write(strings.doctrine_pages + link.substring(Const.DOCTRINE.length))
-            else bw.write(strings.doctrine_future + link.replace(Const.DOCTRINE, Urls.DOCTRINE))
-            bw.write(strings.copyright)
-            bw.write(DateUnit.initToday().year.toString() + Const.BR)
-            if (link.isDoctrineBook) bw.write(strings.edition_of + d.toString())
-            else bw.write(strings.publication_of + d.toString())
-        } else if (link.contains("print")) { // материалы с сайта Откровений
-            bw.write(strings.copyright)
-            bw.write(d.year.toString() + Const.BR)
-        } else {
-            val url = Urls.Site + link
-            bw.write(LINK_FORMAT.format(url, url))
-            bw.write(strings.copyright)
-            bw.write(d.year.toString() + Const.BR)
-            bw.write(strings.downloaded + d.toString())
+        when {
+            isDoctrine -> {
+                if (link.isDoctrineBook) bw.write(strings.doctrine_pages + link.substring(Const.DOCTRINE.length))
+                else bw.write(strings.doctrine_future + link.replace(Const.DOCTRINE, Urls.DOCTRINE))
+                bw.write(strings.copyright)
+                bw.write(DateUnit.initToday().year.toString() + Const.BR)
+                if (link.isDoctrineBook) bw.write(strings.edition_of + d.toString())
+                else bw.write(strings.publication_of + d.toString())
+            }
+
+            isHolyRus -> {
+                bw.write(strings.holy_rus_pages + link.substring(Const.HOLY_RUS.length))
+                bw.write(strings.copyright)
+                bw.write(DateUnit.initToday().year.toString() + Const.BR)
+                bw.write(strings.edition_of + d.toString())
+            }
+
+            link.contains("print") -> { // материалы с сайта Откровений
+                bw.write(strings.copyright)
+                bw.write(d.year.toString() + Const.BR)
+            }
+
+            else -> {
+                val url = Urls.Site + link
+                bw.write(LINK_FORMAT.format(url, url))
+                bw.write(strings.copyright)
+                bw.write(d.year.toString() + Const.BR)
+                bw.write(strings.downloaded + d.toString())
+            }
         }
         bw.write("\n</div></body></html>")
         bw.close()
@@ -291,10 +316,8 @@ class BrowserToiler : NeoToiler() {
         if (fStyle.exists()) {
             replace = fDark.exists() && !isLightTheme || fLight.exists() && isLightTheme
             if (replace) {
-                if (fDark.exists())
-                    fStyle.renameTo(fLight)
-                else
-                    fStyle.renameTo(fDark)
+                if (fDark.exists()) fStyle.renameTo(fLight)
+                else fStyle.renameTo(fDark)
             }
         }
         if (replace) {
@@ -362,7 +385,7 @@ class BrowserToiler : NeoToiler() {
                 return
             }
         }
-        if (isDoctrine) {
+        if (isDoctrine || isHolyRus) {
             setState(BasicState.Success)
             return
         }
@@ -386,10 +409,12 @@ class BrowserToiler : NeoToiler() {
         withOutPosition = true
         storage.open(link)
         storage.getPrevPage(link)?.let {
-            openLink(it, false)
-            return
+            if (!isDoctrine || it.isDoctrineBook) {
+                openLink(it, false)
+                return
+            }
         }
-        if (isDoctrine) {
+        if (isDoctrine || isHolyRus) {
             setState(BasicState.Success)
             return
         }

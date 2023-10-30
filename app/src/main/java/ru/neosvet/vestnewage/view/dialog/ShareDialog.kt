@@ -138,6 +138,12 @@ class ShareDialog : BottomSheetDialogFragment() {
                 } else sb.appendLine(link.replace(Const.DOCTRINE, Urls.DOCTRINE))
             }
 
+            storage.isHolyRus -> {
+                sb.append(getString(R.string.holy_rus_pages))
+                sb.appendLine(link.substring(Const.HOLY_RUS.length))
+                sb.append(Urls.HolyRusSite)
+            }
+
             !storage.isOldBook -> sb.append(Urls.Site + link)
         }
 

@@ -58,6 +58,7 @@ class MasterLoader : Loader, LoadHandlerLite {
         loadSummary()
         loadSite()
         loadDoctrine()
+        loadHolyRus()
         val date = DateUnit.initToday()
         loadMonth(date.month, date.year)
     }
@@ -97,8 +98,19 @@ class MasterLoader : Loader, LoadHandlerLite {
         msg = App.context.getString(R.string.doctrine_creator)
         handler?.postMessage(msg)
         getBookLoader().let {
-            it.loadDoctrineList()
-            it.loadDoctrineBook(null)
+            it.loadBookList(false)
+            it.loadBook(false,null)
+        }
+        isRun = false
+    }
+
+    fun loadHolyRus() {
+        isRun = true
+        msg = App.context.getString(R.string.holy_rus)
+        handler?.postMessage(msg)
+        getBookLoader().let {
+            it.loadBookList(true)
+            it.loadBook(true,null)
         }
         isRun = false
     }

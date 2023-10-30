@@ -267,7 +267,7 @@ class SettingsFragment : NeoFragment() {
                 SettingsToiler.CLEAR_NOW_BOOK
             )
         )
-        list.add(CheckItem(getString(R.string.doctrine_creator), SettingsToiler.CLEAR_DOCTRINE))
+        list.add(CheckItem(getString(R.string.other_books), SettingsToiler.CLEAR_OTHER_BOOKS))
         list.add(
             CheckItem(
                 getString(R.string.articles_and_summary),

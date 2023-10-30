@@ -19,7 +19,7 @@ class BookLoader(private val client: NeoClient) : Loader {
     private val title = mutableListOf<String>()
     private val links = mutableListOf<String>()
     private var isRun = true
-    private val clientDoctrine: NeoClient by lazy {
+    private val clientBook: NeoClient by lazy {
         NeoClient()
     }
 
@@ -95,22 +95,24 @@ class BookLoader(private val client: NeoClient) : Loader {
         links.clear()
     }
 
-    fun loadDoctrineList() {
+    fun loadBookList(isRus: Boolean) {
         isRun = true
         //list format:
         //line 1: pages
         //line 2: title
+        val m = if (isRus) arrayOf(Urls.HolyRusBase, DataBase.HOLY_RUS, Const.HOLY_RUS)
+        else arrayOf(Urls.DoctrineBase, DataBase.DOCTRINE, Const.DOCTRINE)
         val stream = InputStreamReader(
-            clientDoctrine.getStream("${Urls.DoctrineBase}list.txt"),
+            clientBook.getStream("${m[0]}list.txt"),
             Const.ENCODING
         )
         val br = BufferedReader(stream, 1000)
         val storage = PageStorage()
-        storage.open(DataBase.DOCTRINE)
+        storage.open(m[1])
         var link: String? = br.readLine()
         while (link != null) {
             val title = br.readLine()
-            link = Const.DOCTRINE + link
+            link = m[2] + link
             storage.putTitle(title, link)
             if (isRun.not()) break
             link = br.readLine()
@@ -119,42 +121,44 @@ class BookLoader(private val client: NeoClient) : Loader {
         storage.close()
     }
 
-    fun loadDoctrineBook(handler: LoadHandlerLite?) {
+    fun loadBook(isRus: Boolean, handler: LoadHandlerLite?) {
         isRun = true
+        val m = if (isRus) arrayOf(Urls.HolyRusBase, DataBase.HOLY_RUS, Const.HOLY_RUS)
+        else arrayOf(Urls.DoctrineBase, DataBase.DOCTRINE, Const.DOCTRINE)
         val storage = PageStorage()
-        storage.open(DataBase.DOCTRINE)
-        var s: String?
-        var time: Long
+        storage.open(m[1])
         val cursor = storage.getListAll()
-        val max = cursor.count - 1
-        var cur = 0
-        cursor.moveToFirst()
-        val host = Urls.DoctrineBase
-        val iId = cursor.getColumnIndex(DataBase.ID)
-        val iLink = cursor.getColumnIndex(Const.LINK)
-        val iTime = cursor.getColumnIndex(Const.TIME)
-        while (cursor.moveToNext() && isRun) {
-            val link = cursor.getString(iLink)
-            if (!link.isDoctrineBook) continue
-            val id = cursor.getInt(iId)
-            time = cursor.getLong(iTime)
-            s = link.substring(Const.DOCTRINE.length) //pages
-            val stream = clientDoctrine.getStream("$host$s.txt")
-            val br = BufferedReader(InputStreamReader(stream, Const.ENCODING), 1000)
-            s = br.readLine() //time
-            if (time != s.toLong().apply { time = this }) {
-                storage.deleteParagraphs(id)
-                s = br.readLine()
-                while (s != null) {
-                    storage.insertParagraph(id, s)
+        if (cursor.moveToFirst()) {
+            var s: String?
+            var time: Long
+            val max = cursor.count - 1
+            var cur = 0
+            val iId = cursor.getColumnIndex(DataBase.ID)
+            val iLink = cursor.getColumnIndex(Const.LINK)
+            val iTime = cursor.getColumnIndex(Const.TIME)
+            while (cursor.moveToNext() && isRun) {
+                val link = cursor.getString(iLink)
+                if (!isRus && !link.isDoctrineBook) continue
+                val id = cursor.getInt(iId)
+                time = cursor.getLong(iTime)
+                s = link.substring(m[2].length) //pages
+                val stream = clientBook.getStream("${m[0]}$s.txt")
+                val br = BufferedReader(InputStreamReader(stream, Const.ENCODING), 1000)
+                s = br.readLine() //time
+                if (time != s.toLong().apply { time = this }) {
+                    storage.deleteParagraphs(id)
                     s = br.readLine()
+                    while (s != null) {
+                        storage.insertParagraph(id, s)
+                        s = br.readLine()
+                    }
+                    storage.updateTime(link, time)
                 }
-                storage.updateTime(link, time)
-            }
-            br.close()
-            handler?.let {
-                cur++
-                it.postPercent(cur.percent(max))
+                br.close()
+                handler?.let {
+                    cur++
+                    it.postPercent(cur.percent(max))
+                }
             }
         }
         cursor.close()
