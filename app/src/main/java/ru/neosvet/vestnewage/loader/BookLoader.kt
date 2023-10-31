@@ -19,9 +19,6 @@ class BookLoader(private val client: NeoClient) : Loader {
     private val title = mutableListOf<String>()
     private val links = mutableListOf<String>()
     private var isRun = true
-    private val clientBook: NeoClient by lazy {
-        NeoClient()
-    }
 
     override fun load() {
         loadYearList(DateUnit.initToday().year)
@@ -103,7 +100,7 @@ class BookLoader(private val client: NeoClient) : Loader {
         val m = if (isRus) arrayOf(Urls.HolyRusBase, DataBase.HOLY_RUS, Const.HOLY_RUS)
         else arrayOf(Urls.DoctrineBase, DataBase.DOCTRINE, Const.DOCTRINE)
         val stream = InputStreamReader(
-            clientBook.getStream("${m[0]}list.txt"),
+            client.getStream("${m[0]}list.txt"),
             Const.ENCODING
         )
         val br = BufferedReader(stream, 1000)
@@ -142,7 +139,7 @@ class BookLoader(private val client: NeoClient) : Loader {
                 val id = cursor.getInt(iId)
                 time = cursor.getLong(iTime)
                 s = link.substring(m[2].length) //pages
-                val stream = clientBook.getStream("${m[0]}$s.txt")
+                val stream = client.getStream("${m[0]}$s.txt")
                 val br = BufferedReader(InputStreamReader(stream, Const.ENCODING), 1000)
                 s = br.readLine() //time
                 if (time != s.toLong().apply { time = this }) {
