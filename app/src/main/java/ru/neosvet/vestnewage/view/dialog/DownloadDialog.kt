@@ -21,7 +21,7 @@ class DownloadDialog(
         private const val BASIC_SIZE = 165000
         private const val ADDITION_DAY_SIZE = 450
         private const val ADDITION_IN_DAYS = 19078
-        private const val OTHER_BOOK_SIZE = 564001 //DOCTRINE: 215984 HOLY_RUS: 348017
+        private const val OTHER_BOOKS_SIZE = 565649 //DOCTRINE: 215984 HOLY_RUS: 349665
         private val BOOK_SIZE = arrayOf(
             1133299, 1056687, 1057064, 1010414, 972633, 484820
         )
@@ -180,7 +180,7 @@ class DownloadDialog(
             if (it.isChecked)
                 size += when (it.id) {
                     0 -> BASIC_SIZE + ADDITION_DAY_SIZE * (todayInDays - ADDITION_IN_DAYS)
-                    1 -> OTHER_BOOK_SIZE
+                    1 -> OTHER_BOOKS_SIZE
                     curYear -> (midSize * curYearInProc).toInt()
                     else -> {
                         val i = KOEF_INDEX - it.id
