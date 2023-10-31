@@ -427,8 +427,12 @@ class BrowserActivity : AppCompatActivity(), WebClient.Parent, NeoInterface.Pare
                 return@setOnTouchListener false
 
             when (event.actionMasked) {
-                MotionEvent.ACTION_DOWN ->
+                MotionEvent.ACTION_DOWN -> {
+                    val isScrollStart = lastScroll == 0 && wvBrowser.scrollY == 0
+                    if (helper.isAutoReturn && !helper.isMiniTop && isScrollStart)
+                        headBar.expanded()
                     lastScroll = wvBrowser.scrollY
+                }
 
                 MotionEvent.ACTION_MOVE -> {
                     scrollEvent()
@@ -481,14 +485,8 @@ class BrowserActivity : AppCompatActivity(), WebClient.Parent, NeoInterface.Pare
         val scrollY = binding.content.wvBrowser.scrollY
         if (helper.isNavButton)
             setNavButton(scrollY)
-        val isScrollTop = scrollY <= lastScroll
-        if (scrollY == 0) {
-            if (helper.isAutoReturn && !helper.isMiniTop && isScrollTop)
-                headBar.expanded()
-        } else {
-            if (isEndScroll) bottomHide()
-            else if (isScrollTop && helper.isAutoReturn) bottomShow()
-        }
+        if (isEndScroll) bottomHide()
+        else if (helper.isAutoReturn && scrollY < lastScroll) bottomShow()
         if (!headBar.isHided || helper.isAutoReturn)
             headBar.onScrollHost(scrollY, lastScroll)
     }

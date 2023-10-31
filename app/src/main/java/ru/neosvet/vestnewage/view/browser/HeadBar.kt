@@ -45,8 +45,7 @@ class HeadBar(
         mainView.setOnClickListener {
             if (state == State.EXPANDED)
                 onClick.invoke()
-            else
-                changeHeight(expandedH)
+            else changeHeight(expandedH)
         }
         initAnim()
         mainView.setOnLongClickListener {
@@ -95,16 +94,15 @@ class HeadBar(
                 State.GONE
             }
 
-            expandedH ->
-                State.EXPANDED
-
-            else ->
-                State.COLLAPSED
+            expandedH -> State.EXPANDED
+            else -> State.COLLAPSED
         }
         if (state == State.EXPANDED) {
             isFristAnim = true
-            for (v in additionViews)
-                if (v.tag == null) v.startAnimation(anShow)
+            for (v in additionViews) {
+                if (v.tag == null && !v.isVisible)
+                    v.startAnimation(anShow)
+            }
         }
         unblocked()
     }
@@ -115,8 +113,10 @@ class HeadBar(
         mainView.clearAnimation()
         if (h != expandedH) {
             isFristAnim = true
-            for (v in additionViews)
-                if (v.tag == null) v.startAnimation(anHide)
+            for (v in additionViews) {
+                if (v.tag == null && v.isVisible)
+                    v.startAnimation(anHide)
+            }
         }
         val i = mainView.height
         val v = h - i
