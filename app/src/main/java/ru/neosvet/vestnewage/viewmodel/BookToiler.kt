@@ -186,19 +186,26 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
                 } else cursor.moveToNext()
                 val iTitle = cursor.getColumnIndex(Const.TITLE)
                 val iLink = cursor.getColumnIndex(Const.LINK)
-                do {
-                    s = cursor.getString(iLink)
-                    t = cursor.getString(iTitle)
-                    if (s.hasDate && !t.contains(s.date))
-                        t += " (" + strings.from + " ${s.date})"
-                    list.add(BasicItem(t, s))
-                } while (cursor.moveToNext())
-                postPrimary(time, list)
-            } else postPrimary(0L, list)
+                if (cursor.count == 0)
+                    postPrimary(time, list) //empty
+                else {
+                    do {
+                        s = cursor.getString(iLink)
+                        t = cursor.getString(iTitle)
+                        if (s.hasDate && !t.contains(s.date))
+                            t += " (" + strings.from + " ${s.date})"
+                        list.add(BasicItem(t, s))
+                    } while (cursor.moveToNext())
+                    postPrimary(time, list)
+                }
+            } else postPrimary(0L, list) //not loaded
             cursor.close()
             storage.close()
-            if (list.isEmpty() && loadIfNeed)
-                reLoad()
+            if (list.isEmpty() && loadIfNeed) {
+                val file = Files.dateBase(date.my)
+                if (!file.exists() || DateUnit.isLongAgo(file.lastModified()))
+                    reLoad()
+            }
         }
     }
 
