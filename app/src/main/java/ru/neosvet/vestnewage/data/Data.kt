@@ -3,7 +3,7 @@ package ru.neosvet.vestnewage.data
 enum class Section(val value: Int) {
     MENU(0), HOME(1), CALENDAR(2), SUMMARY(3), NEW(4), BOOK(5),
     SITE(6), SEARCH(7), MARKERS(8), JOURNAL(9), CABINET(10),
-    SETTINGS(11), HELP(12)
+    SETTINGS(11), HELP(12), EPISTLES(13), DOCTRINE(14), HOLY_RUS(15)
 }
 
 enum class BookTab(val value: Int) {

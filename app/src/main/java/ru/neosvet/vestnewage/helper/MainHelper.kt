@@ -201,22 +201,12 @@ class MainHelper(private val act: MainActivity) {
         hideActionMenu()
         adAction.clear()
         prevSection = if (savePrev) curSection else null
-        curSection = section
+        curSection = if (section.value > Section.HELP.value) Section.BOOK else section
         when (section) {
-            Section.NEW ->
-                setActionIcon(R.drawable.ic_clear)
-
-            Section.SUMMARY ->
-                setActionIcon(R.drawable.ic_refresh)
-
-            Section.SITE ->
-                setActionIcon(R.drawable.ic_refresh)
-
-            Section.SEARCH ->
-                setActionIcon(R.drawable.ic_settings)
-
-            else ->
-                setActionIcon(R.drawable.star)
+            Section.NEW -> setActionIcon(R.drawable.ic_clear)
+            Section.SUMMARY, Section.SITE -> setActionIcon(R.drawable.ic_refresh)
+            Section.SEARCH -> setActionIcon(R.drawable.ic_settings)
+            else -> setActionIcon(R.drawable.star)
         }
     }
 
@@ -255,8 +245,8 @@ class MainHelper(private val act: MainActivity) {
 
             Section.BOOK -> {
                 adAction.addItem(R.drawable.ic_book, act.getString(R.string.rnd_verse))
-                adAction.addItem(R.drawable.ic_book, act.getString(R.string.rnd_epistle))
-                adAction.addItem(R.drawable.ic_book, act.getString(R.string.rnd_poem))
+                adAction.addItem(R.drawable.ic_book_p, act.getString(R.string.rnd_epistle))
+                adAction.addItem(R.drawable.ic_book_k, act.getString(R.string.rnd_poem))
                 adAction.addItem(R.drawable.ic_refresh, act.getString(R.string.refresh))
             }
 

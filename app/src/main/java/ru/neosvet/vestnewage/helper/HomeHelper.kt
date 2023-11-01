@@ -32,8 +32,8 @@ class HomeHelper(private val context: Context) {
                 }
 
                 Section.BOOK -> {
-                    i = R.drawable.ic_book
-                    t = R.string.book
+                    i = R.drawable.ic_book_k
+                    t = R.string.poems
                 }
 
                 Section.SITE -> {
@@ -74,6 +74,21 @@ class HomeHelper(private val context: Context) {
                     t = R.string.settings
                 }
 
+                Section.EPISTLES -> {
+                    i = R.drawable.ic_book_p
+                    t = R.string.epistles
+                }
+
+                Section.DOCTRINE -> {
+                    i = R.drawable.ic_book_dt
+                    t = R.string.doctrine_creator
+                }
+
+                Section.HOLY_RUS -> {
+                    i = R.drawable.ic_book_sr
+                    t = R.string.holy_rus
+                }
+
                 Section.HELP -> {
                     i = R.drawable.ic_help
                     t = R.string.help
@@ -91,23 +106,26 @@ class HomeHelper(private val context: Context) {
     private val listTitle = listOf(
         context.getString(R.string.edit), context.getString(R.string.summary),
         context.getString(R.string.news), context.getString(R.string.calendar),
-        context.getString(R.string.book), context.getString(R.string.search),
+        context.getString(R.string.poems), context.getString(R.string.search),
         context.getString(R.string.markers), context.getString(R.string.journal),
         context.getString(R.string.cabinet), context.getString(R.string.settings),
-        context.getString(R.string.help)
+        context.getString(R.string.epistles), context.getString(R.string.doctrine_creator),
+        context.getString(R.string.holy_rus), context.getString(R.string.help)
     )
     private val listSection: List<Section> by lazy {
         listOf(
             Section.HOME, Section.SUMMARY, Section.SITE, Section.CALENDAR,
             Section.BOOK, Section.SEARCH, Section.MARKERS, Section.JOURNAL,
-            Section.CABINET, Section.SETTINGS, Section.HELP
+            Section.CABINET, Section.SETTINGS, Section.EPISTLES,
+            Section.DOCTRINE, Section.HOLY_RUS, Section.HELP
         )
     }
     private val listIcon: List<Int> by lazy {
         listOf(
-            R.drawable.ic_edit, R.drawable.ic_summary, R.drawable.ic_site,
-            R.drawable.ic_calendar, R.drawable.ic_book, R.drawable.ic_search, R.drawable.ic_marker,
-            R.drawable.ic_journal, R.drawable.ic_cabinet, R.drawable.ic_settings, R.drawable.ic_help
+            R.drawable.ic_edit, R.drawable.ic_summary, R.drawable.ic_site, R.drawable.ic_calendar,
+            R.drawable.ic_book_k, R.drawable.ic_search, R.drawable.ic_marker, R.drawable.ic_journal,
+            R.drawable.ic_cabinet, R.drawable.ic_settings, R.drawable.ic_book_p,
+            R.drawable.ic_book_dt, R.drawable.ic_book_sr, R.drawable.ic_help
         )
     }
     var isMain = false
@@ -139,12 +157,15 @@ class HomeHelper(private val context: Context) {
                     Section.HELP.value -> Section.HELP
                     Section.SETTINGS.value -> Section.SETTINGS
                     Section.HOME.value -> Section.HOME
+                    Section.EPISTLES.value -> Section.EPISTLES
+                    Section.DOCTRINE.value -> Section.DOCTRINE
+                    Section.HOLY_RUS.value -> Section.HOLY_RUS
                     else -> Section.MENU
                 }
                 menu.add(item)
             }
             stream.close()
-        } catch (e: Exception) {
+        } catch (ignore: Exception) {
         }
 
         if (menu.isEmpty()) {
@@ -188,7 +209,7 @@ class HomeHelper(private val context: Context) {
                 items.add(item)
             }
             stream.close()
-        } catch (e: Exception) {
+        } catch (ignore: Exception) {
         }
 
         if (items.isEmpty())

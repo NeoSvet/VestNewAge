@@ -29,6 +29,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
+import ru.neosvet.vestnewage.data.BookTab
 import ru.neosvet.vestnewage.data.MenuItem
 import ru.neosvet.vestnewage.data.Section
 import ru.neosvet.vestnewage.data.SiteTab
@@ -476,6 +477,21 @@ class MainActivity : AppCompatActivity(), ItemClicker {
                 } else
                     fragmentTransaction.replace(R.id.my_fragment, HelpFragment())
             }
+
+            Section.EPISTLES -> curFragment =
+                BookFragment.newInstance(BookTab.EPISTLES.value, -1).also {
+                    fragmentTransaction.replace(R.id.my_fragment, it)
+                }
+
+            Section.DOCTRINE -> curFragment =
+                BookFragment.newInstance(BookTab.DOCTRINE.value, -1).also {
+                    fragmentTransaction.replace(R.id.my_fragment, it)
+                }
+
+            Section.HOLY_RUS -> curFragment =
+                BookFragment.newInstance(BookTab.HOLY_RUS.value, -1).also {
+                    fragmentTransaction.replace(R.id.my_fragment, it)
+                }
         }
         firstTab = 0
         if (supportFragmentManager.isDestroyed.not())

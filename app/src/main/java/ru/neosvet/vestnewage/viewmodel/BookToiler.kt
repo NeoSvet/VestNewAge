@@ -54,7 +54,6 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
     private val months = mutableListOf<String>()
     private val yearsP = mutableListOf<String>()
     private val yearsE = mutableListOf<String>()
-    private var startTab = -1
     private var startYear = -1
     private val minYear: Int
         get() = if (isPoemsTab || !isLoadedOtkr) 2016 else 2004
@@ -98,7 +97,7 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
 
     override suspend fun defaultState() {
         if (startYear > -1)
-            openList(true, tab = startTab, month = 0, year = startYear)
+            openList(true, month = 0, year = startYear)
         else openList(true)
     }
 
@@ -409,8 +408,7 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
     }
 
     fun setArgument(tab: Int, year: Int) {
-        startTab = tab
-        if (tab == 1) selectedTab = BookTab.EPISTLES
+        selectedTab = convertTab(tab)
         if (year > 2000) startYear = year - minYear
     }
 
