@@ -170,9 +170,10 @@ class MainToiler : NeoToiler() {
             val editor = pref.edit()
             editor.putInt(Const.TIMEDIFF, timeDiff)
             editor.apply()
-            if (pref.getInt(Const.TIME, Const.TURN_OFF) != Const.TURN_OFF) {
+            val time = pref.getInt(Const.TIME, Const.TURN_OFF)
+            if (time != Const.TURN_OFF) {
                 val prom = PromUtils(null)
-                prom.initNotif(timeDiff)
+                prom.initNotif(time)
             }
         }
     }
