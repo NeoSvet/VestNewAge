@@ -332,35 +332,12 @@ class HomeToiler : NeoToiler() {
         if (isEditor)
             return HomeItem(HomeItem.Type.JOURNAL, listOf(strings.journal))
         task = Task.OPEN_JOURNAL
-        var p = getJournalTitle()
-        while (p == null)
-            p = getJournalTitle()
+        val journal = JournalStorage()
+        val p = journal.getLastItem() ?: Pair(strings.nothing, "")
         return HomeItem(
             type = HomeItem.Type.JOURNAL,
             lines = listOf(strings.journal, strings.last_readed, p.first, p.second)
         )
-    }
-
-    @SuppressLint("Range")
-    private fun getJournalTitle(): Pair<String, String>? {
-        val journal = JournalStorage()
-        var title: String? = strings.nothing
-        var link = ""
-        journal.getLastId()?.let { id ->
-            val m = id.split('&')
-            val cursor = getPage(m[0]).getPageById(m[1])
-            if (cursor.moveToFirst()) {
-                title = cursor.getString(cursor.getColumnIndex(Const.TITLE))
-                link = cursor.getString(cursor.getColumnIndex(Const.LINK))
-            } else {
-                title = null
-                journal.delete(id)
-            }
-            cursor.close()
-        }
-        journal.close()
-        title?.let { return Pair(it, link) }
-        return null
     }
 
     @SuppressLint("Range")
@@ -449,17 +426,16 @@ class HomeToiler : NeoToiler() {
         var title = strings.nothing
         if (timeItem > 0L) {
             val today = DateUnit.initToday()
-            title = when (DateUnit.putMills(timeItem).toShortDateString()) {
+            val date = DateUnit.putMills(timeItem)
+            title = when (date.toShortDateString()) {
                 today.toShortDateString() ->
                     strings.new_today
 
                 today.apply { changeDay(-1) }.toShortDateString() ->
                     strings.last + strings.yesterday
 
-                else -> {
-                    val date = DateUnit.putMills(timeItem)
+                else ->
                     strings.last + strings.from + date.toDateString()
-                }
             }
         }
         tabNews = SiteTab.NEWS.value

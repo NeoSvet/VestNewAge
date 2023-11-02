@@ -1,5 +1,6 @@
 package ru.neosvet.vestnewage.storage
 
+import android.annotation.SuppressLint
 import android.content.ContentValues
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
@@ -70,7 +71,7 @@ class JournalStorage : DataBase.Parent {
     override fun close() =
         db.close()
 
-    fun getLastId(): String? {
+    private fun getLastId(): String? {
         val cursor = db.query(
             table = DataBase.JOURNAL,
             column = DataBase.ID,
@@ -184,5 +185,34 @@ class JournalStorage : DataBase.Parent {
         } else 0f
         cursor.close()
         return r
+    }
+
+    @SuppressLint("Range")
+    fun getLastItem(): Pair<String, String>? {
+        filter = Type.OPENED
+        var cursor = getCursor()
+        var k = cursor.count
+        cursor.close()
+        if (k == 0) return null
+        var title = ""
+        var link = ""
+        val storage = PageStorage()
+        while (k > 0 && title.isEmpty())
+            getLastId()?.let { id ->
+                val m = id.split('&')
+                storage.open(m[0])
+                cursor = storage.getPageById(m[1])
+                if (cursor.moveToFirst()) {
+                    title = cursor.getString(cursor.getColumnIndex(Const.TITLE))
+                    link = cursor.getString(cursor.getColumnIndex(Const.LINK))
+                } else {
+                    k--
+                    delete(id)
+                }
+                cursor.close()
+            }
+        storage.close()
+        if (title.isEmpty()) return null
+        return Pair(title, link)
     }
 }
