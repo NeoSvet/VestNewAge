@@ -104,7 +104,8 @@ class BrowserActivity : AppCompatActivity(), WebClient.Parent, NeoInterface.Pare
     private val unread = UnreadStorage()
     private var connectWatcher: Job? = null
     private lateinit var binding: BrowserActivityBinding
-    private lateinit var helper: BrowserHelper
+    private var helper = BrowserHelper(this)
+    private var isAppliedHelper = false
     private var link = ""
     private var searchIndex = -1
     private var lastScroll = 0
@@ -147,21 +148,19 @@ class BrowserActivity : AppCompatActivity(), WebClient.Parent, NeoInterface.Pare
     }
 
     private fun initArguments() {
-        val h = BrowserHelper(this)
         intent?.getStringExtra(Const.LINK)?.let { s ->
             link = s
             intent.getStringExtra(Const.SEARCH)?.let {
                 isSearch = true
-                h.setSearchString(it)
-                binding.content.etSearch.setText(h.request)
+                helper.setSearchString(it)
+                binding.content.etSearch.setText(helper.request)
             }
         }
-        setHelper(h)
+        applyHelper()
         changeArguments()
     }
 
-    private fun setHelper(helper: BrowserHelper) {
-        this.helper = helper
+    private fun applyHelper() {
         currentScale = helper.zoom / 100f
         initOptions()
         with(binding.content) {
@@ -178,6 +177,7 @@ class BrowserActivity : AppCompatActivity(), WebClient.Parent, NeoInterface.Pare
                 bClear.isVisible = false
             }
         }
+        isAppliedHelper = true
     }
 
     private fun changeArguments() {
@@ -234,7 +234,7 @@ class BrowserActivity : AppCompatActivity(), WebClient.Parent, NeoInterface.Pare
     }
 
     override fun onDestroy() {
-        helper.save()
+        if (isAppliedHelper) helper.save()
         super.onDestroy()
     }
 
@@ -284,45 +284,35 @@ class BrowserActivity : AppCompatActivity(), WebClient.Parent, NeoInterface.Pare
         val s = helper.request
         if (s.contains(Const.N))
             binding.content.wvBrowser.findAllAsync(s.substring(0, s.indexOf(Const.N)))
-        else
-            binding.content.wvBrowser.findAllAsync(s)
+        else binding.content.wvBrowser.findAllAsync(s)
     }
 
     private fun initViews() {
         status = StatusButton(this, binding.pStatus)
-
         val pref = getSharedPreferences(MainHelper.TAG, MODE_PRIVATE)
         prom = if (pref.getBoolean(Const.PROM_FLOAT, false))
             PromUtils(binding.tvPromTimeFloat)
-        else
-            PromUtils(binding.tvPromTimeHead)
+        else PromUtils(binding.tvPromTimeHead)
     }
 
     private val onBackPressedCallback = object : OnBackPressedCallback(true) {
         override fun handleOnBackPressed() {
             when {
-                snackbar.isShown ->
-                    snackbar.hide()
-
-                isSearch ->
-                    closeSearch()
-
+                snackbar.isShown -> snackbar.hide()
+                isSearch -> closeSearch()
                 status.isVisible -> {
                     toiler.cancel()
                     status.setError(null)
                     bottomUnblocked()
                 }
 
-                isFullScreen ->
-                    switchFullScreen(false)
-
+                isFullScreen -> switchFullScreen(false)
                 binding.bottomBar.Y > 50 -> {
                     if (isSearch.not()) headBar.show()
                     bottomShow()
                 }
 
-                toiler.onBackBrowser().not() ->
-                    finish()
+                toiler.onBackBrowser().not() -> finish()
             }
         }
     }
@@ -364,10 +354,8 @@ class BrowserActivity : AppCompatActivity(), WebClient.Parent, NeoInterface.Pare
             }
         }
         status.setClick {
-            if (isBlocked)
-                toiler.cancel()
-            else
-                status.onClick()
+            if (isBlocked) toiler.cancel()
+            else status.onClick()
             finishLoading()
         }
     }
@@ -843,7 +831,8 @@ class BrowserActivity : AppCompatActivity(), WebClient.Parent, NeoInterface.Pare
         searchIndex = state.index
         isFullScreen = state.fullscreen
         if (position == 0f) position = state.position
-        setHelper(state.helper)
+        helper = state.helper
+        applyHelper()
         restoreSearch()
         if (isFullScreen) binding.bottomBar.post {
             switchFullScreen(true)
