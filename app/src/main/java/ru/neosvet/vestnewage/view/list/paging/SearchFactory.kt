@@ -1,6 +1,8 @@
 package ru.neosvet.vestnewage.view.list.paging
 
 import androidx.paging.PagingState
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import ru.neosvet.vestnewage.data.BasicItem
 import ru.neosvet.vestnewage.storage.SearchStorage
 
@@ -23,7 +25,9 @@ class SearchFactory(
             parent.newStartPosition(position)
         offset = position
         parent.startPaging()
-        val list = storage.getList(offset)
+        val list = withContext(Dispatchers.IO) {
+            storage.getList(offset)
+        }
         val next = position + NeoPaging.ON_PAGE
         parent.finishPaging()
         return LoadResult.Page(

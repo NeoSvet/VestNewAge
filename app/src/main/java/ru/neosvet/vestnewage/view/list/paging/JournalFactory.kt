@@ -1,6 +1,8 @@
 package ru.neosvet.vestnewage.view.list.paging
 
 import androidx.paging.PagingState
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import ru.neosvet.vestnewage.data.BasicItem
 import ru.neosvet.vestnewage.storage.JournalStorage
 import ru.neosvet.vestnewage.viewmodel.basic.JournalStrings
@@ -21,7 +23,9 @@ class JournalFactory(
             parent.newStartPosition(position)
         offset = position
         parent.startPaging()
-        val list = storage.getList(position, strings)
+        val list = withContext(Dispatchers.IO) {
+            storage.getList(position, strings)
+        }
         val next = position + NeoPaging.ON_PAGE
         parent.finishPaging()
         return LoadResult.Page(
