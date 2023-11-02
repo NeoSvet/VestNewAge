@@ -168,7 +168,7 @@ class CalendarFragment : NeoFragment() {
                 act?.showToast(getString(R.string.finish_list))
 
             BasicState.Empty ->
-                act?.showStaticToast(getString(R.string.empty_list))
+                act?.showStaticToast(getString(R.string.list_empty))
 
             is CalendarState.Primary -> binding?.run {
                 act?.hideToast()

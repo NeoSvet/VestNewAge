@@ -85,7 +85,7 @@ class NewFragment : NeoFragment() {
     private fun emptyList() {
         adapter.clear()
         act?.run {
-            showStaticToast(getString(R.string.empty_list))
+            showStaticToast(getString(R.string.list_empty))
             setAction(0)
         }
     }

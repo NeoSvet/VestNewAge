@@ -182,7 +182,7 @@ class BookFragment : NeoFragment() {
                 pMonth.setItems(state.months, state.selected.y)
                 pYear.setItems(state.years, state.selected.x)
                 if (state.list.isEmpty() && state.time > 0L)
-                    act?.showStaticToast(getString(R.string.empty_list))
+                    act?.showStaticToast(getString(R.string.list_empty))
                 else {
                     adapter.setItems(state.list)
                     rvBook.smoothScrollToPosition(0)

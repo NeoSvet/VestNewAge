@@ -81,8 +81,6 @@
     <string name="format_scroll_position">%.1f%%\n(остановитесь и увидите текст)</string>
     <string name="format_freed_size">Освобождено: %s МБ</string>
     <string name="format_delete">Удалить %s?</string>
-    <!--NewFragment-->
-    <string name="empty_list">Список пуст.</string>
     <!--SummaryFragment-->
     <string name="new_in_additionally">Новое в Сводке-Дополнительном</string>
     <string name="new_in_doctrine">Новое на сайте Доктрина</string>
