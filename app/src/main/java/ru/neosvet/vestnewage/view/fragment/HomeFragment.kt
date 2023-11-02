@@ -108,12 +108,14 @@ class HomeFragment : NeoFragment(), HomeAdapter.Events {
             is HomeState.Primary ->
                 initPrimary(state)
 
-            is ListState.Update<*> ->
+            is ListState.Update<*> -> if (initAdapter)
                 adapter.update(state.index, state.item as HomeItem)
 
-            is HomeState.Loading -> if (adapter.loadingIndex == state.index)
-                adapter.finishLoading() else
-                adapter.startLoading(state.index)
+            is HomeState.Loading -> if (initAdapter) {
+                if (adapter.loadingIndex == state.index)
+                    adapter.finishLoading() else
+                    adapter.startLoading(state.index)
+            }
 
             is HomeState.Status -> if (state.openedReader)
                 toiler.updateJournal()
@@ -121,7 +123,7 @@ class HomeFragment : NeoFragment(), HomeAdapter.Events {
             is HomeState.Menu ->
                 initMenuEdit(state.list)
 
-            is HomeState.ChangeHomeItem ->
+            is HomeState.ChangeHomeItem -> if (initAdapter)
                 adapter.changeMenu(state.index, state.section)
 
             is HomeState.ChangeMainItem ->
