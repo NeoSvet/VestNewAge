@@ -53,7 +53,7 @@ class SummaryHelper : LinksProvider {
     private lateinit var notifBuilder: NotificationCompat.Builder
 
     override fun getLinkList(): List<String> {
-        val br = BufferedReader(FileReader(App.context.filesDir.toString() + Files.RSS))
+        val br = BufferedReader(FileReader(Files.file(Files.RSS)))
         val list = mutableListOf<String>()
         while (br.readLine() != null) { //title
             val link = br.readLine() //link
