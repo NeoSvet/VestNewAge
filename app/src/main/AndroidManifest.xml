@@ -79,6 +79,20 @@
         <receiver android:name=".utils.PromUtils$Rec" />
         <receiver android:name=".helper.SummaryHelper$Rec" />
         <receiver android:name=".utils.NotificationUtils$Result" />
+
+        <receiver
+            android:name=".view.widget.HomeWidget"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/home_widget" />
+        </receiver>
+        <service
+            android:name=".service.HomeService"
+            android:permission="android.permission.BIND_REMOTEVIEWS" />
     </application>
 
 </manifest>

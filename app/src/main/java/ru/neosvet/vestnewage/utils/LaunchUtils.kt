@@ -20,6 +20,7 @@ import java.io.FileWriter
 
 class LaunchUtils(context: Context) {
     companion object {
+        const val DEV_TAB = "/.dev"
         private const val START_ID = 900
         private val FLAGS =
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) PendingIntent.FLAG_UPDATE_CURRENT else PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
@@ -212,6 +213,12 @@ class LaunchUtils(context: Context) {
 
             link == "/novosti.html" ->
                 InputData(0, Section.SITE)
+
+            link.indexOf(DEV_TAB) == 1 ->
+                InputData(2, Section.SITE)
+
+            link.indexOf(DataBase.JOURNAL) == 1 ->
+                InputData(0, Section.JOURNAL)
 
             link.contains("/tolkovaniya") || mLink[0] == "year.html" ->
                 InputData(1, Section.BOOK)
