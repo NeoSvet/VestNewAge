@@ -366,7 +366,7 @@ class HomeToiler : NeoToiler() {
             }
             cursor.close()
         } else {
-            title = getPage(date.my).getTitle(linkCalendar)
+            title = getPage(date.my).getTitle(linkCalendar, true)
         }
         val d = date.toDateString()
         return HomeItem(

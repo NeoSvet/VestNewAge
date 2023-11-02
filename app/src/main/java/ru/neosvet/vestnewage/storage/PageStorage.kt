@@ -263,7 +263,7 @@ class PageStorage : DataBase.Parent {
 
     fun getPageById(id: Int): Cursor = getPageById(id.toString())
 
-    fun getTitle(link: String): String {
+    fun getTitle(link: String, isSimple: Boolean = false): String {
         val cursor = db.query(
             table = Const.TITLE,
             column = Const.TITLE,
@@ -273,8 +273,11 @@ class PageStorage : DataBase.Parent {
         val title = if (cursor.moveToFirst())
             cursor.getString(0) else link
         cursor.close()
-        return if (title.isEmpty()) link
-        else getPageTitle(title, link)
+        return when {
+            title.isEmpty() -> link
+            isSimple -> title
+            else -> getPageTitle(title, link)
+        }
     }
 
     fun getParagraphs(id: String): Cursor = db.query(
