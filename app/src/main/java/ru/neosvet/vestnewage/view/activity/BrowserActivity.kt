@@ -104,7 +104,7 @@ class BrowserActivity : AppCompatActivity(), WebClient.Parent, NeoInterface.Pare
     private val unread = UnreadStorage()
     private var connectWatcher: Job? = null
     private lateinit var binding: BrowserActivityBinding
-    private var helper = BrowserHelper(this)
+    private var helper = BrowserHelper()
     private var isAppliedHelper = false
     private var link = ""
     private var searchIndex = -1

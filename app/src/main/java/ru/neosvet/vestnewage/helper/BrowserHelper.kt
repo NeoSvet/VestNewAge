@@ -1,10 +1,11 @@
 package ru.neosvet.vestnewage.helper
 
 import android.content.Context
+import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.view.basic.convertDpi
 
-class BrowserHelper(context: Context) {
+class BrowserHelper {
     companion object {
         const val TAG = "Browser"
         private const val THEME = "theme"
@@ -16,7 +17,7 @@ class BrowserHelper(context: Context) {
     }
 
     // Options
-    private val pref = context.getSharedPreferences(TAG, Context.MODE_PRIVATE)
+    private val pref = App.context.getSharedPreferences(TAG, Context.MODE_PRIVATE)
     var isLightTheme: Boolean = pref.getInt(THEME, 0) == 0
     var zoom: Int = pref.getInt(SCALE, 0)
     var isNavButton: Boolean = pref.getBoolean(NAVBUTTONS, true)
@@ -34,7 +35,7 @@ class BrowserHelper(context: Context) {
 
     init {
         if (zoom < 10)
-            zoom = context.convertDpi(100)
+            zoom = App.context.convertDpi(100)
     }
 
     fun save() {
