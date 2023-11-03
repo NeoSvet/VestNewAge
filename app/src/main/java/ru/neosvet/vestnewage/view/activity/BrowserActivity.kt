@@ -105,7 +105,6 @@ class BrowserActivity : AppCompatActivity(), WebClient.Parent, NeoInterface.Pare
     private var connectWatcher: Job? = null
     private lateinit var binding: BrowserActivityBinding
     private var helper = BrowserHelper()
-    private var isAppliedHelper = false
     private var link = ""
     private var searchIndex = -1
     private var lastScroll = 0
@@ -161,6 +160,7 @@ class BrowserActivity : AppCompatActivity(), WebClient.Parent, NeoInterface.Pare
     }
 
     private fun applyHelper() {
+        helper.load(this)
         currentScale = helper.zoom / 100f
         initOptions()
         with(binding.content) {
@@ -177,7 +177,6 @@ class BrowserActivity : AppCompatActivity(), WebClient.Parent, NeoInterface.Pare
                 bClear.isVisible = false
             }
         }
-        isAppliedHelper = true
     }
 
     private fun changeArguments() {
@@ -234,7 +233,7 @@ class BrowserActivity : AppCompatActivity(), WebClient.Parent, NeoInterface.Pare
     }
 
     override fun onDestroy() {
-        if (isAppliedHelper) helper.save()
+        helper.save(this)
         super.onDestroy()
     }
 
@@ -640,7 +639,8 @@ class BrowserActivity : AppCompatActivity(), WebClient.Parent, NeoInterface.Pare
                 R.id.nav_opt_scale, R.id.nav_src_scale -> {
                     helper.zoom = if (it.itemId == R.id.nav_opt_scale)
                         convertDpi(100) else 100
-                    helper.save()
+                    helper.save(this@BrowserActivity)
+                    helper.zoom = 0
                     openReader(link, null)
                     finish()
                 }

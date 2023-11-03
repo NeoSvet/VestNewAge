@@ -1,7 +1,6 @@
 package ru.neosvet.vestnewage.helper
 
 import android.content.Context
-import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.view.basic.convertDpi
 
@@ -17,13 +16,12 @@ class BrowserHelper {
     }
 
     // Options
-    private val pref = App.context.getSharedPreferences(TAG, Context.MODE_PRIVATE)
-    var isLightTheme: Boolean = pref.getInt(THEME, 0) == 0
-    var zoom: Int = pref.getInt(SCALE, 0)
-    var isNavButton: Boolean = pref.getBoolean(NAVBUTTONS, true)
-    var isMiniTop: Boolean = pref.getBoolean(MITITOP, false)
-    var isAutoReturn: Boolean = pref.getBoolean(AUTORETURN, false)
-    var isNumPar: Boolean = pref.getBoolean(NUMPAR, false)
+    var isLightTheme = true
+    var zoom = 0
+    var isNavButton = true
+    var isMiniTop = false
+    var isAutoReturn = false
+    var isNumPar = false
 
     // Status
     var place = listOf<String>()
@@ -33,12 +31,20 @@ class BrowserHelper {
     val request: String
         get() = place[placeIndex].trimEnd()
 
-    init {
-        if (zoom < 10)
-            zoom = App.context.convertDpi(100)
+    fun load(context: Context) {
+        val pref = context.getSharedPreferences(TAG, Context.MODE_PRIVATE)
+        isLightTheme = pref.getInt(THEME, 0) == 0
+        zoom = pref.getInt(SCALE, 0)
+        isNavButton = pref.getBoolean(NAVBUTTONS, true)
+        isMiniTop = pref.getBoolean(MITITOP, false)
+        isAutoReturn = pref.getBoolean(AUTORETURN, false)
+        isNumPar = pref.getBoolean(NUMPAR, false)
+        if (zoom < 10) zoom = context.convertDpi(100)
     }
 
-    fun save() {
+    fun save(context: Context) {
+        if (zoom == 0) return
+        val pref = context.getSharedPreferences(TAG, Context.MODE_PRIVATE)
         val editor = pref.edit()
         editor.putInt(THEME, if (isLightTheme) 0 else 1)
         editor.putInt(SCALE, zoom)
