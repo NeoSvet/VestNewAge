@@ -209,6 +209,7 @@ class BrowserActivity : AppCompatActivity(), WebClient.Parent, NeoInterface.Pare
 
     override fun onSaveInstanceState(outState: Bundle) {
         helper.zoom = (currentScale * 100f).toInt()
+        currentScale = 0f
         val s = if (isSearch)
             binding.content.etSearch.text.toString()
         else null
@@ -233,6 +234,8 @@ class BrowserActivity : AppCompatActivity(), WebClient.Parent, NeoInterface.Pare
     }
 
     override fun onDestroy() {
+        if (currentScale > 0f)
+            helper.zoom = (currentScale * 100f).toInt()
         helper.save(this)
         super.onDestroy()
     }
