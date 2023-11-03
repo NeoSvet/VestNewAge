@@ -4,6 +4,7 @@ import android.app.PendingIntent
 import android.app.TaskStackBuilder
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.widget.RemoteViews
@@ -16,6 +17,7 @@ import ru.neosvet.vestnewage.loader.SiteLoader
 import ru.neosvet.vestnewage.loader.UpdateLoader
 import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.network.OnlineObserver
+import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.service.HomeService
 import ru.neosvet.vestnewage.storage.DevStorage
 import ru.neosvet.vestnewage.storage.JournalStorage
@@ -31,12 +33,10 @@ import java.io.FileWriter
 class HomeWidget : AppWidgetProvider() {
     companion object {
         const val NAME = "home_widget"
-        private const val ACTION_REFRESH = "refresh"
+        private var label = ""
     }
 
     private val scope = CoroutineScope(Dispatchers.IO)
-    private var refreshed = ""
-    private var label = ""
 
     override fun onUpdate(
         context: Context,
@@ -49,7 +49,17 @@ class HomeWidget : AppWidgetProvider() {
                 context.packageName,
                 R.layout.home_widget
             ).apply {
+// label
+                if (label.isEmpty()) {
+                    val time = Files.slash(NAME).lastModified()
+                    label = context.getString(R.string.refreshed) +
+                            Const.N + DateUnit.putMills(time).toString()
+                }
                 setTextViewText(R.id.tv_label, label)
+                if (label == context.getString(R.string.load)) {
+                    appWidgetManager.updateAppWidget(id, this@apply)
+                    return
+                }
 // icon
                 val intentIcon = Intent(context, MainActivity::class.java)
                 val clickIcon = PendingIntent.getActivity(
@@ -57,7 +67,7 @@ class HomeWidget : AppWidgetProvider() {
                     PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_IMMUTABLE
                 )
                 setOnClickPendingIntent(R.id.icon, clickIcon)
-// init list
+// list
                 val intentList = Intent(context, HomeService::class.java)
                 intentList.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, id)
                 setRemoteAdapter(R.id.lv_list, intentList)
@@ -68,9 +78,9 @@ class HomeWidget : AppWidgetProvider() {
                         0, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
                     )
                 setPendingIntentTemplate(R.id.lv_list, clickList)
-// refresh button
+// refresh
                 val intentRefresh = Intent(context, HomeWidget::class.java)
-                intentRefresh.action = ACTION_REFRESH
+                intentRefresh.action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
                 intentRefresh.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, id)
                 val clickRefresh = PendingIntent.getBroadcast(
                     context, id, intentRefresh,
@@ -86,28 +96,52 @@ class HomeWidget : AppWidgetProvider() {
 
     override fun onReceive(context: Context, intent: Intent) {
         super.onReceive(context, intent)
-        if (refreshed.isEmpty())
-            refreshed = context.getString(R.string.refreshed)
 
-        if (intent.action != ACTION_REFRESH) {
-            if (!Files.slash(NAME).exists()) generateFile()
-            return
+        when (intent.action) {
+            AppWidgetManager.ACTION_APPWIDGET_UPDATE -> {}
+
+            AppWidgetManager.ACTION_APPWIDGET_ENABLED -> { //create widget
+                generateFile()
+                label = ""
+                return
+            }
+
+            AppWidgetManager.ACTION_APPWIDGET_DELETED -> {
+                val file = Files.slash(NAME)
+                if (file.exists()) file.delete()
+                return
+            }
+
+            else -> return
         }
 
+        if (label == context.getString(R.string.load)) return
+        label = context.getString(R.string.load)
+        val manager = AppWidgetManager.getInstance(context)
+        val id = getId(intent) ?: manager.getAppWidgetIds(
+            ComponentName(context, HomeWidget::class.java)
+        )
+
+        scope.launch {
+            if (OnlineObserver.isOnline.value) {
+                onUpdate(context, manager, id)
+                refresh()
+                generateFile()
+            }
+            label = ""
+            onUpdate(context, manager, id)
+        }
+    }
+
+    private fun getId(intent: Intent): IntArray? {
         val id = intent.extras?.getInt(
             AppWidgetManager.EXTRA_APPWIDGET_ID,
             AppWidgetManager.INVALID_APPWIDGET_ID
         ) ?: AppWidgetManager.INVALID_APPWIDGET_ID
 
         if (id == AppWidgetManager.INVALID_APPWIDGET_ID)
-            return
-
-        scope.launch {
-            if (OnlineObserver.isOnline.value) refresh()
-            generateFile()
-
-            onUpdate(context, AppWidgetManager.getInstance(context), intArrayOf(id))
-        }
+            return null
+        return intArrayOf(id)
     }
 
     private fun generateFile() {
@@ -117,7 +151,6 @@ class HomeWidget : AppWidgetProvider() {
         writeNews(bw)
         writeJournal(bw)
         bw.close()
-        label = refreshed + Const.N + DateUnit.putMills(file.lastModified()).toString()
     }
 
     private fun writeJournal(bw: BufferedWriter) {
@@ -168,6 +201,7 @@ class HomeWidget : AppWidgetProvider() {
     }
 
     private fun refresh() {
+        Urls.restore()
         val client = NeoClient()
         val update = UpdateLoader(client)
         update.checkSummary(true)

@@ -5,4 +5,5 @@
     android:minHeight="110dp"
     android:previewImage="@drawable/preview_home"
     android:resizeMode="horizontal|vertical"
+    android:updatePeriodMillis="10800000"
     android:widgetCategory="home_screen" />
