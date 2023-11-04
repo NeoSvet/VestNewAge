@@ -197,6 +197,9 @@ class BrowserToiler : NeoToiler() {
             val stream = DataOutputStream(BufferedOutputStream(output))
             stream.writeInt(link.dateFromLink.timeInDays)
             stream.close()
+        } else {
+            val f = Files.slash(Files.DATE)
+            if (f.exists()) f.delete()
         }
         val bw = BufferedWriter(FileWriter(file))
         storage.open(link)
