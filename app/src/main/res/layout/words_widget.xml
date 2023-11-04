@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/starsky_bg">
+
+    <ImageButton
+        android:id="@+id/icon"
+        style="@style/Button"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_margin="@dimen/half_indent"
+        android:contentDescription="@string/app_name"
+        android:scaleType="fitXY"
+        android:src="@drawable/star" />
+
+    <TextView
+        style="@style/Label"
+        android:layout_width="match_parent"
+        android:layout_height="45dp"
+        android:layout_alignParentTop="true"
+        android:gravity="center"
+        android:paddingHorizontal="45dp"
+        android:paddingVertical="@dimen/half_indent"
+        android:text="@string/god_words"
+        android:textSize="14sp" />
+
+    <ImageButton
+        android:id="@+id/btn_refresh"
+        style="@style/Button"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:layout_margin="@dimen/half_indent"
+        android:contentDescription="@string/refresh"
+        android:scaleType="fitXY"
+        android:src="@drawable/ic_refresh" />
+
+    <TextView
+        android:id="@+id/div"
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:layout_below="@id/btn_refresh"
+        android:background="#406092" />
+
+    <TextView
+        android:id="@+id/tv_words"
+        style="@style/Label"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_above="@id/btn_scroll"
+        android:layout_below="@id/div"
+        android:padding="@dimen/half_indent"
+        android:textSize="16sp" />
+
+    <Button
+        android:id="@+id/btn_scroll"
+        style="@style/Button"
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:layout_alignParentBottom="true"
+        android:padding="0dp"
+        android:text="@string/to_bottom"
+        android:textSize="14sp" />
+
+</RelativeLayout>
