@@ -55,6 +55,7 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
     private val yearsP = mutableListOf<String>()
     private val yearsE = mutableListOf<String>()
     private var startYear = -1
+    private var startTab = -1
     private val minYear: Int
         get() = if (isPoemsTab || !isLoadedOtkr) 2016 else 2004
 
@@ -96,9 +97,10 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
     }
 
     override suspend fun defaultState() {
-        if (startYear > -1)
-            openList(true, month = 0, year = startYear)
-        else openList(true)
+        if (startYear > -1) {
+            if (startTab == 0) dPoems.month = 1 else dEpistles.month = 1
+            openList(true, month = -1, year = startYear, tab = startTab)
+        } else openList(true)
     }
 
     override suspend fun doLoad() {
@@ -140,7 +142,7 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
         if (tab != -1)
             selectedTab = convertTab(tab)
         scope.launch {
-            if (selectedTab == BookTab.DOCTRINE || selectedTab == BookTab.HOLY_RUS) {
+            if (selectedTab.value > BookTab.EPISTLES.value) {
                 openOtherBook()
                 return@launch
             }
@@ -153,7 +155,8 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
                     -3 -> d.changeMonth(-1)
                     else -> d.month = month + minMonth
                 }
-                if (year > -1) d.year = year + minYear
+                if (year > 2000) d.year = year
+                else if (year > -1) d.year = year + minYear
                 if (isPoemsTab) {
                     if (d.timeInDays > today.timeInDays) d.month = today.month
                     else if (d.timeInDays < DateHelper.MIN_DAYS_POEMS) d.month = 2
@@ -415,8 +418,8 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
     }
 
     fun setArgument(tab: Int, year: Int) {
-        selectedTab = convertTab(tab)
-        if (year > 2000) startYear = year - minYear
+        startTab = tab
+        startYear = year
     }
 
     private fun convertTab(tab: Int) = when (tab) {
