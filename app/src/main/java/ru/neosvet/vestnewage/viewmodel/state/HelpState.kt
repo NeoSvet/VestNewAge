@@ -8,7 +8,7 @@ sealed class HelpState: NeoState {
     ) : PrimaryState
 
     enum class Type {
-        PRIVACY, SITE, TELEGRAM, CHANGELOG, GOOGLE, HUAWEI
+        BEGIN_BOOK, PRIVACY, SITE, TELEGRAM, CHANGELOG, GOOGLE, HUAWEI
     }
 
     data class Open(

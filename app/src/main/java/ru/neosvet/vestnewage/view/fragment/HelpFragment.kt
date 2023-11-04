@@ -17,6 +17,7 @@ import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.HelpItem
 import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.utils.Const
+import ru.neosvet.vestnewage.view.activity.MainActivity
 import ru.neosvet.vestnewage.view.list.HelpAdapter
 import ru.neosvet.vestnewage.viewmodel.HelpToiler
 import ru.neosvet.vestnewage.viewmodel.state.BasicState
@@ -101,6 +102,9 @@ class HelpFragment : Fragment() {
 
                 HelpState.Type.HUAWEI ->
                     shareAppLink(getString(R.string.url_on_huawei))
+
+                HelpState.Type.BEGIN_BOOK ->
+                    (activity as MainActivity).openBook("/2004.", false)
             }
         }
     }

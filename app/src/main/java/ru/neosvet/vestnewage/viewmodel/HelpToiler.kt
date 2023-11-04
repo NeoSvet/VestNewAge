@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.HelpItem
+import ru.neosvet.vestnewage.helper.DateHelper
 import ru.neosvet.vestnewage.utils.TipUtils
 import ru.neosvet.vestnewage.view.activity.TipActivity
 import ru.neosvet.vestnewage.viewmodel.basic.HelpStrings
@@ -18,16 +19,24 @@ import ru.neosvet.vestnewage.viewmodel.state.NeoState
 
 class HelpToiler : ViewModel() {
     companion object {
-        private const val FEEDBACK = 1
+        // main index
+        private const val BEGIN_BOOK = 1
+        private const val FEEDBACK = 2
+        private const val TIPS = 4
+
+        // items count
+        private const val FEEDBACK_COUNT = 6
+        private const val TIPS_COUNT = 3
+
+        // feedback index
+        private const val WRITE_TO_DEV = 1
         private const val LINK_ON_GOOGLE = 2
         private const val LINK_ON_HUAWEI = 3
-        private const val FEEDBACK_COUNT = 6
-        private const val WRITE_TO_DEV = 1
         private const val TG_CHANNEL = 4
         private const val LINK_ON_SITE = 5
         private const val CHANGELOG = 6
-        private const val TIPS = 3
-        private const val TIPS_COUNT = 3
+
+        // tip index
         private const val TIP_MAIN = 0
         private const val TIP_BROWSER = 1
         private const val TIP_SEARCH = 2
@@ -119,6 +128,11 @@ class HelpToiler : ViewModel() {
     }
 
     fun onItemClick(index: Int) {
+        if (index == BEGIN_BOOK) {
+            DateHelper.setLoadedOtkr(true)
+            stateChannel.trySend(HelpState.Open(HelpState.Type.BEGIN_BOOK))
+            return
+        }
         if (feedback && index > FEEDBACK) {
             if (index <= FEEDBACK + FEEDBACK_COUNT) {
                 clickFeedback(index - FEEDBACK)
