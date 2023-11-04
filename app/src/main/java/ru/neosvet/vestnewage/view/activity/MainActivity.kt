@@ -143,7 +143,8 @@ class MainActivity : AppCompatActivity(), ItemClicker {
 
     private fun initWords() {
         findViewById<View>(R.id.tvGodWords).setOnClickListener {
-            WordsUtils.showAlert(this, this::openSearch)
+            val words = WordsUtils()
+            words.showAlert(this, this::openSearch)
         }
     }
 

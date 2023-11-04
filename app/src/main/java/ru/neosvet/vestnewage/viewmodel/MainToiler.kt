@@ -4,12 +4,10 @@ import android.content.Context
 import android.database.Cursor
 import androidx.work.Data
 import okhttp3.Request
-import okhttp3.internal.http.promisesBody
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.BasicItem
 import ru.neosvet.vestnewage.data.DateUnit
-import ru.neosvet.vestnewage.data.NeoException
 import ru.neosvet.vestnewage.helper.MainHelper
 import ru.neosvet.vestnewage.loader.SiteLoader
 import ru.neosvet.vestnewage.loader.page.PageLoader
@@ -47,69 +45,14 @@ class MainToiler : NeoToiler() {
 
     override suspend fun doLoad() {
         Urls.update(client)
-        if (Urls.isSiteCom) loadQuoteCom()
-        else loadQuote()
+        val words = WordsUtils()
+        words.update()
         val timeDiff = synchronizationTime()
         val loader = SiteLoader(client)
         val hasNew = loader.loadDevAds()
         postState(MainState.Ads(hasNew, loader.warnIndex, timeDiff))
         loadNew()
         postState(BasicState.Success)
-    }
-
-    private fun loadQuoteCom() {
-        val request: Request = Request.Builder()
-            .url(Urls.QuoteCom)
-            .addHeader(NetConst.USER_AGENT, App.context.packageName)
-            .build()
-        val client = NeoClient.createHttpClient()
-        val response = client.newCall(request).execute()
-        if (response.isSuccessful.not()) throw NeoException.SiteCode(response.code)
-        if (response.promisesBody().not()) throw NeoException.SiteNoResponse()
-        val inStream = response.body.byteStream()
-        val br = BufferedReader(InputStreamReader(inStream, Const.ENCODING))
-        var s = br.readLine()
-        while (!s.contains("quote"))
-            s = br.readLine()
-        br.close()
-        val i = s.indexOf("quote") + 7
-        s = s.substring(i, s.indexOf("</div>", i)).replace(Const.BR, Const.N)
-        WordsUtils.saveGodWords(s)
-    }
-
-    private fun loadQuote() {
-        val br = BufferedReader(InputStreamReader(client.getStream(Urls.Quote)))
-        var s = br.readLine()
-        br.close()
-        var i = s.indexOf("quoteBlock")
-        i = s.indexOf("class", i)
-        s = s.substring(i, s.indexOf("\\u003C/p", i))
-        s = s.replace("\\u0022", "\"").replace("\\u0020", " ").replace("\\u003Cbr\\u003E", Const.N)
-        val bytes = mutableListOf<Byte>()
-        i = s.indexOf("\\u")
-        var n = 0
-        while (i > -1) {
-            i += 2
-            n = i + 2
-            bytes.add(s.substring(i, n).toByte(16))
-            bytes.add(s.substring(n, n + 2).toByte(16))
-            n += 2
-            i = s.indexOf("\\u", n)
-            if (i > n) {
-                for (b in s.substring(n, i)) {
-                    bytes.add(0)
-                    bytes.add(b.code.toByte())
-                }
-            }
-        }
-        if (n < s.length) {
-            for (b in s.substring(n)) {
-                bytes.add(0)
-                bytes.add(b.code.toByte())
-            }
-        }
-        s = String(bytes.toByteArray(), Charsets.UTF_16).substring(1)
-        WordsUtils.saveGodWords(s)
     }
 
     private suspend fun loadNew() {

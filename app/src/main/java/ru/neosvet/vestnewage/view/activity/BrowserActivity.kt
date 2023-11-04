@@ -380,7 +380,8 @@ class BrowserActivity : AppCompatActivity(), WebClient.Parent, NeoInterface.Pare
         binding.run {
             tvGodWords.setOnClickListener {
                 val context = this@BrowserActivity
-                WordsUtils.showAlert(context) {
+                val words = WordsUtils()
+                words.showAlert(context) {
                     val main = Intent(context, MainActivity::class.java)
                     main.putExtra(Const.START_SCEEN, false)
                     main.putExtra(Const.SEARCH, it)
