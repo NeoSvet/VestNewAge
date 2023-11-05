@@ -124,7 +124,7 @@ class WordsWidget : AppWidgetProvider() {
                 return
             }
 
-            AppWidgetManager.ACTION_APPWIDGET_UPDATE -> {}
+            AppWidgetManager.ACTION_APPWIDGET_UPDATE -> scrollPos = 0
 
             AppWidgetManager.ACTION_APPWIDGET_ENABLED -> { //create widget
                 words = ""
