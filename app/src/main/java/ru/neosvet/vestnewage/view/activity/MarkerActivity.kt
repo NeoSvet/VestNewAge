@@ -244,7 +244,7 @@ class MarkerActivity : AppCompatActivity() {
     private fun initActivity() = binding.run {
         setSupportActionBar(toolbar)
         toolbar.setNavigationOnClickListener {
-            onBackPressed()
+            onBackPressedCallback.handleOnBackPressed()
         }
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         val metrics = DisplayMetrics()
