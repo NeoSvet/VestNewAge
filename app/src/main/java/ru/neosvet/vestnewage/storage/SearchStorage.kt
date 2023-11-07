@@ -38,7 +38,7 @@ class SearchStorage : DataBase.Parent {
                     + Const.LINK + " text primary key,"
                     + Const.TITLE + " text,"
                     + DataBase.ID + " integer," //number for sorting
-                    + Const.DESCTRIPTION + " text);"
+                    + Const.DESCRIPTION + " text);"
         )
     }
 
@@ -69,7 +69,7 @@ class SearchStorage : DataBase.Parent {
 
         val iTitle = cursor.getColumnIndex(Const.TITLE)
         val iLink = cursor.getColumnIndex(Const.LINK)
-        val iDes = cursor.getColumnIndex(Const.DESCTRIPTION)
+        val iDes = cursor.getColumnIndex(Const.DESCRIPTION)
         do {
             val item = BasicItem(cursor.getString(iTitle), cursor.getString(iLink))
             cursor.getString(iDes)?.let {

@@ -19,7 +19,7 @@ class NewsStorage : DataBase.Parent {
                     + DataBase.ID + " integer primary key,"
                     + Const.LINK + " text,"
                     + Const.TITLE + " text,"
-                    + Const.DESCTRIPTION + " text,"
+                    + Const.DESCRIPTION + " text,"
                     + Const.TIME + " integer);"
         )
         val row = ContentValues()
@@ -45,7 +45,7 @@ class NewsStorage : DataBase.Parent {
             // val time = cursor.getLong(cursor.getColumnIndex(Const.TIME))
             val title = cursor.getString(cursor.getColumnIndex(Const.TITLE))
             val link = cursor.getString(cursor.getColumnIndex(Const.LINK))
-            val d = cursor.getString(cursor.getColumnIndex(Const.DESCTRIPTION))
+            val d = cursor.getString(cursor.getColumnIndex(Const.DESCRIPTION))
             var line: String? = null
             val item = BasicItem(title).apply { des = d }
             //item.des = fixDes(d)

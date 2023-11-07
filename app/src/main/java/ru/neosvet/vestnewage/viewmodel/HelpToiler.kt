@@ -61,10 +61,10 @@ class HelpToiler : ViewModel() {
         if (!isInit) {
             verName = act.packageManager.getPackageInfo(act.packageName, 0).versionName
             strings = HelpStrings(
-                srv_info = act.getString(R.string.srv_info),
-                format_info = act.getString(R.string.format_info),
-                feedback = act.resources.getStringArray(R.array.feedback),
-                tips = act.resources.getStringArray(R.array.tips_sections)
+                srvInfo = act.getString(R.string.srv_info),
+                formatInfo = act.getString(R.string.format_info),
+                feedback = act.resources.getStringArray(R.array.feedback).toList(),
+                tips = act.resources.getStringArray(R.array.tips_sections).toList()
             )
             val titles = act.resources.getStringArray(R.array.help_title)
             val contents = act.resources.getStringArray(R.array.help_content)
@@ -96,7 +96,7 @@ class HelpToiler : ViewModel() {
                     title = strings.feedback[i],
                     opened = true,
                     content = String.format(
-                        strings.format_info, verName, App.version,
+                        strings.formatInfo, verName, App.version,
                         Build.VERSION.RELEASE,
                         Build.VERSION.SDK_INT
                     )
@@ -166,7 +166,7 @@ class HelpToiler : ViewModel() {
     private fun clickFeedback(index: Int) {
         when (index) {
             WRITE_TO_DEV -> {
-                val msg = strings.srv_info + list[FEEDBACK + CHANGELOG].content
+                val msg = strings.srvInfo + list[FEEDBACK + CHANGELOG].content
                 stateChannel.trySend(BasicState.Message(msg))
             }
 

@@ -1,35 +1,35 @@
 package ru.neosvet.vestnewage.viewmodel.basic
 
 data class SearchStrings(
-    val format_search_date: String,
-    val format_search_proc: String,
-    val format_month_no_loaded: String,
-    val format_page_no_loaded: String,
-    val format_load: String,
-    val not_found: String,
-    val search_in_results: String,
-    val search_mode: Array<String>,
-    val format_found: String
+    val formatDate: String,
+    val formatProc: String,
+    val formatMonthNoLoaded: String,
+    val formatPageNoLoaded: String,
+    val formatLoad: String,
+    val notFound: String,
+    val searchInResults: String,
+    val listMode: List<String>,
+    val formatFound: String
 )
 
 data class BrowserStrings(
     val copyright: String,
     val downloaded: String,
-    val doctrine_pages: String,
-    val holy_rus_pages: String,
-    val doctrine_future: String,
-    val edition_of: String,
-    val publication_of: String,
+    val doctrinePages: String,
+    val holyRusPages: String,
+    val doctrineFuture: String,
+    val editionOf: String,
+    val publicationOf: String,
     val toPrev: String,
     val toNext: String,
     val searchReaction: String,
-    val not_found_reaction: String,
-    val foot_reaction: String
+    val notFoundReaction: String,
+    val footReaction: String
 )
 
 data class SiteStrings(
     val novosti: String,
-    val mark_read: String,
+    val markRead: String,
     val today: String,
     val unread: String,
     val timekeeping: String,
@@ -39,20 +39,20 @@ data class SiteStrings(
 data class DevStrings(
     val ad: String,
     val ok: String,
-    val url_on_google: String,
-    val url_on_huawei: String,
-    val open_link: String,
-    val access_new_version: String,
-    val current_version: String
+    val urlOnGoogle: String,
+    val urlOnHuawei: String,
+    val openLink: String,
+    val accessNewVersion: String,
+    val currentVersion: String
 )
 
 data class HomeStrings(
     val nothing: String,
     val new: String,
-    val on_tab: String,
+    val onTab: String,
     val never: String,
     val refreshed: String,
-    val today_empty: String,
+    val todayEmpty: String,
     val yesterday: String,
     val journal: String,
     val calendar: String,
@@ -62,76 +62,76 @@ data class HomeStrings(
     val news: String,
     val book: String,
     val markers: String,
-    val precept_human_future: String,
-    val additionally_from_tg: String,
-    val today_msk: String,
+    val preceptHumanFuture: String,
+    val additionallyFromTg: String,
+    val todayMsk: String,
     val back: String,
-    val last_post_from: String,
-    val last_readed: String,
-    val prom_for_soul_unite: String,
-    val new_dev_ads: String,
+    val lastPostFrom: String,
+    val lastRead: String,
+    val promForSoulUnite: String,
+    val newDevAds: String,
     val last: String,
     val from: String,
-    val new_today: String,
+    val newToday: String,
     val information: String,
-    val help_edit: String
+    val helpEdit: String
 )
 
 data class BookStrings(
-    val rnd_epistle: String,
-    val rnd_poem: String,
-    val rnd_verse: String,
-    val alert_rnd: String,
-    val try_again: String,
+    val rndEpistle: String,
+    val rndPoem: String,
+    val rndVerse: String,
+    val alertRnd: String,
+    val tryAgain: String,
     val from: String,
-    val pred_tolk: String
+    val predTolk: String
 )
 
 data class MarkersStrings(
     val collections: String,
-    val no_collections: String,
-    val sel_pos: String,
-    val sel_par: String,
-    val pos_n: String,
-    val par_n: String,
-    val page_entirely: String,
-    val unuse_dot: String,
-    val cancel_rename: String,
-    val help_edit: String
+    val noCollections: String,
+    val selectedPosition: String,
+    val selectedPar: String,
+    val aroundAt: String,
+    val parNumbers: String,
+    val pageEntirely: String,
+    val unusedDot: String,
+    val cancelRename: String,
+    val helpEdit: String
 )
 
 data class MarkerStrings(
-    val sel_pos: String,
-    val sel_par: String,
-    val sel_col: String,
-    val page_entirely: String,
-    val unuse_dot: String,
-    val title_already_used: String,
-    val no_collections: String,
-    val need_set_check: String
+    val selectedPosition: String,
+    val selectedPar: String,
+    val selectedCollections: String,
+    val pageEntirely: String,
+    val unusedDot: String,
+    val titleAlreadyUsed: String,
+    val noCollections: String,
+    val needSetCheck: String
 )
 
 data class CabinetStrings(
-    val selected_status: String,
-    val auth_failed: String,
-    val anketa_failed: String,
-    val send_status: String,
-    val select_status: String,
-    val send_unlivable: String
+    val selectedStatus: String,
+    val authFailed: String,
+    val profileFailed: String,
+    val sendStatus: String,
+    val selectStatus: String,
+    val sendUnlivable: String
 )
 
 data class HelpStrings(
-    val srv_info: String,
-    val format_info: String,
-    val feedback: Array<String>,
-    val tips: Array<String>
+    val srvInfo: String,
+    val formatInfo: String,
+    val feedback: List<String>,
+    val tips: List<String>
 )
 
 data class JournalStrings(
-    val format_opened: String,
-    val format_rnd: String,
+    val formatOpened: String,
+    val formatRnd: String,
     val back: String,
-    val rnd_poem: String,
-    val rnd_epistle: String,
-    val rnd_verse: String
+    val rndPoem: String,
+    val rndEpistle: String,
+    val rndVerse: String
 )

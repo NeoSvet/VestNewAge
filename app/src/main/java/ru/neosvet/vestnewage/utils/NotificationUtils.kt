@@ -81,7 +81,7 @@ class NotificationUtils : ContextWrapper(App.context) {
     fun getPostponeSummaryNotif(id: Int, des: String?, link: String?): PendingIntent {
         val intent = Intent(this, Result::class.java)
         intent.putExtra(MODE, ID_SUMMARY_POSTPONE)
-        intent.putExtra(Const.DESCTRIPTION, des)
+        intent.putExtra(Const.DESCRIPTION, des)
         intent.putExtra(Const.LINK, link)
         intent.putExtra(DataBase.ID, id)
         return PendingIntent.getBroadcast(this, id, intent, FLAGS)
@@ -197,7 +197,7 @@ class NotificationUtils : ContextWrapper(App.context) {
                 notifUtils.cancel(NOTIF_PROM)
             } else if (mode == ID_SUMMARY_POSTPONE) {
                 notifUtils.cancel(intent.getIntExtra(DataBase.ID, 0))
-                val des = intent.getStringExtra(Const.DESCTRIPTION)
+                val des = intent.getStringExtra(Const.DESCRIPTION)
                 val link = intent.getStringExtra(Const.LINK)
                 if (des == null || link == null) return
                 SummaryHelper.postpone(des, link)

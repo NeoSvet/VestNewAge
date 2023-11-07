@@ -13,5 +13,5 @@ public interface Const {
     String START = "start", END = "end", MODE = "mode", STRING = "string", EMAIL = "email", PASSWORD = "password";
     String TIME = "time", TIMEDIFF = "timediff", DOCTRINE = "doctrine:", HOLY_RUS = "rus:";
     String EPISTLES = "epistles", OTKR = "otkr", ADS = "ads", FILE = "file";
-    String TITLE = "title", LINK = "link", PLACE = "place", DESCTRIPTION = "des";
+    String TITLE = "title", LINK = "link", PLACE = "place", DESCRIPTION = "des";
 }

@@ -58,12 +58,12 @@ class CabinetToiler : NeoToiler() {
     override fun init(context: Context) {
         helper = CabinetHelper(context)
         strings = CabinetStrings(
-            selected_status = context.getString(R.string.selected_status),
-            auth_failed = context.getString(R.string.auth_failed),
-            anketa_failed = context.getString(R.string.anketa_failed),
-            send_status = context.getString(R.string.send_status),
-            select_status = context.getString(R.string.select_status),
-            send_unlivable = context.getString(R.string.send_unlivable)
+            selectedStatus = context.getString(R.string.selected_status),
+            authFailed = context.getString(R.string.auth_failed),
+            profileFailed = context.getString(R.string.profile_failed),
+            sendStatus = context.getString(R.string.send_status),
+            selectStatus = context.getString(R.string.select_status),
+            sendUnlivable = context.getString(R.string.send_unlivable)
         )
 
         addLoginItems(context)
@@ -190,7 +190,7 @@ class CabinetToiler : NeoToiler() {
         }
         response.close()
         if (cookie.isEmpty()) {
-            postError(strings.auth_failed)
+            postError(strings.authFailed)
             return
         }
         CabinetHelper.cookie = cookie
@@ -223,13 +223,13 @@ class CabinetToiler : NeoToiler() {
     private suspend fun loadCabinet() {
         val s = loadAnketa(false)
         if (s.isEmpty()) {
-            cabinetItem.title = strings.send_status
-            cabinetItem.des = strings.select_status
+            cabinetItem.title = strings.sendStatus
+            cabinetItem.des = strings.selectStatus
         } else if (s.contains(ERROR_BOX)) {
-            cabinetItem.title = strings.send_unlivable
+            cabinetItem.title = strings.sendUnlivable
             cabinetItem.des = parseMessage(s)
         } else {
-            cabinetItem.title = strings.selected_status
+            cabinetItem.title = strings.selectedStatus
             cabinetItem.des = s
         }
         cabinetScreen()
@@ -259,7 +259,7 @@ class CabinetToiler : NeoToiler() {
 
         when {
             s.isNullOrEmpty() ->
-                postError(strings.anketa_failed)
+                postError(strings.profileFailed)
 
             s.contains(ERROR_BOX) -> // incorrect time s.contains("fd_box") ||
                 return s
@@ -272,7 +272,7 @@ class CabinetToiler : NeoToiler() {
             }
 
             else ->
-                postError(strings.anketa_failed)
+                postError(strings.profileFailed)
         }
         return ""
     }
@@ -319,7 +319,7 @@ class CabinetToiler : NeoToiler() {
         br.close()
         response.close()
         if (s == null) { //no error
-            cabinetItem.title = strings.selected_status
+            cabinetItem.title = strings.selectedStatus
             cabinetItem.des = word
             cabinetScreen()
         } else

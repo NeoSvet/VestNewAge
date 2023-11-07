@@ -46,7 +46,7 @@ class MarkerActivity : AppCompatActivity() {
             val marker = Intent(context, MarkerActivity::class.java)
             marker.putExtra(Const.LINK, link)
             marker.putExtra(Const.PLACE, pos)
-            marker.putExtra(Const.DESCTRIPTION, des)
+            marker.putExtra(Const.DESCRIPTION, des)
             context.startActivity(marker)
         }
 
@@ -61,7 +61,7 @@ class MarkerActivity : AppCompatActivity() {
                 else if (p.isNotEmpty())
                     marker.putExtra(DataBase.PARAGRAPH, p.toInt())
             }
-            marker.putExtra(Const.DESCTRIPTION, des)
+            marker.putExtra(Const.DESCRIPTION, des)
             context.startActivity(marker)
         }
 

@@ -44,7 +44,7 @@ class SiteToiler : NeoToiler() {
     override fun init(context: Context) {
         strings = SiteStrings(
             novosti = context.getString(R.string.novosti),
-            mark_read = context.getString(R.string.mark_read),
+            markRead = context.getString(R.string.mark_read),
             today = context.getString(R.string.today_s),
             unread = context.getString(R.string.unread),
             timekeeping = context.getString(R.string.Timekeeping_Spiritual_Wave),
@@ -83,7 +83,7 @@ class SiteToiler : NeoToiler() {
                 if (it.des[0] == BasicAdapter.LABEL_SEPARATOR)
                     it.des = BasicAdapter.LABEL_SEPARATOR + strings.unread + it.des
             }
-            list.add(0, BasicItem(strings.mark_read))
+            list.add(0, BasicItem(strings.markRead))
             postState(ListState.Primary(devStorage.getTime(), list))
         } else {
             val list = ads.getFullList()
@@ -112,7 +112,7 @@ class SiteToiler : NeoToiler() {
         var line: String? = null
         if (cursor.moveToFirst()) {
             val iTitle = cursor.getColumnIndex(Const.TITLE)
-            val iDes = cursor.getColumnIndex(Const.DESCTRIPTION)
+            val iDes = cursor.getColumnIndex(Const.DESCRIPTION)
             val iLink = cursor.getColumnIndex(Const.LINK)
             val iTime = cursor.getColumnIndex(Const.TIME)
             time = cursor.getLong(iTime)

@@ -177,7 +177,7 @@ class SearchEngine(
         val items = mutableListOf<BasicItem>()
         val cursor = storage.getResults(helper.isDesc)
         if (cursor.moveToFirst()) {
-            val iDes = cursor.getColumnIndex(Const.DESCTRIPTION)
+            val iDes = cursor.getColumnIndex(Const.DESCRIPTION)
             val iTitle = cursor.getColumnIndex(Const.TITLE)
             val iLink = cursor.getColumnIndex(Const.LINK)
             do {
@@ -552,7 +552,7 @@ class SearchEngine(
             if (id != item.id) {
                 row?.let {
                     if (des.isNotEmpty())
-                        it.put(Const.DESCTRIPTION, des.toString())
+                        it.put(Const.DESCRIPTION, des.toString())
                     storage.insert(it)
                 }
                 id = item.id
@@ -568,7 +568,7 @@ class SearchEngine(
         }
         row?.let {
             if (des.isNotEmpty())
-                it.put(Const.DESCTRIPTION, des.toString())
+                it.put(Const.DESCRIPTION, des.toString())
             storage.insert(it)
         }
     }
@@ -689,7 +689,7 @@ class SearchEngine(
         val row = ContentValues()
         row.put(
             Const.TITLE,
-            String.format(parent.strings.format_month_no_loaded, d.monthString, d.year)
+            String.format(parent.strings.formatMonthNoLoaded, d.monthString, d.year)
         )
         row.put(Const.LINK, date)
         row.put(DataBase.ID, id)
@@ -712,7 +712,7 @@ class SearchEngine(
             if (title == link) {
                 helper.isNeedLoad = true
                 val row = ContentValues()
-                row.put(Const.TITLE, String.format(parent.strings.format_page_no_loaded, link))
+                row.put(Const.TITLE, String.format(parent.strings.formatPageNoLoaded, link))
                 row.put(Const.LINK, link)
                 row.put(DataBase.ID, i)
                 storage.insert(row)
@@ -740,7 +740,7 @@ class SearchEngine(
             val row = ContentValues()
             row.put(
                 Const.TITLE,
-                String.format(parent.strings.format_month_no_loaded, d.monthString, d.year)
+                String.format(parent.strings.formatMonthNoLoaded, d.monthString, d.year)
             )
             row.put(Const.LINK, pages.name)
             row.put(DataBase.ID, startId)
@@ -750,7 +750,7 @@ class SearchEngine(
         i = startId
         for (link in links) {
             val row = ContentValues()
-            row.put(Const.TITLE, String.format(parent.strings.format_page_no_loaded, link))
+            row.put(Const.TITLE, String.format(parent.strings.formatPageNoLoaded, link))
             row.put(Const.LINK, link)
             row.put(DataBase.ID, i)
             i++
@@ -770,7 +770,7 @@ class SearchEngine(
 
         if (list.isEmpty()) {
             item = BasicItem(pages.getTitle(link), link)
-            item.des = parent.strings.not_found
+            item.des = parent.strings.notFound
         } else {
             listToStorage(list)
             val des = StringBuilder()

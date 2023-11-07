@@ -200,7 +200,7 @@ class MarkersStorage : DataBase.Parent {
                     + DataBase.ID + " integer primary key autoincrement," //id закладки
                     + Const.LINK + " text," //ссылка на материал
                     + DataBase.COLLECTIONS + " text," //список id подборок, в которые включен материал
-                    + Const.DESCTRIPTION + " text," //описание
+                    + Const.DESCRIPTION + " text," //описание
                     + Const.PLACE + " text);"
         ) //место в материале
         db.execSQL(
@@ -224,7 +224,7 @@ class MarkersStorage : DataBase.Parent {
             table = DataBase.MARKERS,
             column = DataBase.ID,
             selection = Const.PLACE + DataBase.Q + DataBase.AND + Const.LINK +
-                    DataBase.Q + DataBase.AND + Const.DESCTRIPTION + DataBase.Q,
+                    DataBase.Q + DataBase.AND + Const.DESCRIPTION + DataBase.Q,
             selectionArgs = values
         )
         val result = if (cursor.moveToFirst())

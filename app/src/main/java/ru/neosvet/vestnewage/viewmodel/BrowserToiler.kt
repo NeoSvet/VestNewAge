@@ -77,16 +77,16 @@ class BrowserToiler : NeoToiler() {
         strings = BrowserStrings(
             copyright = "<br> " + context.getString(R.string.copyright),
             downloaded = context.getString(R.string.downloaded),
-            doctrine_pages = context.getString(R.string.doctrine_pages),
-            holy_rus_pages = context.getString(R.string.holy_rus_pages),
-            doctrine_future = context.getString(R.string.doctrine_future),
-            edition_of = context.getString(R.string.edition_of),
-            publication_of = context.getString(R.string.publication_of),
+            doctrinePages = context.getString(R.string.doctrine_pages),
+            holyRusPages = context.getString(R.string.holy_rus_pages),
+            doctrineFuture = context.getString(R.string.doctrine_future),
+            editionOf = context.getString(R.string.edition_of),
+            publicationOf = context.getString(R.string.publication_of),
             toPrev = context.getString(R.string.to_prev),
             toNext = context.getString(R.string.to_next),
             searchReaction = context.getString(R.string.search_reaction),
-            not_found_reaction = context.getString(R.string.not_found_reaction),
-            foot_reaction = context.getString(R.string.foot_reaction)
+            notFoundReaction = context.getString(R.string.not_found_reaction),
+            footReaction = context.getString(R.string.foot_reaction)
         )
     }
 
@@ -291,19 +291,19 @@ class BrowserToiler : NeoToiler() {
         }
         when {
             isDoctrine -> {
-                if (link.isDoctrineBook) bw.write(strings.doctrine_pages + link.substring(Const.DOCTRINE.length))
-                else bw.write(strings.doctrine_future + link.replace(Const.DOCTRINE, Urls.DOCTRINE))
+                if (link.isDoctrineBook) bw.write(strings.doctrinePages + link.substring(Const.DOCTRINE.length))
+                else bw.write(strings.doctrineFuture + link.replace(Const.DOCTRINE, Urls.DOCTRINE))
                 bw.write(strings.copyright)
                 bw.write(DateUnit.initToday().year.toString() + Const.BR)
-                if (link.isDoctrineBook) bw.write(strings.edition_of + d.toString())
-                else bw.write(strings.publication_of + d.toString())
+                if (link.isDoctrineBook) bw.write(strings.editionOf + d.toString())
+                else bw.write(strings.publicationOf + d.toString())
             }
 
             isHolyRus -> {
-                bw.write(strings.holy_rus_pages + link.substring(Const.HOLY_RUS.length))
+                bw.write(strings.holyRusPages + link.substring(Const.HOLY_RUS.length))
                 bw.write(strings.copyright)
                 bw.write(DateUnit.initToday().year.toString() + Const.BR)
-                bw.write(strings.edition_of + d.toString())
+                bw.write(strings.editionOf + d.toString())
             }
 
             link.contains("print") -> { // материалы с сайта Откровений
@@ -493,7 +493,7 @@ class BrowserToiler : NeoToiler() {
             if (cursor.moveToFirst()) {
                 val iLink = cursor.getColumnIndex(Const.LINK)
                 val iTitle = cursor.getColumnIndex(Const.TITLE)
-                val iDes = cursor.getColumnIndex(Const.DESCTRIPTION)
+                val iDes = cursor.getColumnIndex(Const.DESCRIPTION)
                 val sb = StringBuilder("<h3>")
                 sb.append(cursor.getString(iTitle))
                 sb.append("</h3>")
@@ -516,7 +516,7 @@ class BrowserToiler : NeoToiler() {
                     }
                     sb.append("</p>")
                     sb.append("<div style='margin-top:20px' class='print2'>\n")
-                    sb.append(strings.foot_reaction)
+                    sb.append(strings.footReaction)
                     sb.append(Const.BR)
                     sb.append("<a href='")
                     val link = Urls.TelegramUrl + cursor.getString(iLink)
@@ -528,7 +528,7 @@ class BrowserToiler : NeoToiler() {
                 }
                 reactionContent = sb.toString()
                 openPage(true)
-            } else postState(BasicState.Message(strings.not_found_reaction))
+            } else postState(BasicState.Message(strings.notFoundReaction))
             cursor.close()
             storage.close()
         }

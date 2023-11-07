@@ -37,37 +37,37 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_alarm1"
+            android:id="@+id/btn_alarm_to_3_hours"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/def_indent"
             android:padding="@dimen/def_indent"
-            android:text="@string/alarm1"
-            app:layout_constraintEnd_toEndOf="@id/btn_alarm2"
-            app:layout_constraintStart_toStartOf="@id/btn_alarm2"
+            android:text="@string/alarm_to_3_hours"
+            app:layout_constraintEnd_toEndOf="@id/btn_alarm_to_11_hours"
+            app:layout_constraintStart_toStartOf="@id/btn_alarm_to_11_hours"
             app:layout_constraintTop_toBottomOf="@id/label" />
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_alarm2"
+            android:id="@+id/btn_alarm_to_11_hours"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/def_indent"
             android:padding="@dimen/def_indent"
-            android:text="@string/alarm2"
+            android:text="@string/alarm_to_11_hours"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/btn_alarm1" />
+            app:layout_constraintTop_toBottomOf="@id/btn_alarm_to_3_hours" />
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_alarm3"
+            android:id="@+id/btn_alarm_to_19_hours"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/def_indent"
             android:padding="@dimen/def_indent"
-            android:text="@string/alarm3"
+            android:text="@string/alarm_to_19_hours"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/btn_alarm2" />
+            app:layout_constraintTop_toBottomOf="@id/btn_alarm_to_11_hours" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_close"
@@ -76,9 +76,9 @@
             android:layout_marginTop="@dimen/def_indent"
             android:padding="@dimen/def_indent"
             android:text="@string/close"
-            app:layout_constraintEnd_toEndOf="@id/btn_alarm3"
-            app:layout_constraintStart_toStartOf="@id/btn_alarm3"
-            app:layout_constraintTop_toBottomOf="@id/btn_alarm3" />
+            app:layout_constraintEnd_toEndOf="@id/btn_alarm_to_19_hours"
+            app:layout_constraintStart_toStartOf="@id/btn_alarm_to_19_hours"
+            app:layout_constraintTop_toBottomOf="@id/btn_alarm_to_19_hours" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <LinearLayout
@@ -106,6 +106,7 @@
             android:id="@+id/iv_clear"
             android:layout_width="45dp"
             android:layout_height="45dp"
+            android:contentDescription="@string/clearing"
             android:src="@drawable/ic_clear" />
     </LinearLayout>
 

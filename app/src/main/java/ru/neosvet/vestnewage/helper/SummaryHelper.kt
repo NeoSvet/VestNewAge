@@ -38,7 +38,7 @@ class SummaryHelper : LinksProvider {
                 Toast.LENGTH_LONG
             ).show()
             val intent = Intent(App.context, Rec::class.java)
-            intent.putExtra(Const.DESCTRIPTION, des)
+            intent.putExtra(Const.DESCRIPTION, des)
             intent.putExtra(Const.LINK, link)
             val piPostpone =
                 PendingIntent.getBroadcast(App.context, 3, intent, NotificationUtils.FLAGS)
@@ -160,7 +160,7 @@ class SummaryHelper : LinksProvider {
 
     class Rec : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
-            val des = intent.getStringExtra(Const.DESCTRIPTION)
+            val des = intent.getStringExtra(Const.DESCRIPTION)
             val link = intent.getStringExtra(Const.LINK)
             if (des == null || link == null) return
             val helper = SummaryHelper()

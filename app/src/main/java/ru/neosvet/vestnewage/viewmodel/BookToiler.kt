@@ -78,13 +78,13 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
             dEpistles = DateUnit.putDays(it.epistlesDays)
         }
         strings = BookStrings(
-            rnd_epistle = context.getString(R.string.rnd_epistle),
-            rnd_poem = context.getString(R.string.rnd_poem),
-            rnd_verse = context.getString(R.string.rnd_verse),
-            alert_rnd = context.getString(R.string.alert_rnd),
-            try_again = context.getString(R.string.try_again),
+            rndEpistle = context.getString(R.string.rnd_epistle),
+            rndPoem = context.getString(R.string.rnd_poem),
+            rndVerse = context.getString(R.string.rnd_verse),
+            alertRnd = context.getString(R.string.alert_rnd),
+            tryAgain = context.getString(R.string.try_again),
             from = context.getString(R.string.from),
-            pred_tolk = context.getString(R.string.pred_tolk)
+            predTolk = context.getString(R.string.pred_tolk)
         )
         context.resources.getStringArray(R.array.months).forEach {
             months.add(it)
@@ -174,7 +174,7 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
             }
             val list = mutableListOf<BasicItem>()
             if (date.timeInDays == DateHelper.MIN_DAYS_NEW_BOOK && isLoadedOtkr.not())
-                list.add(BasicItem(strings.pred_tolk, Urls.PRED_LINK))
+                list.add(BasicItem(strings.predTolk, Urls.PRED_LINK))
             val storage = PageStorage()
             var t: String
             var s: String
@@ -328,12 +328,12 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
             //определяем условие отбора в соотвтствии с выбранным пунктом:
             when (type) {
                 BookRnd.POEM -> {
-                    title = strings.rnd_poem
+                    title = strings.rndPoem
                     curTitle = storage.getList(true)
                 }
 
                 BookRnd.EPISTLE -> {
-                    title = strings.rnd_epistle
+                    title = strings.rndEpistle
                     curTitle = storage.getList(false)
                 }
 
@@ -348,7 +348,7 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
             if (!curTitle.moveToPosition(n)) {
                 curTitle.close()
                 storage.close()
-                postState(BasicState.Message(strings.alert_rnd))
+                postState(BasicState.Message(strings.alertRnd))
                 return@launch
             }
             //если случайный текст найден
@@ -369,15 +369,15 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
                 } else s = ""
                 curPar.close()
                 if (s == "") { //случайный стих не найден
-                    postState(BasicState.Message(strings.alert_rnd))
-                    title = strings.rnd_verse
+                    postState(BasicState.Message(strings.alertRnd))
+                    title = strings.rndVerse
                 }
             } else  // случайный катрен или послание
                 n = -1
             //выводим на экран:
             val link: String? = curTitle.getString(curTitle.getColumnIndex(Const.LINK))
             var msg: String
-            msg = if (link == null) strings.try_again
+            msg = if (link == null) strings.tryAgain
             else storage.getPageTitle(
                 curTitle.getString(curTitle.getColumnIndex(Const.TITLE)), link
             )

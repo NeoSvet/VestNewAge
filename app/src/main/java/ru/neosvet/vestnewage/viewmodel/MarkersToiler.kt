@@ -51,7 +51,7 @@ class MarkersToiler : NeoToiler() {
             builder.putString(Const.TITLE, strings.collections)
         else {
             builder.putString(Const.TITLE, collectionTitle)
-            builder.putString(Const.DESCTRIPTION, collectionData)
+            builder.putString(Const.DESCRIPTION, collectionData)
             if (loadIndex > -1)
                 builder.putString(Const.LINK, list[loadIndex].data)
         }
@@ -61,15 +61,15 @@ class MarkersToiler : NeoToiler() {
     override fun init(context: Context) {
         strings = MarkersStrings(
             collections = context.getString(R.string.collections),
-            no_collections = context.getString(R.string.no_collections),
-            sel_pos = context.getString(R.string.sel_pos),
-            sel_par = context.getString(R.string.sel_par),
-            pos_n = context.getString(R.string.pos_n),
-            par_n = context.getString(R.string.par_n),
-            page_entirely = context.getString(R.string.page_entirely),
-            unuse_dot = context.getString(R.string.unuse_dot),
-            cancel_rename = context.getString(R.string.cancel_rename),
-            help_edit = context.getString(R.string.help_edit)
+            noCollections = context.getString(R.string.no_collections),
+            selectedPosition = context.getString(R.string.sel_pos),
+            selectedPar = context.getString(R.string.sel_par),
+            aroundAt = context.getString(R.string.around_at),
+            parNumbers = context.getString(R.string.par_numbers),
+            pageEntirely = context.getString(R.string.page_entirely),
+            unusedDot = context.getString(R.string.unused_dot),
+            cancelRename = context.getString(R.string.cancel_rename),
+            helpEdit = context.getString(R.string.help_edit)
         )
     }
 
@@ -166,7 +166,7 @@ class MarkersToiler : NeoToiler() {
         isCollections = true
         scope.launch {
             list.clear()
-            list.add(MarkerItem(-1, strings.help_edit, ""))
+            list.add(MarkerItem(-1, strings.helpEdit, ""))
             val cursor = storage.getCollections(Const.PLACE)
             var s: String
             var isNull = false
@@ -218,7 +218,7 @@ class MarkersToiler : NeoToiler() {
             val iID = cursor.getColumnIndex(DataBase.ID)
             val iPlace = cursor.getColumnIndex(Const.PLACE)
             val iLink = cursor.getColumnIndex(Const.LINK)
-            val iDes = cursor.getColumnIndex(Const.DESCTRIPTION)
+            val iDes = cursor.getColumnIndex(Const.DESCRIPTION)
             val link = cursor.getString(iLink)
             val place = cursor.getString(iPlace)
             MarkerItem(
@@ -239,18 +239,18 @@ class MarkersToiler : NeoToiler() {
 
     @SuppressLint("Range")
     private fun getPlace(link: String, place: String): Pair<String, String> {
-        if (place == "0") return Pair(strings.page_entirely, "")
+        if (place == "0") return Pair(strings.pageEntirely, "")
         val storage = PageStorage()
         storage.open(link)
         try {
             val p: String
             val s = if (place.contains("%")) { //позиция
-                p = strings.pos_n + place.replace(".", Const.COMMA)
+                p = strings.aroundAt + place.replace(".", Const.COMMA)
                 storage.getContentPage(link, false)?.let {
                     parsePosition(place, it)
                 }
             } else { //абзацы
-                p = strings.par_n + place.replace(Const.COMMA, ", ")
+                p = strings.parNumbers + place.replace(Const.COMMA, ", ")
                 val cursor = storage.getPage(link)
                 if (cursor.moveToFirst()) {
                     var i = cursor.getColumnIndex(DataBase.ID)
@@ -264,8 +264,8 @@ class MarkersToiler : NeoToiler() {
             storage.close()
             ex.printStackTrace()
         }
-        val p = if (place.contains("%")) strings.sel_pos + place
-        else strings.sel_par + MarkersStorage.openList(place).replace(Const.COMMA, ", ")
+        val p = if (place.contains("%")) strings.selectedPosition + place
+        else strings.selectedPar + MarkersStorage.openList(place).replace(Const.COMMA, ", ")
         return Pair(p, "")
     }
 
@@ -342,7 +342,7 @@ class MarkersToiler : NeoToiler() {
             if (isCollections)
                 storage.deleteCollection(
                     id, MarkersStorage.getList(item.data),
-                    strings.no_collections
+                    strings.noCollections
                 )
             else storage.deleteMarker(id)
             list.removeAt(index)
@@ -384,7 +384,7 @@ class MarkersToiler : NeoToiler() {
         var isCancel = name.isEmpty()
         if (!isCancel) {
             if (name.contains(Const.COMMA)) {
-                setState(BasicState.Message(strings.unuse_dot))
+                setState(BasicState.Message(strings.unusedDot))
                 return
             }
             for (i in 0 until list.size) {
@@ -395,7 +395,7 @@ class MarkersToiler : NeoToiler() {
             }
         }
         if (isCancel) {
-            setState(BasicState.Message(strings.cancel_rename))
+            setState(BasicState.Message(strings.cancelRename))
             return
         }
         val row = ContentValues()
@@ -404,7 +404,7 @@ class MarkersToiler : NeoToiler() {
             list[index].title = name
             setState(ListState.Update(index, list[index]))
         } else
-            setState(BasicState.Message(strings.cancel_rename))
+            setState(BasicState.Message(strings.cancelRename))
     }
 
     private fun doExport(file: Uri) {
@@ -434,7 +434,7 @@ class MarkersToiler : NeoToiler() {
             i1 = cursor.getColumnIndex(DataBase.ID)
             i2 = cursor.getColumnIndex(Const.PLACE)
             i3 = cursor.getColumnIndex(Const.LINK)
-            i4 = cursor.getColumnIndex(Const.DESCTRIPTION)
+            i4 = cursor.getColumnIndex(Const.DESCRIPTION)
             i5 = cursor.getColumnIndex(DataBase.COLLECTIONS)
             do {
                 bw.write(cursor.getString(i1) + Const.N)
@@ -494,7 +494,7 @@ class MarkersToiler : NeoToiler() {
                 row = ContentValues()
                 row.put(Const.PLACE, p)
                 row.put(Const.LINK, s)
-                row.put(Const.DESCTRIPTION, d)
+                row.put(Const.DESCRIPTION, d)
                 nid = storage.insertMarker(row).toInt()
             }
             hM[id] = nid

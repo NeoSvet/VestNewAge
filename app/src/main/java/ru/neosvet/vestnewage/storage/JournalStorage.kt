@@ -113,22 +113,22 @@ class JournalStorage : DataBase.Parent {
                 if (id.size == 2) {
                     val p = curJ.getFloat(iPlace)
                     item.des = String.format(
-                        strings.format_opened,
+                        strings.formatOpened,
                         DateUnit.getDiffDate(now, t), p, d
                     )
                 } else { //случайные
                     if (id[2] == "-1") { //случайный катрен или послание
-                        s = if (s.isPoem) strings.rnd_poem
-                        else strings.rnd_epistle
+                        s = if (s.isPoem) strings.rndPoem
+                        else strings.rndEpistle
                     } else { //случаный стих
                         cursor.close()
                         cursor = storage.getParagraphs(id[1])
-                        s = strings.rnd_verse
+                        s = strings.rndVerse
                         if (cursor.moveToPosition(id[2].toInt()))
                             s += ":" + Const.N + cursor.getString(0).fromHTML
                     }
                     item.des = String.format(
-                        strings.format_rnd,
+                        strings.formatRnd,
                         DateUnit.getDiffDate(now, t), d, s
                     )
                 }

@@ -65,7 +65,7 @@ class SiteLoader(
             row.put(DataBase.ID, id)
             id++
             row.put(Const.TITLE, item.title)
-            row.put(Const.DESCTRIPTION, item.des)
+            row.put(Const.DESCRIPTION, item.des)
             i = item.des.lastIndexOf("<p")
             date = DateUnit.putMills(prevTime)
             if (i > -1 && item.des.length - i > 10) {
@@ -316,7 +316,7 @@ class SiteLoader(
         val row = ContentValues()
         row.put(Const.MODE, mode)
         row.put(Const.TITLE, item.title)
-        row.put(Const.DESCTRIPTION, item.des)
+        row.put(Const.DESCRIPTION, item.des)
         row.put(Const.LINK, item.link)
         storage.insert(row)
     }

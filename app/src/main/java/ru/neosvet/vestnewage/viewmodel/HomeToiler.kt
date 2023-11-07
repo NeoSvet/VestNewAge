@@ -85,10 +85,10 @@ class HomeToiler : NeoToiler() {
         strings = HomeStrings(
             nothing = context.getString(R.string.nothing),
             new = context.getString(R.string.new_section),
-            on_tab = context.getString(R.string.on_tab),
+            onTab = context.getString(R.string.on_tab),
             never = context.getString(R.string.never),
             refreshed = context.getString(R.string.refreshed),
-            today_empty = context.getString(R.string.today_empty),
+            todayEmpty = context.getString(R.string.today_empty),
             yesterday = context.resources.getStringArray(R.array.post_days)[0],
             journal = context.getString(R.string.journal),
             calendar = context.getString(R.string.calendar),
@@ -98,19 +98,19 @@ class HomeToiler : NeoToiler() {
             news = context.getString(R.string.news),
             book = context.getString(R.string.book),
             markers = context.getString(R.string.markers),
-            precept_human_future = context.getString(R.string.precept_human_future),
-            additionally_from_tg = context.getString(R.string.additionally_from_tg),
-            today_msk = context.getString(R.string.today_msk) + " ",
+            preceptHumanFuture = context.getString(R.string.precept_human_future),
+            additionallyFromTg = context.getString(R.string.additionally_from_tg),
+            todayMsk = context.getString(R.string.today_msk) + " ",
             back = context.getString(R.string.back),
-            last_post_from = context.getString(R.string.last_post_from),
-            last_readed = context.getString(R.string.last_readed),
-            prom_for_soul_unite = context.getString(R.string.prom_for_soul_unite),
-            new_dev_ads = context.getString(R.string.new_dev_ads),
+            lastPostFrom = context.getString(R.string.last_post_from),
+            lastRead = context.getString(R.string.last_read),
+            promForSoulUnite = context.getString(R.string.prom_for_soul_unite),
+            newDevAds = context.getString(R.string.new_dev_ads),
             last = context.getString(R.string.last),
             from = context.getString(R.string.from) + " ",
-            new_today = context.getString(R.string.new_today),
+            newToday = context.getString(R.string.new_today),
             information = context.getString(R.string.information),
-            help_edit = context.getString(R.string.help_edit)
+            helpEdit = context.getString(R.string.help_edit)
         )
         loadItems()
     }
@@ -167,7 +167,7 @@ class HomeToiler : NeoToiler() {
             linkCalendar = ""
             val list = mutableListOf<HomeItem>()
             if (isEditor)
-                list.add(HomeItem(HomeItem.Type.HELP, listOf(strings.help_edit)))
+                list.add(HomeItem(HomeItem.Type.HELP, listOf(strings.helpEdit)))
             list.addAll(getHomeList(items))
             if (isEditor) {
                 initHiddenItems()
@@ -263,7 +263,7 @@ class HomeToiler : NeoToiler() {
         val isAc = loader.checkAcademy()
         if (isDoc || isAc) {
             val sb = StringBuilder(strings.new)
-            sb.append(strings.on_tab)
+            sb.append(strings.onTab)
             if (isRss) {
                 sb.append(strings.summary)
                 sb.append(", ")
@@ -336,7 +336,7 @@ class HomeToiler : NeoToiler() {
         val p = journal.getLastItem() ?: Pair(strings.nothing, "")
         return HomeItem(
             type = HomeItem.Type.JOURNAL,
-            lines = listOf(strings.journal, strings.last_readed, p.first, p.second)
+            lines = listOf(strings.journal, strings.lastRead, p.first, p.second)
         )
     }
 
@@ -345,7 +345,7 @@ class HomeToiler : NeoToiler() {
         if (isEditor)
             return HomeItem(HomeItem.Type.CALENDAR, listOf(strings.calendar))
         task = Task.OPEN_CALENDAR
-        var title = strings.today_empty
+        var title = strings.todayEmpty
         val date = DateUnit.initMskNow()
         if (linkCalendar.isEmpty()) {
             val cursor = getPage(date.my).getListAll()
@@ -371,7 +371,7 @@ class HomeToiler : NeoToiler() {
         val d = date.toDateString()
         return HomeItem(
             type = HomeItem.Type.CALENDAR,
-            lines = listOf(strings.calendar, strings.today_msk + d, title, linkCalendar)
+            lines = listOf(strings.calendar, strings.todayMsk + d, title, linkCalendar)
         )
     }
 
@@ -429,7 +429,7 @@ class HomeToiler : NeoToiler() {
             val date = DateUnit.putMills(timeItem)
             title = when (date.toShortDateString()) {
                 today.toShortDateString() ->
-                    strings.new_today
+                    strings.newToday
 
                 today.apply { changeDay(-1) }.toShortDateString() ->
                     strings.last + strings.yesterday
@@ -439,11 +439,11 @@ class HomeToiler : NeoToiler() {
             }
         }
         tabNews = SiteTab.NEWS.value
-        if (title == strings.nothing || title != strings.new_today) {
+        if (title == strings.nothing || title != strings.newToday) {
             val dev = DevStorage()
             if (dev.unreadCount > 0) {
                 tabNews = SiteTab.DEV.value
-                title = strings.new_dev_ads
+                title = strings.newDevAds
             }
             dev.close()
         }
@@ -459,7 +459,7 @@ class HomeToiler : NeoToiler() {
 
     private fun createAdditionItem(): HomeItem {
         if (isEditor)
-            return HomeItem(HomeItem.Type.ADDITION, listOf(strings.additionally_from_tg))
+            return HomeItem(HomeItem.Type.ADDITION, listOf(strings.additionallyFromTg))
         task = Task.OPEN_ADDITION
         val file = Files.dateBase(DataBase.ADDITION)
         needLoadAddition = loadIfNeed && DateUnit.isLongAgo(file.lastModified())
@@ -477,11 +477,11 @@ class HomeToiler : NeoToiler() {
         var t = addition.getLastDate()
         addition.close()
         t = if (t.isEmpty()) strings.nothing
-        else strings.last_post_from.format(t)
+        else strings.lastPostFrom.format(t)
         return HomeItem(
             type = HomeItem.Type.ADDITION,
             time = time,
-            lines = listOf(strings.additionally_from_tg, des, t)
+            lines = listOf(strings.additionallyFromTg, des, t)
         )
     }
 
@@ -492,8 +492,8 @@ class HomeToiler : NeoToiler() {
         return HomeItem(
             type = HomeItem.Type.INFO,
             lines = listOf(
-                strings.prom_for_soul_unite, strings.information,
-                strings.precept_human_future
+                strings.promForSoulUnite, strings.information,
+                strings.preceptHumanFuture
             )
         )
     }

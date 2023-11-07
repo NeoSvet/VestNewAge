@@ -29,11 +29,11 @@ class AdsUtils(
         strings = DevStrings(
             ad = context.getString(R.string.ad),
             ok = context.getString(android.R.string.ok),
-            url_on_google = context.getString(R.string.url_on_google),
-            url_on_huawei = context.getString(R.string.url_on_huawei),
-            open_link = context.getString(R.string.open_link),
-            access_new_version = context.getString(R.string.access_new_version),
-            current_version = context.getString(R.string.current_version)
+            urlOnGoogle = context.getString(R.string.url_on_google),
+            urlOnHuawei = context.getString(R.string.url_on_huawei),
+            openLink = context.getString(R.string.open_link),
+            accessNewVersion = context.getString(R.string.access_new_version),
+            currentVersion = context.getString(R.string.current_version)
         )
     }
 
@@ -41,7 +41,7 @@ class AdsUtils(
         val cursor = storage.getAll()
         if (!cursor.moveToFirst()) return null
         val iTitle = cursor.getColumnIndex(Const.TITLE)
-        val iDes = cursor.getColumnIndex(Const.DESCTRIPTION)
+        val iDes = cursor.getColumnIndex(Const.DESCRIPTION)
         val iLink = cursor.getColumnIndex(Const.LINK)
         var n = 0
         var item: SimpleItem? = null
@@ -65,7 +65,7 @@ class AdsUtils(
         val cursor = storage.getItem(title)
         val item = if (cursor.moveToFirst()) {
             val link = cursor.getString(cursor.getColumnIndex(Const.LINK))
-            val des = cursor.getString(cursor.getColumnIndex(Const.DESCTRIPTION))
+            val des = cursor.getString(cursor.getColumnIndex(Const.DESCRIPTION))
             val mode = cursor.getInt(cursor.getColumnIndex(Const.MODE))
             createItem(
                 title = title,
@@ -84,7 +84,7 @@ class AdsUtils(
         if (!cursor.moveToFirst()) return list
         val iMode = cursor.getColumnIndex(Const.MODE)
         val iTitle = cursor.getColumnIndex(Const.TITLE)
-        val iDes = cursor.getColumnIndex(Const.DESCTRIPTION)
+        val iDes = cursor.getColumnIndex(Const.DESCRIPTION)
         val iLink = cursor.getColumnIndex(Const.LINK)
         do {
             createItem(
@@ -107,7 +107,7 @@ class AdsUtils(
         if (!cursor.moveToFirst()) return list
         val iMode = cursor.getColumnIndex(Const.MODE)
         val iTitle = cursor.getColumnIndex(Const.TITLE)
-        val iDes = cursor.getColumnIndex(Const.DESCTRIPTION)
+        val iDes = cursor.getColumnIndex(Const.DESCRIPTION)
         val iLink = cursor.getColumnIndex(Const.LINK)
         val iUnread = cursor.getColumnIndex(Const.UNREAD)
         do {
@@ -120,8 +120,8 @@ class AdsUtils(
                 val des = cursor.getString(iDes)
                 if (item.link == UPDATE) {
                     item.clear()
-                    item.addLink(GOOGLE, strings.url_on_google)
-                    item.addLink(HUAWEI, strings.url_on_huawei)
+                    item.addLink(GOOGLE, strings.urlOnGoogle)
+                    item.addLink(HUAWEI, strings.urlOnHuawei)
                     item.des = des
                 } else cursor.getString(iLink)?.let {
                     item.addLink(it)
@@ -142,8 +142,8 @@ class AdsUtils(
             DevStorage.TYPE_UPDATE -> {
                 val ver = title.toInt()
                 val item = if (ver > App.version)
-                    BasicItem(strings.access_new_version)
-                else BasicItem(strings.current_version)
+                    BasicItem(strings.accessNewVersion)
+                else BasicItem(strings.currentVersion)
                 des?.let { item.addHead(it) }
                 item.addLink(UPDATE)
                 item
@@ -176,17 +176,17 @@ class AdsUtils(
 
             item.link == UPDATE -> {
                 alert.setLeftButton(GOOGLE) {
-                    Urls.openInApps(strings.url_on_google)
+                    Urls.openInApps(strings.urlOnGoogle)
                     alert.dismiss()
                 }
                 alert.setRightButton(HUAWEI) {
-                    Urls.openInApps(strings.url_on_huawei)
+                    Urls.openInApps(strings.urlOnHuawei)
                     alert.dismiss()
                 }
             }
 
             else -> {
-                alert.setRightButton(strings.open_link) {
+                alert.setRightButton(strings.openLink) {
                     Urls.openInApps(item.link)
                     alert.dismiss()
                 }

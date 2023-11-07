@@ -34,7 +34,7 @@ class ShareDialog : BottomSheetDialogFragment() {
                 arguments = Bundle().apply {
                     putString(Const.LINK, link)
                     putString(Const.TITLE, title)
-                    putString(Const.DESCTRIPTION, content)
+                    putString(Const.DESCRIPTION, content)
                 }
             }
     }
@@ -73,7 +73,7 @@ class ShareDialog : BottomSheetDialogFragment() {
         arguments?.let {
             link = it.getString(Const.LINK) ?: ""
             title = it.getString(Const.TITLE) ?: ""
-            content = it.getString(Const.DESCTRIPTION) ?: ""
+            content = it.getString(Const.DESCRIPTION) ?: ""
         }
         options = savedInstanceState?.getBooleanArray(Const.SEARCH)
             ?: BooleanArray(3) { i -> i % 2 != 1 }

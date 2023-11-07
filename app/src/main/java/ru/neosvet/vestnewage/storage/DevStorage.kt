@@ -24,7 +24,7 @@ class DevStorage : DataBase.Parent {
                     + Const.UNREAD + " integer default 1,"
                     + Const.TITLE + " text,"
                     + Const.LINK + " text,"
-                    + Const.DESCTRIPTION + " text);"
+                    + Const.DESCRIPTION + " text);"
         )
     }
 
@@ -76,7 +76,7 @@ class DevStorage : DataBase.Parent {
         db.update(NAME, row, Const.TITLE + DataBase.Q, title) > 0
 
     private fun updateByDes(des: String, row: ContentValues): Boolean =
-        db.update(NAME, row, Const.DESCTRIPTION + DataBase.Q, des) > 0
+        db.update(NAME, row, Const.DESCRIPTION + DataBase.Q, des) > 0
 
     fun newTime(): Long {
         val row = ContentValues()

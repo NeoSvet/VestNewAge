@@ -56,7 +56,7 @@ class AdditionStorage : DataBase.Parent {
 
     fun search(date: String) = db.query(
         table = DataBase.ADDITION,
-        selection = Const.DESCTRIPTION + DataBase.LIKE,
+        selection = Const.DESCRIPTION + DataBase.LIKE,
         selectionArg = "${date}%"
     )
 
@@ -74,7 +74,7 @@ class AdditionStorage : DataBase.Parent {
                 cursor.getString(cursor.getColumnIndex(Const.TITLE)) + " ($date)"
             } else cursor.getString(cursor.getColumnIndex(Const.TITLE))
             val link = cursor.getInt(cursor.getColumnIndex(Const.LINK)).toString()
-            var d = cursor.getString(cursor.getColumnIndex(Const.DESCTRIPTION))
+            var d = cursor.getString(cursor.getColumnIndex(Const.DESCRIPTION))
             if (withDate && d.indexOf(date) == 0)
                 d = d.substring(d.indexOf(Const.N) + 1)
             if (d.contains("<a")) {
@@ -107,7 +107,7 @@ class AdditionStorage : DataBase.Parent {
             val iLink = cursor.getColumnIndex(Const.LINK)
             val iTitle = cursor.getColumnIndex(Const.TITLE)
             val iTime = cursor.getColumnIndex(Const.TIME)
-            val iDes = cursor.getColumnIndex(Const.DESCTRIPTION)
+            val iDes = cursor.getColumnIndex(Const.DESCRIPTION)
             if (max == 0 && offset == 0)
                 max = cursor.getInt(iID)
             do {
@@ -174,7 +174,7 @@ class AdditionStorage : DataBase.Parent {
                     + Const.LINK + " integer," //number post in Telegram
                     + Const.TITLE + " text,"
                     + Const.TIME + " text,"
-                    + Const.DESCTRIPTION + " text);"
+                    + Const.DESCRIPTION + " text);"
         )
     }
 

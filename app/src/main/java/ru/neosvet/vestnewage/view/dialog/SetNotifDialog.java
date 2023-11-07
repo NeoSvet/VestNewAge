@@ -47,18 +47,18 @@ public class SetNotifDialog extends Dialog {
         tvSound = findViewById(R.id.tvSound);
         View bRingtone = findViewById(R.id.bRingtone);
         CheckBox cbSound = findViewById(R.id.cbSound);
-        CheckBox cbVibr = findViewById(R.id.cbVibr);
+        CheckBox cbVibration = findViewById(R.id.cbVibration);
 
         pref = act.getSharedPreferences(source, Context.MODE_PRIVATE);
-        name = pref.getString(NAME, null);
-        uri = pref.getString(URI, null);
+        name = pref.getString(NAME, "");
+        uri = pref.getString(URI, "");
         setRingtone();
         cbSound.setChecked(pref.getBoolean(SOUND, false));
         if (!cbSound.isChecked()) {
             tvSound.setVisibility(View.GONE);
             bRingtone.setVisibility(View.GONE);
         }
-        cbVibr.setChecked(pref.getBoolean(VIBR, true));
+        cbVibration.setChecked(pref.getBoolean(VIBR, true));
 
         cbSound.setOnCheckedChangeListener((compoundButton, user) -> {
             if (cbSound.isChecked()) {
@@ -79,7 +79,7 @@ public class SetNotifDialog extends Dialog {
             editor.putBoolean(SOUND, cbSound.isChecked());
             editor.putString(NAME, name);
             editor.putString(URI, uri);
-            editor.putBoolean(VIBR, cbVibr.isChecked());
+            editor.putBoolean(VIBR, cbVibration.isChecked());
             editor.apply();
             SetNotifDialog.this.dismiss();
         });
@@ -92,9 +92,7 @@ public class SetNotifDialog extends Dialog {
     }
 
     private void setRingtone() {
-        if (name == null)
-            tvSound.setText(act.getString(R.string.default_));
-        else
-            tvSound.setText(name);
+        if (name.isEmpty()) tvSound.setText(act.getString(R.string.default_));
+        else tvSound.setText(name);
     }
 }

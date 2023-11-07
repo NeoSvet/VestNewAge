@@ -407,9 +407,9 @@ class SettingsFragment : NeoFragment() {
         ))
 
         binding?.run {
-            btnAlarm1.setOnClickListener(this@SettingsFragment::clickAlarm)
-            btnAlarm2.setOnClickListener(this@SettingsFragment::clickAlarm)
-            btnAlarm3.setOnClickListener(this@SettingsFragment::clickAlarm)
+            btnAlarmTo3Hours.setOnClickListener(this@SettingsFragment::clickAlarm)
+            btnAlarmTo11Hours.setOnClickListener(this@SettingsFragment::clickAlarm)
+            btnAlarmTo19Hours.setOnClickListener(this@SettingsFragment::clickAlarm)
             btnClose.setOnClickListener {
                 pAlarm.isVisible = false
             }
@@ -418,15 +418,15 @@ class SettingsFragment : NeoFragment() {
 
     private fun clickAlarm(v: View) {
         val h = when (v.id) {
-            R.id.btn_alarm1 -> 3
-            R.id.btn_alarm2 -> 11
-            else -> 19 //R.id.btn_alarm3
+            R.id.btn_alarm_to_3_hours -> 3
+            R.id.btn_alarm_to_11_hours -> 11
+            else -> 19 //R.id.btn_alarm_to_19_hours
         }
         toiler.setAlarm(h, prefProm.getInt(Const.TIME, -1))
     }
 
     private fun initDefaultSection() {
-        val pack = Uri.parse("package:ru.neosvet.vestnewage")
+        val pack = Uri.parse("package:${requireContext().packageName}")
 
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
             adapter.addItem(SettingsItem.Message(

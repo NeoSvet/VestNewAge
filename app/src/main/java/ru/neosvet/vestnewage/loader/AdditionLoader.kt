@@ -57,7 +57,7 @@ class AdditionLoader(private val client: NeoClient) : Loader {
                     des.append(Const.N)
                     s = br.readLine()
                 }
-                row.put(Const.DESCTRIPTION, des.toString().trim())
+                row.put(Const.DESCRIPTION, des.toString().trim())
                 des.clear()
                 if (!storage.update(id, row))
                     storage.insert(row)
@@ -121,7 +121,7 @@ class AdditionLoader(private val client: NeoClient) : Loader {
                 des.append(Const.N)
             }
             br.close()
-            row.put(Const.DESCTRIPTION, des.toString().trim())
+            row.put(Const.DESCRIPTION, des.toString().trim())
             return row
         } catch (_: NeoException.SiteCode) {
         }

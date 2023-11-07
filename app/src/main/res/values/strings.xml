@@ -165,18 +165,18 @@
     <string name="marker">Закладка</string>
     <string name="need_set_check">Поставьте хотя бы одну галочку!</string>
     <string name="no_collections">Вне подборок</string>
-    <string name="unuse_dot">Запятую нельзя использовать</string>
+    <string name="unused_dot">Запятую нельзя использовать</string>
     <string name="title_already_used">Данный заголовок уже используется!</string>
     <string name="paragraph">Абзац</string>
     <string name="position">Позиция</string>
     <string name="sel_pos">Выбрана позиция:&#160;</string>
-    <string name="pos_n">Приблизительно на&#160;</string>
+    <string name="around_at">Приблизительно на&#160;</string>
     <string name="page_entirely">Страница целиком</string>
-    <string name="desctription">Описание</string>
+    <string name="description">Описание</string>
     <string name="add_col">Добавить подборку</string>
     <string name="sel_col">Выбраны подборки:&#160;</string>
     <string name="sel_par">Выбраны абзацы №№:&#160;</string>
-    <string name="par_n">Абзацы №№&#160;</string>
+    <string name="par_numbers">Абзацы №№&#160;</string>
     <!--SiteFragment-->
     <string name="site">Сайт</string>
     <string name="to_load">Скачать</string>
@@ -188,7 +188,7 @@
     <string name="Timekeeping_Spiritual_Wave">Хронометраж акции «Импульс Духовной Волны»</string>
     <string name="The_Path_of_the_impulse">Путь Импульса Духовной Волны</string>
     <!--CabmainFragment-->
-    <string name="anketa_failed">Анкета загружена неверно</string>
+    <string name="profile_failed">Анкета загружена неверно</string>
     <string name="auth_failed">Авторизация не удалась</string>
     <string name="send_status">Передать ощущение</string>
     <string name="selected_status">Выбранное состояние</string>
@@ -253,14 +253,14 @@
     <string name="set">Установить</string>
     <string name="look">Посмотреть</string>
     <string name="about_alarms">Чтобы уведомление сработало точно в срок, в стандартном приложении «Часы» можно установить будильник. Удалять их надо вручную в «Часах». При смене часового пояса, будильники надо задать заново (удалив предыдущие).</string>
-    <string name="alarm1">Будильник до 3:00 (МСК)</string>
-    <string name="alarm2">Будильник до 11:00 (МСК)</string>
-    <string name="alarm3">Будильник до 19:00 (МСК)</string>
+    <string name="alarm_to_3_hours">Будильник до 3:00 (МСК)</string>
+    <string name="alarm_to_11_hours">Будильник до 11:00 (МСК)</string>
+    <string name="alarm_to_19_hours">Будильник до 19:00 (МСК)</string>
     <string name="in">за</string>
     <string name="often">чаще</string>
     <string name="less">реже</string>
     <string name="notif_sound">Звуковой сигнал</string>
-    <string name="vibr">Вибрация</string>
+    <string name="vibration">Вибрация</string>
     <string name="set_notif">Настроить сигнал, вибрацию</string>
     <string name="about_manager">Об автозапуске</string>
     <string name="info_manager">На некоторых устройствах присутствует менеджер автозапуска (может называться по другому). Для работы проверки и напоминания необходимо в менеджере разрешить автозапуск для данного приложения.</string>
@@ -309,7 +309,7 @@
     <string name="today_msk">Сегодня по Москве</string>
     <string name="today_empty">За сегодня ещё ничего нет</string>
     <string name="last_post_from">Сообщение от %s</string>
-    <string name="last_readed">В прошлый раз читали:</string>
+    <string name="last_read">В прошлый раз читали:</string>
     <string name="nothing">Ничего…</string>
     <string name="never">Никогда…</string>
     <string name="refreshed">Обновлено&#160;</string>

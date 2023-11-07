@@ -84,9 +84,9 @@ class MarkerHelper(private val strings: MarkerStrings) {
     fun getParString(): String? {
         val s = StringBuilder()
         if (parsList[0].isChecked) {
-            s.append(strings.page_entirely)
+            s.append(strings.pageEntirely)
         } else {
-            s.append(strings.sel_par)
+            s.append(strings.selectedPar)
             for (i in 1 until parsList.size) {
                 if (parsList[i].isChecked) {
                     s.append(i)
@@ -102,7 +102,7 @@ class MarkerHelper(private val strings: MarkerStrings) {
     }
 
     fun getColString(): String? {
-        val s = StringBuilder(strings.sel_col)
+        val s = StringBuilder(strings.selectedCollections)
         for (i in colsList.indices) {
             if (colsList[i].isChecked) {
                 s.append(colsList[i].title)
@@ -116,10 +116,10 @@ class MarkerHelper(private val strings: MarkerStrings) {
 
     fun checkTitleCol(title: String): String? {
         if (title.contains(Const.COMMA))
-            return strings.unuse_dot
+            return strings.unusedDot
         colsList.forEach { item ->
             if (item.title == title)
-                return strings.title_already_used
+                return strings.titleAlreadyUsed
         }
         return null
     }

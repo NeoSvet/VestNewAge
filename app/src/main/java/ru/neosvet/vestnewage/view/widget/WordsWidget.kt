@@ -55,7 +55,7 @@ class WordsWidget : AppWidgetProvider() {
                 val intentWords = Intent(context, WordsWidget::class.java)
                 intentWords.action = ACTION_COPY
                 intentWords.putExtra(
-                    Const.DESCTRIPTION,
+                    Const.DESCRIPTION,
                     context.getString(R.string.god_words) + ":" + Const.N + words
                 )
                 intentWords.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, id)
@@ -111,7 +111,7 @@ class WordsWidget : AppWidgetProvider() {
 
         when (intent.action) {
             ACTION_COPY -> {
-                goCopy(context, intent.getStringExtra(Const.DESCTRIPTION) ?: words)
+                goCopy(context, intent.getStringExtra(Const.DESCRIPTION) ?: words)
                 return
             }
 

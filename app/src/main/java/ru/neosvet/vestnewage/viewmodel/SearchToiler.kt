@@ -77,15 +77,15 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent, SearchEngine.Parent, LoadHan
             parent = this
         )
         strings = SearchStrings(
-            format_search_date = context.getString(R.string.format_search_date),
-            format_search_proc = context.getString(R.string.format_search_proc),
-            format_month_no_loaded = context.getString(R.string.format_month_no_loaded),
-            format_page_no_loaded = context.getString(R.string.format_page_no_loaded),
-            format_load = context.getString(R.string.format_load),
-            not_found = context.getString(R.string.not_found),
-            search_in_results = context.getString(R.string.search_in_results),
-            search_mode = context.resources.getStringArray(R.array.search_mode),
-            format_found = context.getString(R.string.format_found),
+            formatDate = context.getString(R.string.format_search_date),
+            formatProc = context.getString(R.string.format_search_proc),
+            formatMonthNoLoaded = context.getString(R.string.format_month_no_loaded),
+            formatPageNoLoaded = context.getString(R.string.format_page_no_loaded),
+            formatLoad = context.getString(R.string.format_load),
+            notFound = context.getString(R.string.not_found),
+            searchInResults = context.getString(R.string.search_in_results),
+            listMode = context.resources.getStringArray(R.array.search_mode).toList(),
+            formatFound = context.getString(R.string.format_found),
         )
     }
 
@@ -108,7 +108,7 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent, SearchEngine.Parent, LoadHan
         val pageLoader = PageLoader(client)
         loadDate?.let { date ->
             val d = dateFromString(date)
-            msgLoad = String.format(strings.format_load, d.monthString + " " + d.year)
+            msgLoad = String.format(strings.formatLoad, d.monthString + " " + d.year)
             postState(BasicState.Message(msgLoad))
             val masterLoader = MasterLoader(this)
             currentLoader = masterLoader
@@ -127,7 +127,7 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent, SearchEngine.Parent, LoadHan
             loadDate = null
         }
         loadLink?.let { link ->
-            postState(BasicState.Message(String.format(strings.format_load, link)))
+            postState(BasicState.Message(String.format(strings.formatLoad, link)))
             val id = storage.getIdByLink(link)
             storage.delete(id.toString())
             currentLoader = pageLoader
@@ -224,8 +224,8 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent, SearchEngine.Parent, LoadHan
         scope.launch {
             isRun = true
             labelMode = if (mode >= SearchEngine.MODE_RESULT_TEXT)
-                strings.search_in_results
-            else strings.search_mode[mode]
+                strings.searchInResults
+            else strings.listMode[mode]
             engine.startSearch(mode)
             isRun = false
         }
@@ -281,7 +281,7 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent, SearchEngine.Parent, LoadHan
 
     private fun setLabel(countMaterials: Int) = helper.run {
         label = String.format(
-            strings.format_found,
+            strings.formatFound,
             labelMode.substring(labelMode.indexOf(" ") + 1),
             request,
             engine.countMatches,
@@ -308,7 +308,7 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent, SearchEngine.Parent, LoadHan
         postState(
             BasicState.Message(
                 String.format(
-                    strings.format_search_date,
+                    strings.formatDate,
                     date.monthString, date.year
                 )
             )
@@ -343,7 +343,7 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent, SearchEngine.Parent, LoadHan
     }
 
     private suspend fun postStatus(percent: Int) {
-        postState(BasicState.Message(String.format(strings.format_search_proc, percent)))
+        postState(BasicState.Message(String.format(strings.formatProc, percent)))
         lastTimeS = System.currentTimeMillis()
     }
 
@@ -396,7 +396,7 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent, SearchEngine.Parent, LoadHan
         bw.write("<script>var data=[")
         val iTitle = cursor.getColumnIndex(Const.TITLE)
         val iLink = cursor.getColumnIndex(Const.LINK)
-        val iDes = cursor.getColumnIndex(Const.DESCTRIPTION)
+        val iDes = cursor.getColumnIndex(Const.DESCRIPTION)
         var i: Int
         var s: String
         var link: String

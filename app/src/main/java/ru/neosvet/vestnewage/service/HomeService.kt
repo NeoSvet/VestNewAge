@@ -104,7 +104,7 @@ class HomeService : RemoteViewsService() {
                     labels.add(context.getString(R.string.nothing))
                     links.add(DataBase.JOURNAL)
                 } else {
-                    labels.add(context.getString(R.string.last_readed) + " " + s)
+                    labels.add(context.getString(R.string.last_read) + " " + s)
                     links.add(br.readLine())
                 }
 // end
