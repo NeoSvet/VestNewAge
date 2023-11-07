@@ -140,7 +140,6 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent, SearchEngine.Parent, LoadHan
     }
 
     override fun onDestroy() {
-        factory.destroy()
         storage.close()
     }
 
@@ -186,7 +185,7 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent, SearchEngine.Parent, LoadHan
 
     //------begin    NeoPaging.Parent
     override val factory: SearchFactory by lazy {
-        SearchFactory(paging)
+        SearchFactory(storage, paging)
     }
     override val isBusy: Boolean
         get() = isRun
