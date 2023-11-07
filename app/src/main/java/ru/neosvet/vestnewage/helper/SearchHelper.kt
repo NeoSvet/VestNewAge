@@ -78,7 +78,7 @@ class SearchHelper(context: Context) {
         _options.add(pref.getBoolean(ALL_WORDS, true))
 
         context.resources.getStringArray(R.array.search_options).forEach {
-            optionsNames.add(it.lowercase())
+            optionsNames.add(it.trim().lowercase())
         }
         initOptionsString()
     }
@@ -126,7 +126,7 @@ class SearchHelper(context: Context) {
             sb.append(".")
             sb.toString()
         }
-        if (mode != SearchEngine.MODE_DOCTRINE)
+        if (mode < SearchEngine.MODE_DOCTRINE)
             optionsString += " $stringRange ${start.my}-${end.my}."
     }
 

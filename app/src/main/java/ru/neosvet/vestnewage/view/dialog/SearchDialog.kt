@@ -120,7 +120,7 @@ class SearchDialog(
     }
 
     private fun switchDatePickers() = binding.run {
-        if (sMode.selectedItemPosition == SearchEngine.MODE_DOCTRINE) {
+        if (sMode.selectedItemPosition >= SearchEngine.MODE_DOCTRINE) {
             label.isVisible = false
             bStartRange.isVisible = false
             bEndRange.isVisible = false

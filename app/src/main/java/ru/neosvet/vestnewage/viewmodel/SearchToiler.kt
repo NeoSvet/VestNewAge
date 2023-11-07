@@ -226,8 +226,7 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent, SearchEngine.Parent, LoadHan
             isRun = true
             labelMode = if (mode >= SearchEngine.MODE_RESULT_TEXT)
                 strings.search_in_results
-            else
-                strings.search_mode[mode]
+            else strings.search_mode[mode]
             engine.startSearch(mode)
             isRun = false
         }

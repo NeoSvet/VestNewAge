@@ -35,8 +35,9 @@ class SearchEngine(
         const val MODE_LINKS = 4
         const val MODE_BOOK = 5
         const val MODE_DOCTRINE = 6
-        const val MODE_RESULT_TEXT = 7
-        const val MODE_RESULT_PAR = 8
+        const val MODE_HOLY_RUS = 7
+        const val MODE_RESULT_TEXT = 8
+        const val MODE_RESULT_PAR = 9
         private const val OR = " OR "
         private const val startSelect = "<font color='#99ccff'><b>"
         private const val endSelect = "</b></font>"
@@ -107,6 +108,11 @@ class SearchEngine(
         storage.clear()
         if (mode == MODE_DOCTRINE) {
             searchList(DataBase.DOCTRINE)
+            pages.close()
+            return@run
+        }
+        if (mode == MODE_HOLY_RUS) {
+            searchList(DataBase.HOLY_RUS)
             pages.close()
             return@run
         }
