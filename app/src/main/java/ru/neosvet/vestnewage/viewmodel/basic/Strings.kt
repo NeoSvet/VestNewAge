@@ -21,7 +21,10 @@ data class BrowserStrings(
     val edition_of: String,
     val publication_of: String,
     val toPrev: String,
-    val toNext: String
+    val toNext: String,
+    val searchReaction: String,
+    val not_found_reaction: String,
+    val foot_reaction: String
 )
 
 data class SiteStrings(

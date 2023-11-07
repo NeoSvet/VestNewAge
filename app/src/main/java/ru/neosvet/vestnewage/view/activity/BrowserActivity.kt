@@ -779,6 +779,9 @@ class BrowserActivity : AppCompatActivity(), WebClient.Parent, NeoInterface.Pare
             BasicState.NotLoaded ->
                 toast.show(getString(R.string.not_load_month))
 
+            is BasicState.Message ->
+                toast.show(state.message)
+
             is BasicState.Error ->
                 if (state.isNeedReport)
                     status.setError(state)
@@ -819,7 +822,10 @@ class BrowserActivity : AppCompatActivity(), WebClient.Parent, NeoInterface.Pare
             view = binding.fabNav,
             msg = getString(R.string.go_to_last_place),
             event = this::restoreLastPosition
-        )
+        ) else if (positionForRestore < 0f) {
+            position = -positionForRestore
+            restorePosition()
+        }
     }
 
     private fun restoreLastPosition() {
@@ -898,5 +904,9 @@ class BrowserActivity : AppCompatActivity(), WebClient.Parent, NeoInterface.Pare
         }
         if (next) toiler.nextPage()
         else toiler.prevPage()
+    }
+
+    override fun searchReaction() {
+        toiler.searchReaction()
     }
 }

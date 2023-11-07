@@ -6,7 +6,9 @@ class NeoInterface(private val parent: Parent) {
 
     interface Parent {
         fun changePage(next: Boolean)
+        fun searchReaction()
     }
+
     @JavascriptInterface
     fun NextPage() {
         parent.changePage(true)
@@ -15,5 +17,10 @@ class NeoInterface(private val parent: Parent) {
     @JavascriptInterface
     fun PrevPage() {
         parent.changePage(false)
+    }
+
+    @JavascriptInterface
+    fun SearchReaction() {
+        parent.searchReaction()
     }
 }

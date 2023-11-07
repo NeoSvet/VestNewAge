@@ -54,6 +54,12 @@ class AdditionStorage : DataBase.Parent {
         orderBy = DataBase.ID + DataBase.DESC + LIMIT + NeoPaging.ON_PAGE
     )
 
+    fun search(date: String) = db.query(
+        table = DataBase.ADDITION,
+        selection = Const.DESCTRIPTION + DataBase.LIKE,
+        selectionArg = "${date}%"
+    )
+
     @SuppressLint("Range")
     fun getItem(id: String, withDate: Boolean): BasicItem? {
         val cursor = db.query(

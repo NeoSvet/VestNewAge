@@ -13,6 +13,7 @@ import ru.neosvet.vestnewage.loader.page.PageLoader
 import ru.neosvet.vestnewage.loader.page.StyleLoader
 import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.network.Urls
+import ru.neosvet.vestnewage.storage.AdditionStorage
 import ru.neosvet.vestnewage.storage.DataBase
 import ru.neosvet.vestnewage.storage.JournalStorage
 import ru.neosvet.vestnewage.storage.PageStorage
@@ -42,6 +43,7 @@ class BrowserToiler : NeoToiler() {
         private const val FONT = "/style/myriad.ttf"
         private const val PAGE = "/page.html"
         private const val SCRIPT = "<input type='button' onclick='NeoInterface."
+        private const val PAR_POEM = "<p class='poem'>"
         private const val PERIOD_FOR_REFRESH = DateUnit.DAY_IN_SEC * 30
     }
 
@@ -57,6 +59,8 @@ class BrowserToiler : NeoToiler() {
     private var isLightTheme = true
     private var link = ""
     private var idPage = ""
+    private var reactionDay = 0
+    private var reactionContent = ""
     private val pageLoader: PageLoader by lazy {
         PageLoader(NeoClient())
     }
@@ -79,7 +83,10 @@ class BrowserToiler : NeoToiler() {
             edition_of = context.getString(R.string.edition_of),
             publication_of = context.getString(R.string.publication_of),
             toPrev = context.getString(R.string.to_prev),
-            toNext = context.getString(R.string.to_next)
+            toNext = context.getString(R.string.to_next),
+            searchReaction = context.getString(R.string.search_reaction),
+            not_found_reaction = context.getString(R.string.not_found_reaction),
+            foot_reaction = context.getString(R.string.foot_reaction)
         )
     }
 
@@ -172,7 +179,7 @@ class BrowserToiler : NeoToiler() {
             if (withOutPosition) {
                 p = 0f
                 withOutPosition = false
-            }
+            } else if (reactionContent.isNotEmpty()) p = -90f
             postState(
                 BrowserState.Primary(
                     url = FILE + file.toString(),
@@ -192,12 +199,20 @@ class BrowserToiler : NeoToiler() {
     }
 
     private fun generatePage(file: File): Boolean { //isNeedUpdate
+        val linkDay: Int
         if (link.hasDate) {
             val output = App.context.openFileOutput(Files.DATE, Context.MODE_PRIVATE)
             val stream = DataOutputStream(BufferedOutputStream(output))
-            stream.writeInt(link.dateFromLink.timeInDays)
+            linkDay = link.dateFromLink.timeInDays
+            stream.writeInt(linkDay)
             stream.close()
+            if (reactionDay != linkDay) {
+                reactionContent = ""
+                reactionDay = linkDay
+            }
         } else {
+            linkDay = 0
+            reactionContent = ""
             val f = Files.slash(Files.DATE)
             if (f.exists()) f.delete()
         }
@@ -244,12 +259,12 @@ class BrowserToiler : NeoToiler() {
                 s = cursor.getString(0)
                 if (poems) {
                     if (isNumPar && !s.contains("noind")) {
-                        bw.write("<p class='poem'>")
+                        bw.write(PAR_POEM)
                         bw.write("$n. ")
                         n++
                         bw.write(s.substring(3))
                     } else {
-                        bw.write("<p class='poem'")
+                        bw.write(PAR_POEM.substring(0, PAR_POEM.length - 1))
                         bw.write(s.substring(2))
                     }
                 } else bw.write(s)
@@ -266,6 +281,12 @@ class BrowserToiler : NeoToiler() {
             bw.write("NextPage();' value='" + strings.toNext + "'/>")
             bw.write(Const.BR)
             bw.write(Const.BR)
+            if (linkDay >= DateHelper.MIN_DAYS_REACTIONS && reactionContent.isEmpty()) {
+                bw.write(SCRIPT)
+                bw.write("SearchReaction();' value='" + strings.searchReaction + "'/>")
+                bw.write(Const.BR)
+                bw.write(Const.BR)
+            }
             bw.flush()
         }
         when {
@@ -298,7 +319,9 @@ class BrowserToiler : NeoToiler() {
                 bw.write(strings.downloaded + d.toString())
             }
         }
-        bw.write("\n</div></body></html>")
+        bw.write("\n</div>")
+        if (reactionContent.isNotEmpty()) bw.write(reactionContent)
+        bw.write("</body></html>")
         bw.close()
         return isNeedUpdate
     }
@@ -459,5 +482,55 @@ class BrowserToiler : NeoToiler() {
         row.put(Const.PLACE, positionOnPage)
         dbJournal.update(idPage, row)
         dbJournal.close()
+    }
+
+    fun searchReaction() {
+        scope.launch {
+            val date = DateUnit.putDays(reactionDay).toShortDateString()
+            val storage = AdditionStorage()
+            storage.open()
+            val cursor = storage.search(date)
+            if (cursor.moveToFirst()) {
+                val iLink = cursor.getColumnIndex(Const.LINK)
+                val iTitle = cursor.getColumnIndex(Const.TITLE)
+                val iDes = cursor.getColumnIndex(Const.DESCTRIPTION)
+                val sb = StringBuilder("<h3>")
+                sb.append(cursor.getString(iTitle))
+                sb.append("</h3>")
+                val s = cursor.getString(iDes)
+                if (s.contains("<")) sb.append(s)
+                else {
+                    var p = 0
+                    s.lines().forEach {
+                        if (p == 0) p++
+                        else if (it.length < 2) {
+                            sb.append("</p>")
+                            p = 1
+                        } else {
+                            if (p == 1) {
+                                sb.append(PAR_POEM)
+                                p = 2
+                            } else sb.append("<br>")
+                            sb.append(it)
+                        }
+                    }
+                    sb.append("</p>")
+                    sb.append("<div style='margin-top:20px' class='print2'>\n")
+                    sb.append(strings.foot_reaction)
+                    sb.append(Const.BR)
+                    sb.append("<a href='")
+                    val link = Urls.TelegramUrl + cursor.getString(iLink)
+                    sb.append(link)
+                    sb.append("'>")
+                    sb.append(link)
+                    sb.append("</a>")
+                    sb.append("</div>")
+                }
+                reactionContent = sb.toString()
+                openPage(true)
+            } else postState(BasicState.Message(strings.not_found_reaction))
+            cursor.close()
+            storage.close()
+        }
     }
 }

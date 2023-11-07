@@ -147,6 +147,7 @@
     <string name="dark_theme">Темное оформление</string>
     <string name="go_to_last_place">Перейти к прошлому месту?</string>
     <string name="not_load_month">Месяц не загружен</string>
+    <string name="not_found_reaction">Реакция не найдена, возможно надо загрузить в Сводка-Дополнительно</string>
     <!--MarkersFragment-->
     <string name="export">Экспорт</string>
     <string name="import_">Импорт</string>
@@ -218,6 +219,8 @@
     <string name="publication_of">Публикация от&#160;</string>
     <string name="to_prev">← назад</string>
     <string name="to_next">далее →</string>
+    <string name="search_reaction">Искать реакцию Создателя</string>
+    <string name="foot_reaction">Телеграм канал «Новости от Создателя»:&#160;</string>
     <!--SettingsFragment-->
     <string name="base">Основное</string>
     <string name="notif_new">Проверка обновлений</string>

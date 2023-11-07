@@ -10,6 +10,7 @@ object DateHelper {
     const val MIN_DAYS_OLD_BOOK = 12631 //Август 2004
     const val MIN_DAYS_NEW_BOOK = 16801 //Январь 2016
     const val MAX_DAYS_BOOK = 17045 //Сентябрь 2016
+    const val MIN_DAYS_REACTIONS = 19103 //21 апреля 2022 - первое "Откровения или реакция Создателя на современность"
 
     @JvmStatic
     fun isLoadedOtkr(): Boolean {
