@@ -24,6 +24,7 @@ import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.appbar.AppBarLayout
+import com.google.android.material.bottomappbar.BottomAppBar
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -63,7 +64,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
     }
 
     private lateinit var helper: MainHelper
-    private var firstSection = Section.SETTINGS
+    private var firstSection = Section.EPISTLES
     private var curFragment: NeoFragment? = null
     private var frWelcome: WelcomeFragment? = null
 
@@ -100,18 +101,14 @@ class MainActivity : AppCompatActivity(), ItemClicker {
         get() = helper.newId
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
-            doCheckPermission()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) doCheckPermission()
         val withSplash = intent.getBooleanExtra(Const.START_SCEEN, true)
         toiler.setArgument(withSplash)
-        if (savedInstanceState == null && withSplash)
-            launchSplashScreen()
+        if (savedInstanceState == null && withSplash) launchSplashScreen()
         else setTheme(R.style.Theme_MainTheme)
         ScreenUtils.init(this)
-        if (ScreenUtils.isTabletLand)
-            setContentView(R.layout.main_activity_tablet)
-        else
-            setContentView(R.layout.main_activity)
+        if (ScreenUtils.isTabletLand) setContentView(R.layout.main_activity_tablet)
+        else setContentView(R.layout.main_activity)
         App.context = this
         helper = MainHelper(this)
         initLaunch()
@@ -171,7 +168,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
     }
 
     private fun setBottomPanel() = helper.bottomBar?.let { bar ->
-        loadMenu()
+        loadMenu(bar)
         val menuView = bar.menu.getItem(0).actionView as ActionMenuView
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
             menuView.tooltipText = getString(R.string.menu)
@@ -199,33 +196,19 @@ class MainActivity : AppCompatActivity(), ItemClicker {
             return@let
         }
         when (itemId) {
-            R.id.bottom_item1 ->
-                it.editMainMenu(0)
-
-            R.id.bottom_item2 ->
-                it.editMainMenu(1)
-
-            R.id.bottom_item3 ->
-                it.editMainMenu(2)
-
-            R.id.bottom_item4 ->
-                it.editMainMenu(3)
+            R.id.bottom_item1 -> it.editMainMenu(0)
+            R.id.bottom_item2 -> it.editMainMenu(1)
+            R.id.bottom_item3 -> it.editMainMenu(2)
+            R.id.bottom_item4 -> it.editMainMenu(3)
         }
     }
 
     private fun openMenu(itemId: Int) {
         when (itemId) {
-            R.id.bottom_item1 ->
-                setSection(helper.bottomMenu[0], false)
-
-            R.id.bottom_item2 ->
-                setSection(helper.bottomMenu[1], false)
-
-            R.id.bottom_item3 ->
-                setSection(helper.bottomMenu[2], false)
-
-            R.id.bottom_item4 ->
-                setSection(helper.bottomMenu[3], false)
+            R.id.bottom_item1 -> setSection(helper.bottomMenu[0], false)
+            R.id.bottom_item2 -> setSection(helper.bottomMenu[1], false)
+            R.id.bottom_item3 -> setSection(helper.bottomMenu[2], false)
+            R.id.bottom_item4 -> setSection(helper.bottomMenu[3], false)
         }
     }
 
@@ -291,8 +274,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
         if (helper.startWithNew()) {
             setSection(Section.NEW, false)
             helper.prevSection = firstSection
-        } else
-            setSection(firstSection, false)
+        } else setSection(firstSection, false)
         showWelcome()
     }
 
@@ -334,8 +316,8 @@ class MainActivity : AppCompatActivity(), ItemClicker {
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
-        outState.putBoolean(Const.LIST, helper.isSideMenu)
         outState.putString(Const.MODE, helper.curSection.toString())
+        outState.putInt(Const.TAB, curFragment?.getTab() ?: 0)
         jobFinishStar?.cancel()
         toiler.setStatus(
             MainState.Status(
@@ -349,21 +331,19 @@ class MainActivity : AppCompatActivity(), ItemClicker {
         super.onSaveInstanceState(outState)
     }
 
-    override fun onRestoreInstanceState(savedInstanceState: Bundle) { //for support DeX / resize window
-        val isSizeMenu = savedInstanceState.getBoolean(Const.LIST)
-        val sec = savedInstanceState.getString(Const.MODE)?.let {
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+        var sec = savedInstanceState.getString(Const.MODE)?.let {
             Section.valueOf(it)
         } ?: Section.HOME
-        if (helper.isSideMenu && !isSizeMenu) {
-            showHead()
-            setSection(sec, false)
-            updateNew()
-        } else if (!ScreenUtils.isTablet && isSizeMenu) {
-            showHead()
-            setSection(sec, false)
-            helper.bottomBar?.isVisible = true
+        val tab = savedInstanceState.getInt(Const.TAB, 0)
+        showHead()
+        if (sec == Section.MENU) {
+            if (ScreenUtils.isTabletLand) sec = Section.HOME
+            else title = getString(R.string.app_name)
         }
-        if (sec == Section.MENU) title = getString(R.string.app_name)
+        setSection(sec, false, tab)
+        updateNew()
+        helper.bottomBar?.isVisible = true
         super.onRestoreInstanceState(savedInstanceState)
     }
 
@@ -414,16 +394,12 @@ class MainActivity : AppCompatActivity(), ItemClicker {
                 utils.clearSummaryNotif(id)
             }
 
-            Section.SITE -> {
-                curFragment = SiteFragment.newInstance(tab).also {
-                    fragmentTransaction.replace(R.id.my_fragment, it)
-                }
+            Section.SITE -> curFragment = SiteFragment.newInstance(tab).also {
+                fragmentTransaction.replace(R.id.my_fragment, it)
             }
 
-            Section.CALENDAR -> {
-                curFragment = CalendarFragment().also {
-                    fragmentTransaction.replace(R.id.my_fragment, it)
-                }
+            Section.CALENDAR -> curFragment = CalendarFragment().also {
+                fragmentTransaction.replace(R.id.my_fragment, it)
             }
 
             Section.BOOK -> {
@@ -434,39 +410,27 @@ class MainActivity : AppCompatActivity(), ItemClicker {
             }
 
             Section.SEARCH -> {
-                val search = when {
-                    intent.hasExtra(Const.LINK) -> {
-                        SearchFragment.newInstance(
-                            intent.getStringExtra(Const.LINK), tab
-                        )
-                    }
-
-                    else -> SearchFragment()
-                }
+                val search = if (intent.hasExtra(Const.LINK)) {
+                    SearchFragment.newInstance(
+                        intent.getStringExtra(Const.LINK), tab
+                    )
+                } else SearchFragment()
                 curFragment = search
                 fragmentTransaction.replace(R.id.my_fragment, search)
             }
 
-            Section.JOURNAL -> {
-                fragmentTransaction.replace(R.id.my_fragment, JournalFragment())
+            Section.JOURNAL -> fragmentTransaction.replace(R.id.my_fragment, JournalFragment())
+
+            Section.MARKERS -> curFragment = MarkersFragment().also {
+                fragmentTransaction.replace(R.id.my_fragment, it)
             }
 
-            Section.MARKERS -> {
-                curFragment = MarkersFragment().also {
-                    fragmentTransaction.replace(R.id.my_fragment, it)
-                }
+            Section.CABINET -> curFragment = CabinetFragment().also {
+                fragmentTransaction.replace(R.id.my_fragment, it)
             }
 
-            Section.CABINET -> {
-                curFragment = CabinetFragment().also {
-                    fragmentTransaction.replace(R.id.my_fragment, it)
-                }
-            }
-
-            Section.SETTINGS -> {
-                curFragment = SettingsFragment().also {
-                    fragmentTransaction.replace(R.id.my_fragment, it)
-                }
+            Section.SETTINGS -> curFragment = SettingsFragment().also {
+                fragmentTransaction.replace(R.id.my_fragment, it)
             }
 
             Section.HELP -> {
@@ -516,8 +480,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
     private val onBackPressedCallback = object : OnBackPressedCallback(true) {
         override fun handleOnBackPressed() {
             when {
-                snackbar.isShown ->
-                    snackbar.hide()
+                snackbar.isShown -> snackbar.hide()
 
                 status.isCrash -> {
                     status.setError(null)
@@ -525,14 +488,9 @@ class MainActivity : AppCompatActivity(), ItemClicker {
                     curFragment?.resetError()
                 }
 
-                helper.shownActionMenu ->
-                    helper.hideActionMenu()
-
-                curFragment?.onBackPressed() == false ->
-                    return
-
-                helper.bottomAreaIsHide ->
-                    showBottomArea()
+                helper.shownActionMenu -> helper.hideActionMenu()
+                curFragment?.onBackPressed() == false -> return
+                helper.bottomAreaIsHide -> showBottomArea()
 
                 firstSection == Section.NEW -> {
                     firstSection = helper.getFirstSection()
@@ -546,8 +504,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
 
     private fun exit() {
         when {
-            statusBack == StatusBack.EXIT ->
-                finish()
+            statusBack == StatusBack.EXIT -> finish()
 
             helper.prevSection != null -> helper.prevSection?.let {
                 if (it == Section.SITE)
@@ -556,8 +513,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
                 helper.prevSection = null
             }
 
-            statusBack == StatusBack.FIRST ->
-                setSection(firstSection, false)
+            statusBack == StatusBack.FIRST -> setSection(firstSection, false)
 
             else -> {
                 showToast(getString(R.string.click_for_exit))
@@ -621,15 +577,11 @@ class MainActivity : AppCompatActivity(), ItemClicker {
                 utils.updateTime()
                 if (state.timediff.absoluteValue > LIMIT_DIFF_SEC || state.hasNew)
                     frWelcome = WelcomeFragment.newInstance(state.hasNew, state.timediff)
-                if (state.warnIndex > -1)
-                    showWarnAds(state.warnIndex)
+                if (state.warnIndex > -1) showWarnAds(state.warnIndex)
             }
 
-            is MainState.Status ->
-                restoreStatus(state)
-
-            is MainState.FirstRun ->
-                firstRun(state)
+            is MainState.Status -> restoreStatus(state)
+            is MainState.FirstRun -> firstRun(state)
 
             is ListState.Primary -> {
                 if (frWelcome == null)
@@ -643,12 +595,10 @@ class MainActivity : AppCompatActivity(), ItemClicker {
         val intent = intent
         if (firstTab == 0)
             firstTab = intent.getIntExtra(Const.TAB, 0)
-        if (helper.isFirstRun)
-            firstTab = -1
+        if (helper.isFirstRun) firstTab = -1
         else {
             intent.getStringExtra(Const.CUR_ID)
-            if (firstSection == Section.MENU)
-                updateNew()
+            if (firstSection == Section.MENU) updateNew()
         }
         if (intent.getBooleanExtra(Const.DIALOG, false))
             helper.showDownloadDialog()
@@ -735,16 +685,13 @@ class MainActivity : AppCompatActivity(), ItemClicker {
 
     fun setAction(icon: Int) {
         helper.setActionIcon(icon)
-        if (isBlocked)
-            helper.fabAction.isVisible = false
+        if (isBlocked) helper.fabAction.isVisible = false
     }
 
     fun setFloatProm(isFloat: Boolean) {
         prom?.hide()
-        prom = if (isFloat)
-            PromUtils(helper.tvPromTimeFloat)
-        else
-            PromUtils(findViewById(R.id.tvPromTimeHead))
+        prom = if (isFloat) PromUtils(helper.tvPromTimeFloat)
+        else PromUtils(findViewById(R.id.tvPromTimeHead))
         prom?.show()
     }
 
@@ -769,8 +716,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
         if (error.isNeedReport) {
             blocked()
             status.setError(error)
-        } else
-            snackbar.show(helper.fabAction, error.message)
+        } else snackbar.show(helper.fabAction, error.message)
     }
 
     fun showStaticToast(msg: String) {
@@ -824,7 +770,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
 
     fun finishEditMenu() {
         isEditor = false
-        loadMenu()
+        helper.bottomBar?.let { loadMenu(it) }
     }
 
     fun changeMenu(index: Int, item: MenuItem) = helper.bottomBar?.let { bar ->
@@ -833,7 +779,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
         bottomItem.icon = ContextCompat.getDrawable(this, item.image)
     }
 
-    private fun loadMenu() = helper.bottomBar?.let { bar ->
+    private fun loadMenu(bar: BottomAppBar) {
         val home = HomeHelper(this).apply { isMain = true }
         var i = 1
         helper.setBottomMenu(home.loadMenu(true))

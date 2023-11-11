@@ -72,7 +72,7 @@ class MainHelper(private val act: MainActivity) {
 
     val unread = UnreadStorage()
     var countNew: Int = 0
-    var curSection = Section.SETTINGS
+    var curSection = Section.EPISTLES
     var prevSection: Section? = null
     val bottomMenu = mutableListOf<Section>()
     val newId: Int
@@ -97,10 +97,8 @@ class MainHelper(private val act: MainActivity) {
         rvAction.adapter = adAction
 
         fabAction.setOnClickListener {
-            if (type == ActionType.MENU)
-                showActionMenu()
-            else
-                act.onAction(TAG)
+            if (type == ActionType.MENU) showActionMenu()
+            else act.onAction(TAG)
         }
 
         val ivHeadBack = act.findViewById<ImageView>(R.id.ivHeadBack)
@@ -218,8 +216,7 @@ class MainHelper(private val act: MainActivity) {
             showDownloadDialog()
             return
         }
-        if (index == adAction.itemCount - 1)
-            return
+        if (index == adAction.itemCount - 1) return
         act.onAction(item.title)
     }
 
@@ -239,9 +236,8 @@ class MainHelper(private val act: MainActivity) {
         if (adAction.itemCount > 0) return
         adAction.addItem(R.drawable.ic_download, act.getString(R.string.download_))
         when (curSection) {
-            Section.SITE, Section.CALENDAR -> {
+            Section.SITE, Section.CALENDAR ->
                 adAction.addItem(R.drawable.ic_refresh, act.getString(R.string.refresh))
-            }
 
             Section.BOOK -> {
                 adAction.addItem(R.drawable.ic_book, act.getString(R.string.rnd_verse))
@@ -256,9 +252,7 @@ class MainHelper(private val act: MainActivity) {
                 adAction.addItem(R.drawable.ic_edit, act.getString(R.string.edit))
             }
 
-            Section.HOME -> {
-                adAction.addItem(R.drawable.ic_edit, act.getString(R.string.edit))
-            }
+            Section.HOME -> adAction.addItem(R.drawable.ic_edit, act.getString(R.string.edit))
 
             else -> {}
         }

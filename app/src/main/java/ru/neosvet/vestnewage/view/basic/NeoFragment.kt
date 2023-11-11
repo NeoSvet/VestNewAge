@@ -42,6 +42,8 @@ abstract class NeoFragment : Fragment() {
 
     abstract fun onViewCreated(savedInstanceState: Bundle?)
 
+    open fun getTab() : Int = 0
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         root = view

@@ -67,10 +67,14 @@ class SiteFragment : NeoFragment() {
         super.onDestroyView()
     }
 
+    override fun getTab(): Int {
+        return binding?.pTab?.selectedIndex ?: 0
+    }
+
     override fun onSaveInstanceState(outState: Bundle) {
         toiler.setStatus(
             SiteState.Status(
-                selectedTab = binding?.pTab?.selectedIndex ?: 0
+                selectedTab = getTab()
             )
         )
         super.onSaveInstanceState(outState)
