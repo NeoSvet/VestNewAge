@@ -120,7 +120,7 @@ class SettingsToiler : NeoToiler() {
         cursor.close()
         storage.deletePages(list)
         storage.close()
-        size = fileSize - Files.dateBase(DataBase.DOCTRINE).length()
+        size += fileSize - Files.dateBase(DataBase.DOCTRINE).length()
     }
 
     private fun clearBook(startYear: Int, endYear: Int) {
