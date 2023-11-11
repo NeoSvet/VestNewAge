@@ -147,7 +147,7 @@
     <string name="dark_theme">Темное оформление</string>
     <string name="go_to_last_place">Перейти к прошлому месту?</string>
     <string name="not_load_month">Месяц не загружен</string>
-    <string name="not_found_reaction">Реакция не найдена, возможно надо загрузить в Сводка-Дополнительно</string>
+    <string name="not_found_reaction">Реакция не найдена</string>
     <!--MarkersFragment-->
     <string name="export">Экспорт</string>
     <string name="import_">Импорт</string>

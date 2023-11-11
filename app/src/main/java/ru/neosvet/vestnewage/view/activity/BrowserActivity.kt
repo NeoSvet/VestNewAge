@@ -779,8 +779,10 @@ class BrowserActivity : AppCompatActivity(), WebClient.Parent, NeoInterface.Pare
             BasicState.NotLoaded ->
                 toast.show(getString(R.string.not_load_month))
 
-            is BasicState.Message ->
+            is BasicState.Message -> {
+                finishLoading()
                 toast.show(state.message)
+            }
 
             is BasicState.Error ->
                 if (state.isNeedReport)
@@ -793,6 +795,7 @@ class BrowserActivity : AppCompatActivity(), WebClient.Parent, NeoInterface.Pare
     }
 
     private fun setPrimary(state: BrowserState.Primary) {
+        toiler.clearStates()
         toast.hide()
         if (link.isNotEmpty()) {
             if (link != state.link) position = -1f

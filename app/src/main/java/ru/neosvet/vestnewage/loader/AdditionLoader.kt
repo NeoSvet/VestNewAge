@@ -27,7 +27,7 @@ class AdditionLoader(private val client: NeoClient) : Loader {
 
     override fun cancel() {}
 
-    fun loadAll(handler: LoadHandlerLite) {
+    fun loadAll(handler: LoadHandlerLite?) {
         isRun = true
         val storage = AdditionStorage()
         storage.open()
@@ -61,7 +61,7 @@ class AdditionLoader(private val client: NeoClient) : Loader {
                 des.clear()
                 if (!storage.update(id, row))
                     storage.insert(row)
-                handler.postPercent(100 - id.percent(maxPost))
+                handler?.postPercent(100 - id.percent(maxPost))
                 s = br.readLine()
             }
             br.close()
@@ -72,7 +72,7 @@ class AdditionLoader(private val client: NeoClient) : Loader {
             if (storage.hasPost(p).not())
                 loadPost(p)?.let { storage.insert(it) }
             p--
-            handler.postPercent(100 - p.percent(maxPost))
+            handler?.postPercent(100 - p.percent(maxPost))
         }
         storage.close()
         isRun = false

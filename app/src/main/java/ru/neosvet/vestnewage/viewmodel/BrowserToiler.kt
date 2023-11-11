@@ -9,9 +9,11 @@ import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.helper.BrowserHelper
 import ru.neosvet.vestnewage.helper.DateHelper
+import ru.neosvet.vestnewage.loader.AdditionLoader
 import ru.neosvet.vestnewage.loader.page.PageLoader
 import ru.neosvet.vestnewage.loader.page.StyleLoader
 import ru.neosvet.vestnewage.network.NeoClient
+import ru.neosvet.vestnewage.network.OnlineObserver
 import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.storage.AdditionStorage
 import ru.neosvet.vestnewage.storage.DataBase
@@ -489,48 +491,65 @@ class BrowserToiler : NeoToiler() {
             val date = DateUnit.putDays(reactionDay).toShortDateString()
             val storage = AdditionStorage()
             storage.open()
-            val cursor = storage.search(date)
-            if (cursor.moveToFirst()) {
-                val iLink = cursor.getColumnIndex(Const.LINK)
-                val iTitle = cursor.getColumnIndex(Const.TITLE)
-                val iDes = cursor.getColumnIndex(Const.DESCRIPTION)
-                val sb = StringBuilder("<h3>")
-                sb.append(cursor.getString(iTitle))
-                sb.append("</h3>")
-                val s = cursor.getString(iDes)
-                if (s.contains("<")) sb.append(s)
-                else {
-                    var p = 0
-                    s.lines().forEach {
-                        if (p == 0) p++
-                        else if (it.length < 2) {
-                            sb.append("</p>")
-                            p = 1
-                        } else {
-                            if (p == 1) {
-                                sb.append(PAR_POEM)
-                                p = 2
-                            } else sb.append("<br>")
-                            sb.append(it)
-                        }
-                    }
-                    sb.append("</p>")
-                    sb.append("<div style='margin-top:20px' class='print2'>\n")
-                    sb.append(strings.footReaction)
-                    sb.append(Const.BR)
-                    sb.append("<a href='")
-                    val link = Urls.TelegramUrl + cursor.getString(iLink)
-                    sb.append(link)
-                    sb.append("'>")
-                    sb.append(link)
-                    sb.append("</a>")
-                    sb.append("</div>")
+            startSearchReaction(storage, date)
+            if (reactionContent.isEmpty() && OnlineObserver.isOnline.value) {
+                postState(BasicState.Loading)
+                val loader = AdditionLoader(NeoClient())
+                loader.load(storage, 0)
+                startSearchReaction(storage, date)
+                if (reactionContent.isEmpty()) {
+                    loader.loadAll(null)
+                    startSearchReaction(storage, date)
                 }
-                reactionContent = sb.toString()
-                openPage(true)
-            } else postState(BasicState.Message(strings.notFoundReaction))
-            cursor.close()
+            }
             storage.close()
+            if (reactionContent.isEmpty())
+                postState(BasicState.Message(strings.notFoundReaction))
+            else openPage(true)
         }
     }
+
+    private fun startSearchReaction(storage: AdditionStorage, date: String) {
+        val cursor = storage.search(date)
+        if (cursor.moveToFirst()) {
+            val iLink = cursor.getColumnIndex(Const.LINK)
+            val iTitle = cursor.getColumnIndex(Const.TITLE)
+            val iDes = cursor.getColumnIndex(Const.DESCRIPTION)
+            val sb = StringBuilder("<h3>")
+            sb.append(cursor.getString(iTitle))
+            sb.append("</h3>")
+            val s = cursor.getString(iDes)
+            if (s.contains("<")) sb.append(s)
+            else {
+                var p = 0
+                s.lines().forEach {
+                    if (p == 0) p++
+                    else if (it.length < 2) {
+                        sb.append("</p>")
+                        p = 1
+                    } else {
+                        if (p == 1) {
+                            sb.append(PAR_POEM)
+                            p = 2
+                        } else sb.append("<br>")
+                        sb.append(it)
+                    }
+                }
+                sb.append("</p>")
+                sb.append("<div style='margin-top:20px' class='print2'>\n")
+                sb.append(strings.footReaction)
+                sb.append(Const.BR)
+                sb.append("<a href='")
+                val link = Urls.TelegramUrl + cursor.getString(iLink)
+                sb.append(link)
+                sb.append("'>")
+                sb.append(link)
+                sb.append("</a>")
+                sb.append("</div>")
+            }
+            reactionContent = sb.toString()
+        } else reactionContent = ""
+        cursor.close()
+    }
+
 }
