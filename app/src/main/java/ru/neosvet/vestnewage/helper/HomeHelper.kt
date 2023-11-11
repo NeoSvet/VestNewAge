@@ -80,7 +80,7 @@ class HomeHelper(private val context: Context) {
                 }
 
                 Section.DOCTRINE -> {
-                    i = R.drawable.ic_book_dt
+                    i = R.drawable.ic_book_dc
                     t = R.string.doctrine_creator
                 }
 
@@ -125,7 +125,7 @@ class HomeHelper(private val context: Context) {
             R.drawable.ic_edit, R.drawable.ic_summary, R.drawable.ic_site, R.drawable.ic_calendar,
             R.drawable.ic_book_k, R.drawable.ic_search, R.drawable.ic_marker, R.drawable.ic_journal,
             R.drawable.ic_cabinet, R.drawable.ic_settings, R.drawable.ic_book_p,
-            R.drawable.ic_book_dt, R.drawable.ic_book_sr, R.drawable.ic_help
+            R.drawable.ic_book_dc, R.drawable.ic_book_sr, R.drawable.ic_help
         )
     }
     var isMain = false
