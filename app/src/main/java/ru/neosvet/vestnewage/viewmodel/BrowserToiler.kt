@@ -62,6 +62,7 @@ class BrowserToiler : NeoToiler() {
     private var link = ""
     private var idPage = ""
     private var reactionDay = 0
+    private var reactionPosition = 0
     private var reactionContent = ""
     private val pageLoader: PageLoader by lazy {
         PageLoader(NeoClient())
@@ -181,7 +182,7 @@ class BrowserToiler : NeoToiler() {
             if (withOutPosition) {
                 p = 0f
                 withOutPosition = false
-            } else if (reactionContent.isNotEmpty()) p = -90f
+            } else if (reactionContent.isNotEmpty()) p = -reactionPosition.toFloat()
             postState(
                 BrowserState.Primary(
                     url = FILE + file.toString(),
@@ -486,7 +487,8 @@ class BrowserToiler : NeoToiler() {
         dbJournal.close()
     }
 
-    fun searchReaction() {
+    fun searchReaction(heightPage: Int) {
+        reactionPosition = heightPage
         scope.launch {
             val date = DateUnit.putDays(reactionDay).toShortDateString()
             val storage = AdditionStorage()

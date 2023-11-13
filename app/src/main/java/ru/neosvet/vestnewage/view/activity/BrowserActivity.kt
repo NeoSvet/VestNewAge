@@ -730,6 +730,11 @@ class BrowserActivity : AppCompatActivity(), WebClient.Parent, NeoInterface.Pare
             unread.deleteLink(link)
         lifecycleScope.launch {
             delay(250)
+            if (positionForRestore < 0) {
+                val height = binding.content.wvBrowser.contentHeight
+                position = (positionForRestore * -0.98f / height) * 100f
+                positionForRestore = 0f
+            }
             binding.content.wvBrowser.post {
                 if (helper.request.isNotEmpty()) restoreSearch()
                 else if (position > 0f) restorePosition()
@@ -822,10 +827,7 @@ class BrowserActivity : AppCompatActivity(), WebClient.Parent, NeoInterface.Pare
             view = binding.fabNav,
             msg = getString(R.string.go_to_last_place),
             event = this::restoreLastPosition
-        ) else if (positionForRestore < 0f) {
-            position = -positionForRestore
-            restorePosition()
-        }
+        )
     }
 
     private fun restoreLastPosition() {
@@ -907,6 +909,9 @@ class BrowserActivity : AppCompatActivity(), WebClient.Parent, NeoInterface.Pare
     }
 
     override fun searchReaction() {
-        toiler.searchReaction()
+        binding.content.wvBrowser.let {
+            it.post { toiler.searchReaction(it.contentHeight) }
+        }
+
     }
 }
