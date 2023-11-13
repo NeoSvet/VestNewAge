@@ -370,11 +370,8 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent,
 
             is SearchState.Results -> {
                 if (state.max == 0) noResults()
-                else {
-                    showResult(state.max)
-                    if (state.finish)
-                        setStatus(false)
-                }
+                else showResult(state.max)
+                if (state.finish) setStatus(false)
             }
 
             is SearchState.Primary ->
@@ -394,7 +391,6 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent,
 
             is SearchState.FinishExport ->
                 doneExport(state.message)
-
 
             BasicState.Empty ->
                 act?.showToast(getString(R.string.words_not_found))
