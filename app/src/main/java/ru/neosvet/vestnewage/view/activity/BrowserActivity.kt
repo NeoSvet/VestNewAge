@@ -519,6 +519,7 @@ class BrowserActivity : AppCompatActivity(), WebClient.Parent, NeoInterface.Pare
         ) {
             when {
                 link.contains(Const.DOCTRINE) -> Urls.openInBrowser(Urls.DoctrineSite)
+                link.contains(Const.HOLY_RUS) -> Urls.openInBrowser(Urls.HolyRusSite)
                 menu.refresh.isVisible -> Urls.openInBrowser(Urls.Site + link)
                 else -> Urls.openInBrowser(Urls.Site)
             }
