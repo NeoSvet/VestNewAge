@@ -736,6 +736,8 @@ class BrowserActivity : AppCompatActivity(), WebClient.Parent, NeoInterface.Pare
                 positionForRestore = 0f
             }
             binding.content.wvBrowser.post {
+                if (helper.isNavButton)
+                    setNavButton(binding.content.wvBrowser.scrollY)
                 if (helper.request.isNotEmpty()) restoreSearch()
                 else if (position > 0f) restorePosition()
 
