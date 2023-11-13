@@ -58,7 +58,6 @@ import ru.neosvet.vestnewage.viewmodel.state.BrowserState
 import ru.neosvet.vestnewage.viewmodel.state.NeoState
 import kotlin.math.abs
 
-
 class BrowserActivity : AppCompatActivity(), WebClient.Parent, NeoInterface.Parent {
     companion object {
         @JvmStatic
@@ -209,7 +208,6 @@ class BrowserActivity : AppCompatActivity(), WebClient.Parent, NeoInterface.Pare
 
     override fun onSaveInstanceState(outState: Bundle) {
         helper.zoom = (currentScale * 100f).toInt()
-        currentScale = 0f
         val s = if (isSearch)
             binding.content.etSearch.text.toString()
         else null
@@ -256,10 +254,8 @@ class BrowserActivity : AppCompatActivity(), WebClient.Parent, NeoInterface.Pare
     }
 
     private fun restorePosition() = binding.content.wvBrowser.run {
-        if (position > 0f) {
-            val pos = (position / 100f * currentScale * contentHeight.toFloat()).toInt()
-            scrollTo(0, pos)
-        }
+        val pos = (position / 100f * currentScale * contentHeight.toFloat()).toInt()
+        scrollTo(0, pos)
     }
 
     private fun closeSearch() {
@@ -397,7 +393,6 @@ class BrowserActivity : AppCompatActivity(), WebClient.Parent, NeoInterface.Pare
 
     @SuppressLint("ClickableViewAccessibility", "SetJavaScriptEnabled")
     private fun setContent() = with(binding.content) {
-        etSearch.requestLayout()
         wvBrowser.settings.builtInZoomControls = true
         wvBrowser.settings.displayZoomControls = false
         wvBrowser.settings.javaScriptEnabled = true
@@ -736,7 +731,9 @@ class BrowserActivity : AppCompatActivity(), WebClient.Parent, NeoInterface.Pare
         lifecycleScope.launch {
             delay(250)
             binding.content.wvBrowser.post {
-                restorePosition()
+                if (helper.request.isNotEmpty()) restoreSearch()
+                else if (position > 0f) restorePosition()
+
             }
         }
     }
@@ -833,7 +830,7 @@ class BrowserActivity : AppCompatActivity(), WebClient.Parent, NeoInterface.Pare
 
     private fun restoreLastPosition() {
         position = positionForRestore
-        restorePosition()
+        if (position > 0f) restorePosition()
     }
 
     private fun restoreStatus(state: BrowserState.Status) {

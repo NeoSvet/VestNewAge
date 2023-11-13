@@ -29,7 +29,7 @@ class BrowserHelper {
     var isSearch = false
 
     val request: String
-        get() = place[placeIndex].trimEnd()
+        get() = if (placeIndex == -1 || place.isEmpty()) "" else place[placeIndex].trimEnd()
 
     fun load(context: Context) {
         val pref = context.getSharedPreferences(TAG, Context.MODE_PRIVATE)
@@ -56,9 +56,11 @@ class BrowserHelper {
     }
 
     fun setSearchString(s: String) {
-        place = if (s.contains(Const.NN))
-            s.split(Const.NN)
-        else listOf(s)
+        place = when {
+            s.contains(Const.NN) -> s.split(Const.NN)
+            s.contains(Const.N) -> s.split(Const.N)
+            else -> listOf(s)
+        }
         isSearch = true
         placeIndex = 0
     }
