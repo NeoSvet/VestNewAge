@@ -213,8 +213,8 @@ class MarkerActivity : AppCompatActivity() {
                 pPos.layoutParams.height = heightDialog
                 pPos.requestLayout()
                 pPos.isVisible = true
-                tvPos.text = state.positionText
                 sbPos.progress = state.position
+                tvPos.text = state.positionText
             }
 
             MarkerScreen.PARAGRAPH -> {
