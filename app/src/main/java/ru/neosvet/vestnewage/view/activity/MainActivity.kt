@@ -316,6 +316,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
+        outState.putBoolean(Const.LIST, helper.isSideMenu)
         outState.putString(Const.MODE, helper.curSection.toString())
         outState.putInt(Const.TAB, curFragment?.getTab() ?: 0)
         jobFinishStar?.cancel()
@@ -332,6 +333,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+        val isSideMenu = savedInstanceState.getBoolean(Const.LIST)
         var sec = savedInstanceState.getString(Const.MODE)?.let {
             Section.valueOf(it)
         } ?: Section.HOME
@@ -341,7 +343,8 @@ class MainActivity : AppCompatActivity(), ItemClicker {
             if (ScreenUtils.isTabletLand) sec = Section.HOME
             else title = getString(R.string.app_name)
         }
-        setSection(sec, false, tab)
+        if (helper.isSideMenu != isSideMenu)
+            setSection(sec, false, tab)
         updateNew()
         helper.bottomBar?.isVisible = true
         super.onRestoreInstanceState(savedInstanceState)
