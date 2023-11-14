@@ -97,15 +97,10 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
     }
 
     override suspend fun defaultState() {
-        when {
-            startTab > 1 -> openOtherBook()
-            startYear > -1 -> {
-                if (startTab == 0) dPoems.month = 1 else dEpistles.month = 1
-                openList(true, month = -1, year = startYear, tab = startTab)
-            }
-
-            else -> openList(true)
-        }
+        if (startYear > -1) {
+            if (startTab == 0) dPoems.month = 1 else dEpistles.month = 1
+            openList(true, month = -1, year = startYear, tab = startTab)
+        } else openList(true, tab = startTab)
     }
 
     override suspend fun doLoad() {
