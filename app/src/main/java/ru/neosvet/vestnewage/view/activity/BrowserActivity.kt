@@ -108,12 +108,13 @@ class BrowserActivity : AppCompatActivity(), WebClient.Parent, NeoInterface.Pare
     private var searchIndex = -1
     private var lastScroll = 0
     private var positionForRestore = 0f
+    private var positionFactor = 1f
     private var bottomX = 0
     private var position = 0f
 
     private val positionOnPage: Float
         get() = binding.content.wvBrowser.run {
-            (scrollY.toFloat() / currentScale / contentHeight.toFloat()) * 100f
+            (scrollY.toFloat() / currentScale / contentHeight.toFloat()) * 100f * positionFactor
         }
     private val isBigHead: Boolean
         get() {
@@ -628,11 +629,13 @@ class BrowserActivity : AppCompatActivity(), WebClient.Parent, NeoInterface.Pare
                     goSearch(true)
 
                 R.id.nav_marker -> {
-                    val des = if (helper.isSearch)
-                        getString(R.string.search_for) + " “" + helper.request + "”"
-                    else ""
                     MarkerActivity.addByPos(
-                        this@BrowserActivity, link, positionOnPage, des
+                        context = this@BrowserActivity,
+                        link = link,
+                        pos = positionOnPage,
+                        des = if (helper.isSearch)
+                            getString(R.string.search_for) + " “" + helper.request + "”"
+                        else ""
                     )
                 }
 
@@ -733,7 +736,9 @@ class BrowserActivity : AppCompatActivity(), WebClient.Parent, NeoInterface.Pare
             delay(250)
             if (positionForRestore < 0) {
                 val height = binding.content.wvBrowser.contentHeight
-                position = (positionForRestore * -0.98f / height) * 100f
+                positionForRestore *= -1f
+                positionFactor = height / positionForRestore
+                position = (positionForRestore / height) * 100f
                 positionForRestore = 0f
             }
             binding.content.wvBrowser.post {
