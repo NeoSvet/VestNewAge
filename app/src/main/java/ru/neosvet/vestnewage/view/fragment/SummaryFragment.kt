@@ -83,12 +83,8 @@ class SummaryFragment : NeoFragment(), PagingAdapter.Parent, NeoScrollBar.Host {
         initTabs(tab)
     }
 
-    override fun getTab(): Int {
-        return binding?.pTab?.selectedIndex ?: 0
-    }
-
     override fun onSaveInstanceState(outState: Bundle) {
-        val tab = getTab()
+        val tab = binding?.pTab?.selectedIndex ?: 0
         firstPosition = if (tab == SummaryTab.ADDITION.value && initAdapter)
             adPaging.firstPosition
         else -1

@@ -70,15 +70,11 @@ class JournalFragment : NeoFragment(), PagingAdapter.Parent, NeoScrollBar.Host {
             initTabs(0)
     }
 
-    override fun getTab(): Int {
-        return binding?.pTab?.selectedIndex ?: 0
-    }
-
     override fun onSaveInstanceState(outState: Bundle) {
         toiler.setStatus(
             JournalState.Status(
                 firstPosition = adapter.firstPosition,
-                tab = getTab()
+                tab = binding?.pTab?.selectedIndex ?: 0
             )
         )
         super.onSaveInstanceState(outState)

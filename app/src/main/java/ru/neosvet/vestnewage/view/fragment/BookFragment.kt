@@ -55,8 +55,10 @@ class BookFragment : NeoFragment() {
     private var openedReader = false
     private var shownDwnDialog = false
     private var linkToSrc = ""
+    private val tab: Int
+        get() = binding?.pTab?.selectedIndex ?: 0
     private val hasDatePicker: Boolean
-        get() = getTab() < BookTab.DOCTRINE.value
+        get() = tab < BookTab.DOCTRINE.value
 
 
     override fun onCreateView(
@@ -86,14 +88,10 @@ class BookFragment : NeoFragment() {
         super.onDestroyView()
     }
 
-    override fun getTab(): Int {
-        return binding?.pTab?.selectedIndex ?: 0
-    }
-
     override fun onSaveInstanceState(outState: Bundle) {
         toiler.setStatus(
             BookState.Status(
-                selectedTab = getTab(),
+                selectedTab = tab,
                 shownDwnDialog = shownDwnDialog
             )
         )
