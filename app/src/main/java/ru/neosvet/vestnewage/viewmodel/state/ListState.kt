@@ -10,7 +10,7 @@ sealed class ListState : NeoState {
 
     data class Paging(
         val max: Int
-    ) : PrimaryState
+    ) : ListState()
 
     data class Remove(
         val index: Int

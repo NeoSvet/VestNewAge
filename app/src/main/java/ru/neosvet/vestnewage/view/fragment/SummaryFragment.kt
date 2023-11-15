@@ -189,6 +189,8 @@ class SummaryFragment : NeoFragment(), PagingAdapter.Parent, NeoScrollBar.Host {
     private fun restoreStatus(state: SummaryState.Status) {
         firstPosition = state.firstPosition
         binding?.pTab?.selectedIndex = state.selectedTab
+        if (state.selectedTab == SummaryTab.ADDITION.value)
+            toiler.openList(true, state.selectedTab)
     }
 
     private fun initPrimary(state: ListState.Primary) {
