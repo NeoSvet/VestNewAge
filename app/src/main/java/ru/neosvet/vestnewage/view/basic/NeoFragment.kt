@@ -168,13 +168,8 @@ abstract class NeoFragment : Fragment() {
 
     protected fun setListEvents(list: RecyclerView, onlyLimit: Boolean = true) {
         scroll = ScrollHelper {
-            when (it) {
-                ScrollHelper.Events.SCROLL_END ->
-                    act?.hideBottomArea()
-
-                ScrollHelper.Events.SCROLL_START ->
-                    act?.showBottomArea()
-            }
+            if (it == ScrollHelper.Events.SCROLL_END)
+                act?.hideBottomArea()
         }.apply { attach(list) }
         val helper = ListHelper(onlyLimit) {
             when (it) {
