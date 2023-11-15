@@ -258,7 +258,7 @@ class HomeFragment : NeoFragment(), HomeAdapter.Events {
     override fun onBackPressed(): Boolean {
         when {
             rvMenu.isVisible -> closeEditMenu()
-            adapter.isEditor -> {
+            initAdapter && adapter.isEditor -> {
                 toiler.restore()
                 act?.finishEditMenu()
             }
