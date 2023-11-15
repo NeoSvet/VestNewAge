@@ -316,9 +316,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
-        outState.putBoolean(Const.LIST, helper.isSideMenu)
         outState.putString(Const.MODE, helper.curSection.toString())
-        outState.putInt(Const.TAB, curFragment?.getTab() ?: 0)
         jobFinishStar?.cancel()
         toiler.setStatus(
             MainState.Status(
@@ -333,20 +331,18 @@ class MainActivity : AppCompatActivity(), ItemClicker {
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
-        val isSideMenu = savedInstanceState.getBoolean(Const.LIST)
         var sec = savedInstanceState.getString(Const.MODE)?.let {
             Section.valueOf(it)
         } ?: Section.HOME
-        val tab = savedInstanceState.getInt(Const.TAB, 0)
         showHead()
         if (sec == Section.MENU) {
             if (ScreenUtils.isTabletLand) sec = Section.HOME
             else title = getString(R.string.app_name)
         }
-        if (helper.isSideMenu != isSideMenu)
-            setSection(sec, false, tab)
-        updateNew()
+        setMenu(sec, false)
         helper.bottomBar?.isVisible = true
+        helper.fabAction.isVisible = true
+        updateNew()
         super.onRestoreInstanceState(savedInstanceState)
     }
 
@@ -437,8 +433,6 @@ class MainActivity : AppCompatActivity(), ItemClicker {
             }
 
             Section.HELP -> {
-                if (helper.isSideMenu)
-                    helper.fabAction.isVisible = false
                 if (tab == -1) { //first isRun
                     val frHelp = HelpFragment.newInstance(0)
                     fragmentTransaction.replace(R.id.my_fragment, frHelp)
@@ -628,8 +622,6 @@ class MainActivity : AppCompatActivity(), ItemClicker {
         else if (curSection != Section.MENU)
             statusBack = StatusBack.PAGE
         updateNew()
-        if (curSection == Section.HELP && isSideMenu)
-            fabAction.isVisible = false
         if (state.shownDwnDialog)
             showDownloadDialog()
         if (state.isEditor)
