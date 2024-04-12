@@ -81,6 +81,10 @@ class SearchEngine(
             MODE_RESULT_PAR -> searchInResultPar()
             else -> searchInPages()
         }
+        finish()
+    }
+
+    suspend fun finish() {
         pages.close()
         parent.searchFinish()
     }
@@ -88,8 +92,7 @@ class SearchEngine(
     suspend fun startSearch(list: String) {
         helper.isNeedLoad = false
         searchList(list)
-        pages.close()
-        parent.searchFinish()
+        finish()
     }
 
     private suspend fun searchList(name: String) {
@@ -108,12 +111,10 @@ class SearchEngine(
         storage.clear()
         if (mode == MODE_DOCTRINE) {
             searchList(DataBase.DOCTRINE)
-            pages.close()
             return@run
         }
         if (mode == MODE_HOLY_RUS) {
             searchList(DataBase.HOLY_RUS)
-            pages.close()
             return@run
         }
         if (mode == MODE_ALL)
@@ -136,7 +137,6 @@ class SearchEngine(
             if (d.timeInDays == finish) break
             d.changeMonth(step)
         }
-        pages.close()
     }
 
     private suspend fun notifyResultIfNeed() {
@@ -169,7 +169,6 @@ class SearchEngine(
             }
             parent.notifyPercent(i.percent(links.size))
         }
-        pages.close()
         links.clear()
     }
 
@@ -221,7 +220,6 @@ class SearchEngine(
             }
             parent.notifyPercent(i.percent(items.size))
         }
-        pages.close()
         items.clear()
     }
 
@@ -781,8 +779,7 @@ class SearchEngine(
             item.des = des.toString()
         }
 
-        pages.close()
-        parent.searchFinish()
+        finish()
         return item
     }
 }
