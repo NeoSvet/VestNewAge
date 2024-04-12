@@ -52,6 +52,7 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent, SearchEngine.Parent, LoadHan
     private val storage = SearchStorage()
     private lateinit var engine: SearchEngine
     private var isExport = false
+    private var dateSearch = DateUnit.initToday()
 
     //last:
     private var lastPercent = -1
@@ -292,16 +293,18 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent, SearchEngine.Parent, LoadHan
 
     override suspend fun notifyDate(date: DateUnit) {
         if (System.currentTimeMillis() - lastTimeS < 250) {
+            dateSearch = date
             if (isWaitS) return
             isWaitS = true
             viewModelScope.launch {
                 delay(250)
-                postStatus(date)
+                if (isRun) postStatus(dateSearch)
                 isWaitS = false
             }
             return
         }
-        postStatus(date)
+        if (date != dateSearch)
+            postStatus(date)
     }
 
     private suspend fun postStatus(date: DateUnit) {
@@ -471,9 +474,6 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent, SearchEngine.Parent, LoadHan
     }
 
     fun setArguments(mode: Int, request: String) {
-        /* helper here not init:
-        helper.mode = mode
-        helper.request = request */
         lastPercent = mode
         labelMode = request
     }
