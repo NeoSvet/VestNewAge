@@ -35,6 +35,7 @@ class SiteToiler : NeoToiler() {
     private val newsStorage = NewsStorage()
     private val devStorage = DevStorage()
     private lateinit var ads: AdsUtils
+    private val fixers = mutableListOf<Pair<String, String>>()
 
     override fun getInputData(): Data = Data.Builder()
         .putString(Const.TASK, "Site")
@@ -47,9 +48,9 @@ class SiteToiler : NeoToiler() {
             markRead = context.getString(R.string.mark_read),
             today = context.getString(R.string.today_s),
             unread = context.getString(R.string.unread),
-            timekeeping = context.getString(R.string.Timekeeping_Spiritual_Wave),
-            path = context.getString(R.string.The_Path_of_the_impulse)
         )
+        fixers.add(Pair("-The_Path_", context.getString(R.string.the_path)))
+        fixers.add(Pair("-Timekeeping_", context.getString(R.string.timekeeping)))
         ads = AdsUtils(devStorage, context)
     }
 
@@ -144,24 +145,38 @@ class SiteToiler : NeoToiler() {
             reLoad()
     }
 
-    private fun fixDes(s: String) = if (s.contains("the_impulse")) {
-        s.replace(
-            ">3-The_Path_of_the_impulse.jpg<",
-            ">" + strings.path + "<"
-        ).replace(
-            ">2-Timekeeping_Spiritual_Wave+.jpg<",
-            ">" + strings.timekeeping + "<"
-        )
-    } else s
+    private fun fixDes(s: String): String {
+        if (s.contains(".jpg")) {
+            var a = s.indexOf(">") + 1
+            var des = s
+            var b: Int
+            while (a < des.length) {
+                b = des.indexOf("<", a)
+                if (b > a) {
+                    val t = des.substring(a, b)
+                    for (f in fixers) {
+                        if (t.contains(f.first)) {
+                            des = des.substring(0, a) + f.second + des.substring(b)
+                            b = des.indexOf("<", a)
+                            break
+                        }
+                    }
+                } else if (b == -1) break
+                a = des.indexOf(">", b) + 1
+            }
+            return des
+        }
+        return s
+    }
 
-    private fun fixHead(s: String) = when {
-        s.contains("the_impulse") ->
-            s.replace("3-The_Path_of_the_impulse.jpg", strings.path)
-
-        s.contains("Spiritual_Wave") ->
-            s.replace("2-Timekeeping_Spiritual_Wave+.jpg", strings.timekeeping)
-
-        else -> s
+    private fun fixHead(s: String): String {
+        if (s.contains(".jpg")) {
+            for (f in fixers) {
+                if (s.contains(f.first))
+                    return f.second
+            }
+        }
+        return s
     }
 
     private suspend fun openSite() {
