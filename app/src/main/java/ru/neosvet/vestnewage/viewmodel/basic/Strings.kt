@@ -31,9 +31,7 @@ data class SiteStrings(
     val novosti: String,
     val markRead: String,
     val today: String,
-    val unread: String,
-    val timekeeping: String,
-    val path: String
+    val unread: String
 )
 
 data class DevStrings(

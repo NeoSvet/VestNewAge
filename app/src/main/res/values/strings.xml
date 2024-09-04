@@ -185,8 +185,8 @@
     <string name="mail">[почта]</string>
     <string name="webpage">[сайт]</string>
     <string name="links">Ссылки:</string>
-    <string name="Timekeeping_Spiritual_Wave">Хронометраж акции «Импульс Духовной Волны»</string>
-    <string name="The_Path_of_the_impulse">Путь Импульса Духовной Волны</string>
+    <string name="timekeeping">Хронометраж акции</string>
+    <string name="the_path">Путь Импульса Духовной Волны</string>
     <!--CabmainFragment-->
     <string name="profile_failed">Анкета загружена неверно</string>
     <string name="auth_failed">Авторизация не удалась</string>
@@ -302,7 +302,7 @@
     <string name="check_new">Проверка на наличие нового</string>
     <string name="appeared_new_some">Новые материалы</string>
     <string name="postpone">Отложить</string>
-    <string name="postpone_alert">Уведомление отложено на 15-20 минут</string>
+    <string name="postpone_alert">Уведомление отложено на 15&#8211;20 минут</string>
     <!--HomeFragment-->
     <string name="additionally_from_tg">Дополнительно из Телеграма</string>
     <string name="on_tab">&#160;на вкладках:&#160;</string>
