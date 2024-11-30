@@ -6,6 +6,7 @@ import androidx.work.Data
 import kotlinx.coroutines.launch
 import okhttp3.FormBody
 import okhttp3.Request
+import okhttp3.Response
 import okhttp3.internal.http.promisesBody
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
@@ -16,7 +17,6 @@ import ru.neosvet.vestnewage.helper.CabinetHelper
 import ru.neosvet.vestnewage.network.NetConst
 import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.utils.Const
-import ru.neosvet.vestnewage.view.activity.CabinetActivity
 import ru.neosvet.vestnewage.view.list.CabinetAdapter
 import ru.neosvet.vestnewage.viewmodel.basic.CabinetStrings
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
@@ -47,7 +47,6 @@ class CabinetToiler : NeoToiler() {
     private val loginList = mutableListOf<BasicItem>()
     private val cabinetList = mutableListOf<BasicItem>()
     private val cabinetItem = BasicItem("")
-    private var isAlterPath = false
 
     override fun getInputData() = Data.Builder()
         .putString(Const.TASK, CabinetHelper.TAG)
@@ -143,8 +142,7 @@ class CabinetToiler : NeoToiler() {
         action = Action.None
     }
 
-    fun login(email: String, password: String, alterPath: Boolean) {
-        isAlterPath = alterPath
+    fun login(email: String, password: String) {
         action = Action.Login(email, password)
         load()
     }
@@ -175,11 +173,9 @@ class CabinetToiler : NeoToiler() {
 
     private suspend fun doLogin(email: String, password: String) {
         helper.email = email
-        if (isAlterPath) helper.initAlterPath()
-        var request = Request.Builder()
+        var request = Request.Builder().head()
             .url(CabinetHelper.codingUrl(Urls.MainSite))
             .addHeader(NetConst.USER_AGENT, App.context.packageName)
-            .addHeader(NetConst.COOKIE, CabinetHelper.alterCookie)
             .build()
         val client = CabinetHelper.createHttpClient()
         var response = client.newCall(request).execute()
@@ -202,7 +198,6 @@ class CabinetToiler : NeoToiler() {
             .post(requestBody)
             .url(CabinetHelper.codingUrl(Urls.MainSite + "auth.php"))
             .addHeader(NetConst.USER_AGENT, App.context.packageName)
-            .addHeader(NetConst.COOKIE, CabinetHelper.alterCookie)
             .addHeader(NetConst.COOKIE, cookie)
             .build()
         response = client.newCall(request).execute()
@@ -235,11 +230,18 @@ class CabinetToiler : NeoToiler() {
         cabinetScreen()
     }
 
+    private fun isCyrillic(response: Response): Boolean {
+        response.headers.forEach {
+            if (it.second.contains("charset"))
+                return it.second.contains("1251")
+        }
+        return true
+    }
+
     private suspend fun loadAnketa(loadWordList: Boolean): String {
         val request = Request.Builder()
             .url(CabinetHelper.codingUrl(Urls.MainSite + "edinenie/anketa.html"))
             .header(NetConst.USER_AGENT, App.context.packageName)
-            .addHeader(NetConst.COOKIE, CabinetHelper.alterCookie)
             .addHeader(NetConst.COOKIE, CabinetHelper.cookie)
             .build()
         val client = CabinetHelper.createHttpClient()
@@ -247,7 +249,9 @@ class CabinetToiler : NeoToiler() {
         if (response.isSuccessful.not()) throw NeoException.SiteCode(response.code)
         if (response.promisesBody().not()) throw NeoException.SiteNoResponse()
         val inStream = response.body.byteStream()
-        val br = BufferedReader(InputStreamReader(inStream, Const.ENCODING), 1000)
+        val br = if (isCyrillic(response))
+            BufferedReader(InputStreamReader(inStream, Const.ENCODING), 1000)
+        else BufferedReader(InputStreamReader(inStream), 1000)
         var s = br.readLine()
         while (s != null) {
             if (s.contains(ERROR_BOX) || s.contains(WORDS_BOX)) //s.contains("fd_box") &
@@ -306,7 +310,6 @@ class CabinetToiler : NeoToiler() {
             .post(requestBody)
             .url(CabinetHelper.codingUrl(Urls.MainSite + "savedata.php"))
             .header(NetConst.USER_AGENT, App.context.packageName)
-            .addHeader(NetConst.COOKIE, CabinetHelper.alterCookie)
             .addHeader(NetConst.COOKIE, CabinetHelper.cookie)
             .build()
         val client = CabinetHelper.createHttpClient()
@@ -366,15 +369,6 @@ class CabinetToiler : NeoToiler() {
             it.addLink(CabinetAdapter.TYPE_CHECK, password)
         }
         helper.save(login, password)
-    }
-
-    fun openByAlterPath(link: String) {
-        scope.launch {
-            postState(BasicState.Loading)
-            helper.initAlterPath()
-            postState(BasicState.Ready)
-            CabinetActivity.openPage(link)
-        }
     }
 
     fun setCheck(index: Int, value: Boolean) {

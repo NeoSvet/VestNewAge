@@ -28,7 +28,7 @@ class CabinetFragment : NeoFragment(), CabinetAdapter.Host {
     companion object {
         private const val I_EMAIL = 0
         private const val I_PASSWORD = 1
-        private const val I_ALTER_PATH = 2
+        //private const val I_ALTER_PATH = 2
     }
 
     private var binding: CabinetFragmentBinding? = null
@@ -141,7 +141,7 @@ class CabinetFragment : NeoFragment(), CabinetAdapter.Host {
         setStatus(true)
         val email = adapter.getText(I_EMAIL)
         val password = adapter.getText(I_PASSWORD)
-        toiler.login(email, password, adapter.getCheck(I_ALTER_PATH))
+        toiler.login(email, password)
         if (adapter.getCheck(I_EMAIL))
             toiler.save(email, if (adapter.getCheck(I_PASSWORD)) password else "")
     }
@@ -163,9 +163,7 @@ class CabinetFragment : NeoFragment(), CabinetAdapter.Host {
                     10 -> "regstat.html"
                     else -> "trans.html"
                 }
-                if (adapter.getCheck(I_ALTER_PATH) && CabinetHelper.alterUrl.isEmpty())
-                    toiler.openByAlterPath(link)
-                else CabinetActivity.openPage(link)
+                CabinetActivity.openPage(link)
             }
 
             CabinetScreen.CABINET -> {
@@ -206,9 +204,9 @@ class CabinetFragment : NeoFragment(), CabinetAdapter.Host {
                 toiler.setCheck(2, true)
             }
 
-            index == 4 && !value -> { // is alter path
-                CabinetHelper.alterUrl = ""
-                CabinetHelper.alterCookie = ""
+            index == 4 -> { // is alter path
+                CabinetHelper.cookie = ""
+                CabinetHelper.isAlterPath = value
             }
         }
     }

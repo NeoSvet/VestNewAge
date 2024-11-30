@@ -1,6 +1,7 @@
 package ru.neosvet.vestnewage.network
 
 import okhttp3.OkHttpClient
+import okhttp3.Protocol
 import okhttp3.Request
 import okhttp3.internal.http.promisesBody
 import ru.neosvet.vestnewage.App
@@ -23,8 +24,9 @@ class NeoClient(
         private const val PATH = "/cache/file"
 
         @JvmStatic
-        fun createHttpClient(): OkHttpClient {
+        fun createHttpClient(oldHttp: Boolean = false): OkHttpClient {
             val client = OkHttpClient.Builder()
+            if (oldHttp) client.protocols(listOf(Protocol.HTTP_1_1))
             client.connectTimeout(NetConst.TIMEOUT, TimeUnit.SECONDS)
             client.readTimeout(NetConst.TIMEOUT, TimeUnit.SECONDS)
             client.writeTimeout(NetConst.TIMEOUT, TimeUnit.SECONDS)
@@ -102,7 +104,6 @@ class NeoClient(
                 file.delete()
                 return file
             }
-
             i++
         }
     }
