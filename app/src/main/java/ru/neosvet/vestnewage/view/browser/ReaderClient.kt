@@ -6,7 +6,7 @@ import android.webkit.WebViewClient
 import ru.neosvet.vestnewage.network.Urls.openInApps
 import ru.neosvet.vestnewage.network.Urls.openInBrowser
 
-class WebClient(
+class ReaderClient(
     private val parent: Parent,
     private val packageName: String
 ) : WebViewClient() {

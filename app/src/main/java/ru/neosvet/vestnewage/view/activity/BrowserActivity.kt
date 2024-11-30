@@ -50,7 +50,7 @@ import ru.neosvet.vestnewage.view.basic.convertDpi
 import ru.neosvet.vestnewage.view.basic.fromDpi
 import ru.neosvet.vestnewage.view.browser.HeadBar
 import ru.neosvet.vestnewage.view.browser.NeoInterface
-import ru.neosvet.vestnewage.view.browser.WebClient
+import ru.neosvet.vestnewage.view.browser.ReaderClient
 import ru.neosvet.vestnewage.view.dialog.ShareDialog
 import ru.neosvet.vestnewage.viewmodel.BrowserToiler
 import ru.neosvet.vestnewage.viewmodel.state.BasicState
@@ -58,7 +58,7 @@ import ru.neosvet.vestnewage.viewmodel.state.BrowserState
 import ru.neosvet.vestnewage.viewmodel.state.NeoState
 import kotlin.math.abs
 
-class BrowserActivity : AppCompatActivity(), WebClient.Parent, NeoInterface.Parent {
+class BrowserActivity : AppCompatActivity(), ReaderClient.Parent, NeoInterface.Parent {
     companion object {
         @JvmStatic
         fun openReader(link: String?, search: String?) {
@@ -401,7 +401,7 @@ class BrowserActivity : AppCompatActivity(), WebClient.Parent, NeoInterface.Pare
         wvBrowser.settings.allowFileAccess = true
         val act = this@BrowserActivity
         wvBrowser.addJavascriptInterface(NeoInterface(act), "NeoInterface")
-        wvBrowser.webViewClient = WebClient(act, act.packageName)
+        wvBrowser.webViewClient = ReaderClient(act, act.packageName)
         wvBrowser.setOnTouchListener { _, event ->
             if (snackbar.isShown) snackbar.hide()
             if (event.pointerCount == 2) {
