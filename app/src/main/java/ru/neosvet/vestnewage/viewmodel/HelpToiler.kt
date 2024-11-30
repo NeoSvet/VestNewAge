@@ -59,7 +59,7 @@ class HelpToiler : ViewModel() {
 
     fun start(act: Activity, section: Int) {
         if (!isInit) {
-            verName = act.packageManager.getPackageInfo(act.packageName, 0).versionName
+            verName = act.packageManager.getPackageInfo(act.packageName, 0).versionName ?: "3.x"
             strings = HelpStrings(
                 srvInfo = act.getString(R.string.srv_info),
                 formatInfo = act.getString(R.string.format_info),
