@@ -93,7 +93,7 @@ class RequestInspector {
     }
 
     private fun getFormBody(formParameterJsonArray: JSONArray): RequestBody {
-        val builder = FormBody.Builder(Charset.forName("cp1251"))
+        val builder = FormBody.Builder(Charset.forName("utf-8"))
         repeat(formParameterJsonArray.length()) { i ->
             val formParameter = formParameterJsonArray.get(i) as JSONObject
             val name = formParameter.getString("name")
