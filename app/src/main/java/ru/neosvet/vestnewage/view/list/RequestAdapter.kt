@@ -23,7 +23,7 @@ class RequestAdapter(
     private val selectItem: (String) -> Unit
 ) : RecyclerView.Adapter<RequestAdapter.Holder>() {
     companion object {
-        const val LIMIT = 20
+        const val LIMIT = 21
         fun getType(item: BasicItem): Type {
             if (item.link.length == 5) return Type.LOAD_MONTH
             if (item.title.contains(Const.HTML)) return Type.LOAD_PAGE
@@ -125,13 +125,13 @@ class RequestAdapter(
             adapter.remove(request)
             notifyItemRemoved(i + 1)
         }
+        if (itemCount == LIMIT) {
+            adapter.remove(items[LIMIT - 2])
+            items.removeAt(LIMIT - 2)
+            notifyItemRemoved(LIMIT - 1)
+        }
         items.add(0, request)
         adapter.insert(request, 0)
-        notifyItemInserted(1)
-        if (itemCount == LIMIT) {
-            adapter.remove(items[LIMIT - 1])
-            items.removeAt(LIMIT - 1)
-            notifyItemRemoved(LIMIT)
-        }
+        notifyItemInserted(0)
     }
 }
