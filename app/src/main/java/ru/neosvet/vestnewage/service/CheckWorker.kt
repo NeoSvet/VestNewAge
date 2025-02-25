@@ -74,15 +74,30 @@ class CheckWorker(
             val pref = context.getSharedPreferences(SummaryHelper.TAG, Context.MODE_PRIVATE)
             if (pref.getBoolean(Const.MODE, true)) {
                 if (loader.checkAddition())
-                    list.add(Pair(context.getString(R.string.new_in_additionally), Files.RSS + "1"))
+                    list.add(
+                        Pair(
+                            context.getString(R.string.new_in_additionally),
+                            SummaryHelper.TAG + "1"
+                        )
+                    )
             }
             if (pref.getBoolean(Const.DOCTRINE, false)) {
                 if (loader.checkDoctrine())
-                    list.add(Pair(context.getString(R.string.new_in_doctrine), Files.RSS + "2"))
+                    list.add(
+                        Pair(
+                            context.getString(R.string.new_in_doctrine),
+                            SummaryHelper.TAG + "2"
+                        )
+                    )
             }
             if (pref.getBoolean(Const.PLACE, false)) {
                 if (loader.checkAcademy())
-                    list.add(Pair(context.getString(R.string.new_in_academy), Files.RSS + "3"))
+                    list.add(
+                        Pair(
+                            context.getString(R.string.new_in_academy),
+                            SummaryHelper.TAG + "3"
+                        )
+                    )
             }
             if (list.isNotEmpty) pushNotification(list)
         } catch (ignored: Exception) {

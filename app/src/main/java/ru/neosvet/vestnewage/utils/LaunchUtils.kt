@@ -10,6 +10,7 @@ import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.data.Section
 import ru.neosvet.vestnewage.helper.MainHelper
+import ru.neosvet.vestnewage.helper.SummaryHelper
 import ru.neosvet.vestnewage.storage.DataBase
 import ru.neosvet.vestnewage.view.activity.BrowserActivity.Companion.openReader
 import ru.neosvet.vestnewage.view.activity.MainActivity
@@ -196,12 +197,12 @@ class LaunchUtils(context: Context) {
                 InputData(-1, Section.MENU)
             }
 
-            link.indexOf(Files.RSS) == 0 -> {
+            link.indexOf(SummaryHelper.TAG) == 0 -> {
                 if (intent.hasExtra(DataBase.ID)) {
                     val id = intent.getIntExtra(DataBase.ID, NotificationUtils.NOTIF_SUMMARY)
                     clearSummaryNotif(id)
                 }
-                val tab = link.substring(Files.RSS.length).toInt()
+                val tab = link.substring(SummaryHelper.TAG.length).toInt()
                 InputData(tab, Section.SUMMARY)
             }
 
