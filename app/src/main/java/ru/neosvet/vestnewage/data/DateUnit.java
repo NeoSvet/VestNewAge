@@ -26,7 +26,7 @@ public class DateUnit {
     public static final long MONTH_IN_MILLS = 2592000000L;
     private DateTimeFormatter formatter = null;
     private LocalDate date;
-    private LocalTime time;
+    private LocalTime time = null;
 
     private DateUnit(LocalDate date, @Nullable LocalTime time) {
         AndroidThreeTen.init(App.context);
@@ -159,42 +159,42 @@ public class DateUnit {
     }
 
     public static String getDiffDate(long mills1, long mills2) {
-        float time = (mills1 - mills2) / (float) SEC_IN_MILLS;
+        float t = (mills1 - mills2) / (float) SEC_IN_MILLS;
         int k;
-        if (time < 59.95f) {
-            if (time < 1) time = 1;
-            else time = (int) time;
+        if (t < 59.95f) {
+            if (t < 1) t = 1;
+            else t = (int) t;
             k = 0;
         } else {
-            time = time / 60f;
-            if (time < 59.95f)
+            t = t / 60f;
+            if (t < 59.95f)
                 k = 3;
             else {
-                time = time / 60f;
-                if (time < 23.95f)
+                t = t / 60f;
+                if (t < 23.95f)
                     k = 6;
                 else {
-                    time = time / 24f;
+                    t = t / 24f;
                     k = 9;
                 }
             }
         }
         String result;
         String[] arrTime = App.context.getResources().getStringArray(R.array.time);
-        if (time > 4.95f && time < 20.95f)
-            result = formatFloat(time) + arrTime[1 + k];
+        if (t > 4.95f && t < 20.95f)
+            result = formatFloat(t) + arrTime[1 + k];
         else {
-            if (time == 1f)
+            if (t == 1f)
                 result = arrTime[k];
             else {
-                int n = (time - Math.floor(time) < 0.95f ? 0 : 1);
-                n = ((int) time + n) % 10;
+                int n = (t - Math.floor(t) < 0.95f ? 0 : 1);
+                n = ((int) t + n) % 10;
                 if (n == 1)
-                    result = formatFloat(time) + " " + arrTime[k];
+                    result = formatFloat(t) + " " + arrTime[k];
                 else if (n > 1 && n < 5)
-                    result = formatFloat(time) + arrTime[2 + k];
+                    result = formatFloat(t) + arrTime[2 + k];
                 else
-                    result = formatFloat(time) + arrTime[1 + k];
+                    result = formatFloat(t) + arrTime[1 + k];
             }
         }
 
@@ -390,5 +390,17 @@ public class DateUnit {
     public int getOffset() {
         ZoneOffset zoneOffset = ZoneId.systemDefault().getRules().getOffset(LocalDateTime.now());
         return zoneOffset.getTotalSeconds();
+    }
+
+    //@Override
+    public boolean equalsDate(Object obj) {
+        if (this == obj) return true;
+
+        if (obj instanceof DateUnit) {
+            DateUnit d = (DateUnit) obj;
+           //if (toTimeString().equals(d.toTimeString()))
+                return d.getDay() == getDay() && d.getMonth() == getMonth() && d.getYear() == getYear();
+        }
+        return false;
     }
 }

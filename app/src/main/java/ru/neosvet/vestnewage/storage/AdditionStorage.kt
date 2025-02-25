@@ -138,14 +138,10 @@ class AdditionStorage : DataBase.Parent {
 
     private fun getDate(s: String): String {
         val date = DateUnit.parse(s)
-        if (date.day == today.day && date.month == today.month
-            && date.year == today.year
-        ) return date.toTimeString()
-        if (date.day == yesterday.day && date.month == yesterday.month
-            && date.year == yesterday.year
-        ) return date.toTimeString() + ", " + weekDays[0]
+        if (date.equalsDate(today)) return date.toTimeString()
+        if (date.equalsDate(yesterday)) return date.toTimeString() + ", " + weekDays[0]
         if (date.year == today.year) {
-            if (today.timeInDays - date.timeInDays < 8)
+            if (today.timeInDays - date.timeInDays < 7)
                 return date.toTimeString() + ", " + weekDays[date.dayWeek]
             val t = date.toAlterString()
             return t.substring(0, t.length - 5)
