@@ -33,7 +33,12 @@ class CabinetToiler : NeoToiler() {
     }
 
     sealed class Action {
-        data class Login(val email: String, val password: String) : Action()
+        data class Login(val email: String, val password: String) : Action() {
+            override fun toString(): String {
+                return "Login"
+            }
+        }
+
         data class Word(val index: Int, val word: String) : Action()
         data object Anketa : Action()
         data object None : Action()
