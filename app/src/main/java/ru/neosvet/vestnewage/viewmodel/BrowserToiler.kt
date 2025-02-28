@@ -267,7 +267,7 @@ class BrowserToiler : NeoToiler() {
                         n++
                         bw.write(s.substring(3))
                     } else {
-                        bw.write(PAR_POEM.substring(0, PAR_POEM.length - 1))
+                        bw.write("<p")
                         bw.write(s.substring(2))
                     }
                 } else bw.write(s)
