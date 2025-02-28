@@ -680,18 +680,17 @@ class BrowserActivity : AppCompatActivity(), ReaderClient.Parent, NeoInterface.P
     }
 
     private fun switchNavButton() = binding.run {
+        fabNav.alpha = 0.5f
         if (helper.isNavButton) {
             btnFullScreen.isVisible = tvGodWords.isVisible
             btnFullScreen.tag = null
             animButton = null
             setNavButton(content.wvBrowser.scrollY)
-            fabNav.alpha = 0.5f
         } else {
             btnFullScreen.isVisible = false
             btnFullScreen.tag = "v"
             animButton = BottomAnim(binding.fabNav)
             fabNav.setImageResource(R.drawable.ic_fullscreen)
-            fabNav.alpha = 1f
         }
     }
 
