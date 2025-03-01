@@ -62,7 +62,7 @@ class PageParser(private val client: NeoClient) {
         val sb = StringBuilder(line)
         line = br.readLine()
         while (line != null) {
-            if (line.contains(end) || line.contains("div class=\"next")) break
+            if (line.contains(end)) break
             sb.append(" ").append(line)
             line = br.readLine()
         }
@@ -106,11 +106,8 @@ class PageParser(private val client: NeoClient) {
             }
             if (s.indexOf(Const.DIV) == 0 || s.indexOf(Const.SPAN) == 0) {
                 s = s.substring(s.indexOf(">") + 1)
-                if (s.isNotEmpty()) {
-                    elem = HTMLElem(Const.TEXT)
-                    elem.html = s
-                    content.add(elem)
-                }
+                if (s.isNotEmpty())
+                    content.current().html += s
                 i++
                 continue
             }
@@ -151,7 +148,18 @@ class PageParser(private val client: NeoClient) {
                         continue
                     }
                     n = s.indexOf("href") + 6
-                    if (n == 5) continue
+                    if (n == 5) {
+                        i++
+                        n = s.indexOf("name") + 6
+                        if (n == 5) continue
+                        elem.par = "name:" + //this label for PageLoader about second poem per day
+                                if (s.contains("\"")) s.substring(n, s.indexOf("\"", n))
+                                else s.substring(n, s.indexOf("'", n))
+                        elem.end = true
+                        i++
+                        content.add(elem)
+                        continue
+                    }
                     if (s.contains("\""))
                         elem.par = convertUrl(s.substring(n, s.indexOf("\"", n)))
                     else
@@ -188,8 +196,16 @@ class PageParser(private val client: NeoClient) {
                             elem.par = ""
                         else if (s.contains("noind")) {
                             if (wasNoind) {
-                                content.current().tag = Const.LINE
-                                content.current().html = elem.html
+                                val e = content.current()
+                                if (e.html.isEmpty()) {
+                                    e.tag = Const.LINE
+                                    e.html = elem.html
+                                } else {
+                                    e.end = false
+                                    elem.tag = Const.LINE
+                                    elem.end = true
+                                    content.add(elem)
+                                }
                                 wasNoind = false
                                 i++
                                 continue

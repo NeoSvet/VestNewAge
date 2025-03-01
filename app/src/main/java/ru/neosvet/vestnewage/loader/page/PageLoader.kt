@@ -42,13 +42,18 @@ class PageLoader(private val client: NeoClient) : Loader {
         page.load(Urls.Page + link, "")
         if (singlePage) storage.deleteParagraphs(storage.getPageId(link))
         var id = 0
+        var par = ""
         var s: String? = page.currentElem
-        var wasHead = false
         val time = System.currentTimeMillis()
         do {
-            if (page.isHead && (!wasHead || !storage.isArticle)) {
-                wasHead = true
-                id = storage.putTitle(getTitle(s, storage.name), link, time)
+            page.link?.let {
+                if (it.startsWith("name:")) {
+                    par = "#" + it.substring(5)
+                    s = page.nextElem
+                }
+            }
+            if (page.isHead && !storage.isArticle) {
+                id = storage.putTitle(getTitle(s, storage.name), link + par, time)
                 if (exists) storage.deleteParagraphs(id)
                 s = page.nextElem
             }
