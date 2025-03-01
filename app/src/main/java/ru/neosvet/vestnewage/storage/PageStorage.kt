@@ -92,7 +92,9 @@ class PageStorage : DataBase.Parent {
         } else {
             val s = link.date
             if (link.isPoem) {
-                s + " " + App.context.getString(R.string.poem) + " " + Const.KV_OPEN + title + Const.KV_CLOSE
+                s + " " + App.context.getString(R.string.poem) + " " +
+                        (if (!title.startsWith("№")) Const.KV_OPEN else "") +
+                        title + Const.KV_CLOSE
             } else if (!title.contains(s)) "$s $title"
             else title
         }

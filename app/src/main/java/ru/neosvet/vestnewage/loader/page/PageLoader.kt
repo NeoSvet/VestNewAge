@@ -112,7 +112,9 @@ class PageLoader(private val client: NeoClient) : Loader {
         var s = line.fromHTML.replace(".20", ".")
         if (s.contains(name)) {
             s = s.substring(9)
-            if (s.contains(Const.KV_OPEN))
+            if(s.contains("№"))
+                s = s.substring(s.indexOf("№"), s.length - 1)
+            else if (s.contains(Const.KV_OPEN))
                 s = s.substring(s.indexOf(Const.KV_OPEN) + 1, s.length - 1)
         }
         return s

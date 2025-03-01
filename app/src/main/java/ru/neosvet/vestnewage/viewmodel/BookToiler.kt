@@ -195,6 +195,8 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
                     do {
                         s = cursor.getString(iLink)
                         t = cursor.getString(iTitle)
+                        if (t.contains(Const.KV_OPEN))
+                            t = t.substring(t.indexOf(Const.KV_OPEN) + 1)
                         if (s.hasDate && !t.contains(s.date))
                             t += " (" + strings.from + " ${s.date})"
                         list.add(BasicItem(t, s))

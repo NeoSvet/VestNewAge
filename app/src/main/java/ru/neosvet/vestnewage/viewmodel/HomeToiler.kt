@@ -336,7 +336,7 @@ class HomeToiler : NeoToiler() {
         val p = journal.getLastItem() ?: Pair(strings.nothing, "")
         return HomeItem(
             type = HomeItem.Type.JOURNAL,
-            lines = listOf(strings.journal, strings.lastRead, p.first, p.second)
+            lines = listOf(strings.journal, strings.lastRead, getPageTitle(p.first), p.second)
         )
     }
 
@@ -360,7 +360,7 @@ class HomeToiler : NeoToiler() {
                     link = cursor.getString(iLink)
                     if (link.contains(today)) {
                         linkCalendar = link
-                        title = cursor.getString(iTitle)
+                        title = getPageTitle(cursor.getString(iTitle))
                     }
                 }
             }
@@ -373,6 +373,12 @@ class HomeToiler : NeoToiler() {
             type = HomeItem.Type.CALENDAR,
             lines = listOf(strings.calendar, strings.todayMsk + d, title, linkCalendar)
         )
+    }
+
+    private fun getPageTitle(title: String): String {
+        return if (title.contains(Const.KV_OPEN))
+            title.substring(title.indexOf(Const.KV_OPEN) + 1)
+        else title
     }
 
     private fun createSummaryItem(): HomeItem {
