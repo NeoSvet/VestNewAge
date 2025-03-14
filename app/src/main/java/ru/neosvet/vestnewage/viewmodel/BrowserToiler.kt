@@ -60,6 +60,7 @@ class BrowserToiler : NeoToiler() {
     private var withOutPosition = false
     private var isLightTheme = true
     private var link = ""
+    private var nextLink = ""
     private var idPage = ""
     private var reactionDay = 0
     private var reactionPosition = 0
@@ -170,6 +171,7 @@ class BrowserToiler : NeoToiler() {
             }
             if (!preparingStyle()) return@launch
             val file = Files.file(PAGE)
+
             val isNeedUpdate = if (newPage || !file.exists())
                 generatePage(file)
             else false
@@ -255,6 +257,7 @@ class BrowserToiler : NeoToiler() {
         }
         cursor.close()
         cursor = storage.getParagraphs(id)
+        nextLink = ""
         var s: String
         val poems = link.isPoem
         if (cursor.moveToFirst()) {
@@ -267,8 +270,8 @@ class BrowserToiler : NeoToiler() {
                         n++
                         bw.write(s.substring(3))
                     } else {
-                        bw.write("<p")
-                        bw.write(s.substring(2))
+                        if (s.contains("href")) nextLink = s
+                        bw.write(s)
                     }
                 } else bw.write(s)
                 bw.write(Const.N)
@@ -408,6 +411,16 @@ class BrowserToiler : NeoToiler() {
         if (!isPaging) return
         withOutPosition = true
         storage.open(link)
+        if (nextLink.isNotEmpty()) {
+            var a = nextLink.indexOf("href") + 6
+            val b = nextLink.indexOf(">", a) + 1
+            val s = nextLink.substring(a, b - 2)
+            if (!storage.existsPage(s)) {
+                a = nextLink.indexOf("<", b)
+                val t = nextLink.substring(b, a)
+                storage.putTitle(t, s, System.currentTimeMillis())
+            }
+        }
         storage.getNextPage(link)?.let {
             if (!isDoctrine || it.isDoctrineBook) {
                 openLink(it, false)

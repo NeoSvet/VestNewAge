@@ -53,7 +53,12 @@ class PageLoader(private val client: NeoClient) : Loader {
                 }
             }
             if (page.isHead && !storage.isArticle) {
-                id = storage.putTitle(getTitle(s, storage.name), link + par, time)
+                s = getTitle(s, storage.name)
+                if (id > 0) storage.insertParagraph(
+                    id,
+                    "<p class='noind'><a href='${link + par}'>$s</a></p>"
+                )
+                id = storage.putTitle(s!!, link + par, time)
                 if (exists) storage.deleteParagraphs(id)
                 s = page.nextElem
             }
@@ -112,7 +117,7 @@ class PageLoader(private val client: NeoClient) : Loader {
         var s = line.fromHTML.replace(".20", ".")
         if (s.contains(name)) {
             s = s.substring(9)
-            if(s.contains("№"))
+            if (s.contains("№"))
                 s = s.substring(s.indexOf("№"), s.length - 1)
             else if (s.contains(Const.KV_OPEN))
                 s = s.substring(s.indexOf(Const.KV_OPEN) + 1, s.length - 1)
