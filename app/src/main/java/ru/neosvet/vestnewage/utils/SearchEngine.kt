@@ -608,14 +608,16 @@ class SearchEngine(
         var id = -1
         var n = startId - 1
         var add = true
+        var par: String
         val list = mutableListOf<SearchItem>()
         do {
+            par = cursor.getString(iPar)
+            if (par.contains("noind")) continue
             if (id == cursor.getInt(iID) && add) {
                 val item = SearchItem(n, "", "")
                 item.des = if (isSelect)
-                    selectWords(cursor.getString(iPar))
-                else
-                    cursor.getString(iPar)
+                    selectWords(par)
+                else par
                 list.add(item)
             } else {
                 id = cursor.getInt(iID)
@@ -632,9 +634,8 @@ class SearchEngine(
                         n++
                         val item = SearchItem(n, title, link)
                         item.des = if (isSelect)
-                            selectWords(cursor.getString(iPar))
-                        else
-                            cursor.getString(iPar)
+                            selectWords(par)
+                        else par
                         list.add(item)
                     }
                 }
