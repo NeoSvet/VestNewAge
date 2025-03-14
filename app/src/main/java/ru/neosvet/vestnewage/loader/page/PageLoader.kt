@@ -52,7 +52,7 @@ class PageLoader(private val client: NeoClient) : Loader {
                     s = page.nextElem
                 }
             }
-            if (page.isHead && !storage.isArticle) {
+            if (page.isHead) {
                 s = getTitle(s, storage.name)
                 if (id > 0) storage.insertParagraph(
                     id,
