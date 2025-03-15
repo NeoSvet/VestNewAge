@@ -35,7 +35,7 @@ class UpdateLoader(private val client: NeoClient) : Loader {
             br.readLine() //title
             br.readLine() //link
             br.readLine() //des always empty
-            val timeFile = br.readLine().toLong()
+            val timeFile = br.readLine()?.toLong() ?: 0
             br.close()
 
             load()

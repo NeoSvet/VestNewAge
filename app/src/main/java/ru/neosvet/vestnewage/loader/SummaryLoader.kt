@@ -8,9 +8,9 @@ import ru.neosvet.vestnewage.loader.page.PageParser
 import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.storage.PageStorage
+import ru.neosvet.vestnewage.storage.UnreadStorage
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Files
-import ru.neosvet.vestnewage.storage.UnreadStorage
 import java.io.BufferedReader
 import java.io.BufferedWriter
 import java.io.FileWriter
@@ -171,25 +171,29 @@ class SummaryLoader(private val client: NeoClient) : Loader {
         page.load(Urls.ACADEMY + "/Press/News/" + pageUrl, "row sm-razdel-listnews")
         var s: String? = page.nextItem
         var date: String
+        var lastLink = ""
         val list = mutableListOf<SimpleItem>()
         var item = SimpleItem("", "", "")
-        var p = -1
         val end = if (pageUrl.isEmpty()) "</nav>" else "<nav"
         do {
             if (page.isHead) s = page.nextItem
             page.link?.let {
-                if (it != item.link) {
-                    item.link = it
+                if (lastLink.isEmpty() || !it.endsWith(lastLink)) {
                     if (it.contains("pageIndex")) {
-                        p++
-                        if (p > 1)
+                        val p = it.substring(it.indexOf("=") + 1).toInt()
+                        if (pageUrl.isEmpty() && p > 1 && page.text.isNotEmpty())
                             list.addAll(loadAcademyList(it))
-                    } else item.title = page.text
+                    } else if (it.isNotEmpty()) {
+                        lastLink = it.substring(it.lastIndexOf("/"))
+                        item.link = it
+                        item.title = page.text
+                    }
                 }
+                s = null
             }
             s?.let {
-                if (page.isSimple) {
-                    date = it.trim()
+                if (it.startsWith("<i") && it.length > 15) {
+                    date = it.substring(3, it.length - 5).trim()
                     if (date.length == 10) {
                         item.des = date
                         list.add(item)
