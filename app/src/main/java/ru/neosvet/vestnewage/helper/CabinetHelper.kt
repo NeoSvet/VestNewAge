@@ -1,10 +1,6 @@
 package ru.neosvet.vestnewage.helper
 
 import android.content.Context
-import android.os.Build
-import okhttp3.OkHttpClient
-import ru.neosvet.vestnewage.network.NeoClient
-import ru.neosvet.vestnewage.network.UnsafeClient
 import ru.neosvet.vestnewage.utils.Const
 
 class CabinetHelper(context: Context) {
@@ -18,11 +14,6 @@ class CabinetHelper(context: Context) {
         fun codingUrl(url: String) = if (isAlterPath) {
             ALTER_URL + url.substring(url.indexOf(".com") + 4)
         } else url
-
-        fun createHttpClient(): OkHttpClient =
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
-                NeoClient.createHttpClient(true)
-            else UnsafeClient.createHttpClient()
     }
 
     private val pref = context.getSharedPreferences(TAG, Context.MODE_PRIVATE)

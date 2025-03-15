@@ -9,6 +9,7 @@ import okhttp3.Request
 import okhttp3.internal.charset
 import org.intellij.lang.annotations.Language
 import ru.neosvet.vestnewage.helper.CabinetHelper
+import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.network.NetConst
 import ru.neosvet.vestnewage.network.Urls
 
@@ -68,7 +69,7 @@ class CabinetClient(
             if (request.method == "POST") inspector.findRecordedRequestForUrl(url)?.let {
                 builder.method(request.method, it.body)
             }
-            val client = CabinetHelper.createHttpClient()
+            val client = NeoClient.createHttpClient(true)
             val response = client.newCall(builder.build()).execute()
             var type = response.body.contentType().toString()
             if (type.contains(";"))

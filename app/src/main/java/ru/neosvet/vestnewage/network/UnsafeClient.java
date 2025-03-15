@@ -16,7 +16,7 @@ import okhttp3.Protocol;
 //from https://stackoverflow.com/a/49063199/2956830
 
 public class UnsafeClient {
-    public static OkHttpClient createHttpClient() {
+    public static OkHttpClient createHttpClient(boolean oldHttp) {
         try {
             // Create a trust manager that does not validate certificate chains
             final TrustManager[] trustAllCerts = new TrustManager[]{
@@ -46,9 +46,11 @@ public class UnsafeClient {
             OkHttpClient.Builder builder = new OkHttpClient.Builder();
             builder.sslSocketFactory(sslSocketFactory, (X509TrustManager) trustAllCerts[0]);
             builder.hostnameVerifier((hostname, session) -> true);
-            ArrayList<Protocol> list = new ArrayList<>();
-            list.add(Protocol.HTTP_1_1);
-            builder.protocols(list);
+            if (oldHttp) {
+                ArrayList<Protocol> list = new ArrayList<>();
+                list.add(Protocol.HTTP_1_1);
+                builder.protocols(list);
+            }
             builder.connectTimeout(NetConst.TIMEOUT, TimeUnit.SECONDS);
             builder.readTimeout(NetConst.TIMEOUT, TimeUnit.SECONDS);
             builder.writeTimeout(NetConst.TIMEOUT, TimeUnit.SECONDS);

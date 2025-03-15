@@ -30,13 +30,18 @@ class ErrorUtils(private val throwable: Throwable) {
             }
 
             throwable is SocketTimeoutException || throwable is SocketException ||
-                    throwable is UnknownHostException || throwable is SSLHandshakeException ||
-                    throwable is CertificateException ->
+                    throwable is UnknownHostException ->
                 App.context.getString(R.string.site_no_response)
+
+            throwable is SSLHandshakeException || throwable is CertificateException ||
+                    throwable is NeoException.SiteNoResponse -> {
+                App.needUnsafeClient()
+                App.context.getString(R.string.site_no_response)
+            }
 
             else -> {
                 isNeedReport = throwable !is NeoException
-                throwable.localizedMessage!!
+                throwable.localizedMessage ?: throwable.message!!
             }
         }
     }

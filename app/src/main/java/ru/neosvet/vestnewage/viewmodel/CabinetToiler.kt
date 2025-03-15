@@ -14,6 +14,7 @@ import ru.neosvet.vestnewage.data.BasicItem
 import ru.neosvet.vestnewage.data.CabinetScreen
 import ru.neosvet.vestnewage.data.NeoException
 import ru.neosvet.vestnewage.helper.CabinetHelper
+import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.network.NetConst
 import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.utils.Const
@@ -182,7 +183,7 @@ class CabinetToiler : NeoToiler() {
             .url(CabinetHelper.codingUrl(Urls.MainSite))
             .addHeader(NetConst.USER_AGENT, App.context.packageName)
             .build()
-        val client = CabinetHelper.createHttpClient()
+        val client = NeoClient.createHttpClient(true)
         var response = client.newCall(request).execute()
         var cookie = ""
         response.headers.forEach {
@@ -249,7 +250,7 @@ class CabinetToiler : NeoToiler() {
             .header(NetConst.USER_AGENT, App.context.packageName)
             .addHeader(NetConst.COOKIE, CabinetHelper.cookie)
             .build()
-        val client = CabinetHelper.createHttpClient()
+        val client = NeoClient.createHttpClient(true)
         val response = client.newCall(request).execute()
         if (response.isSuccessful.not()) throw NeoException.SiteCode(response.code)
         if (response.promisesBody().not()) throw NeoException.SiteNoResponse()
@@ -317,7 +318,7 @@ class CabinetToiler : NeoToiler() {
             .header(NetConst.USER_AGENT, App.context.packageName)
             .addHeader(NetConst.COOKIE, CabinetHelper.cookie)
             .build()
-        val client = CabinetHelper.createHttpClient()
+        val client = NeoClient.createHttpClient(true)
         val response = client.newCall(request).execute()
         if (response.isSuccessful.not()) throw NeoException.SiteCode(response.code)
         if (response.promisesBody().not()) throw NeoException.SiteNoResponse()

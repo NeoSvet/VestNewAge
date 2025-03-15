@@ -24,14 +24,17 @@ class NeoClient(
         private const val PATH = "/cache/file"
 
         @JvmStatic
-        fun createHttpClient(oldHttp: Boolean = false): OkHttpClient {
-            val client = OkHttpClient.Builder()
-            if (oldHttp) client.protocols(listOf(Protocol.HTTP_1_1))
-            client.connectTimeout(NetConst.TIMEOUT, TimeUnit.SECONDS)
-            client.readTimeout(NetConst.TIMEOUT, TimeUnit.SECONDS)
-            client.writeTimeout(NetConst.TIMEOUT, TimeUnit.SECONDS)
-            return client.build()
-        }
+        fun createHttpClient(oldHttp: Boolean = false): OkHttpClient =
+            if (App.unsafeClient)
+                UnsafeClient.createHttpClient(oldHttp)
+            else {
+                val client = OkHttpClient.Builder()
+                if (oldHttp) client.protocols(listOf(Protocol.HTTP_1_1))
+                client.connectTimeout(NetConst.TIMEOUT, TimeUnit.SECONDS)
+                client.readTimeout(NetConst.TIMEOUT, TimeUnit.SECONDS)
+                client.writeTimeout(NetConst.TIMEOUT, TimeUnit.SECONDS)
+                client.build()
+            }
 
         fun deleteTempFiles() {
             val d = Files.parent("/cache")
