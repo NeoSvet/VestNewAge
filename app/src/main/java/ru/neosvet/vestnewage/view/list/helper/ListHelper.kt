@@ -55,7 +55,7 @@ class ListHelper(
     private var isDown = false
     private var x = 0
     private var y = 0
-    private var distanceForSwipe: Int = 50
+    private var distanceForSwipe: Int = 75
 
     fun attach(view: RecyclerView) {
         initTouchListener(view)
