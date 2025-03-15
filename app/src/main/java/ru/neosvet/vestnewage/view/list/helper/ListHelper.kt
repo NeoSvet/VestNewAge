@@ -5,7 +5,6 @@ import android.graphics.Canvas
 import android.view.MotionEvent
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
-import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.view.basic.convertDpi
 import kotlin.math.abs
 
@@ -57,7 +56,6 @@ class ListHelper(
     private var x = 0
     private var y = 0
     private var distanceForSwipe: Int = 50
-    private var limit: Int = 0
 
     fun attach(view: RecyclerView) {
         initTouchListener(view)
@@ -70,7 +68,6 @@ class ListHelper(
     @SuppressLint("ClickableViewAccessibility")
     private fun initTouchListener(view: RecyclerView) {
         view.setOnTouchListener { _, event: MotionEvent ->
-            initLimit(view)
             when (event.actionMasked) {
                 MotionEvent.ACTION_MOVE -> {
                     if (isDown) return@setOnTouchListener false
@@ -90,8 +87,7 @@ class ListHelper(
                         val value =
                             view.computeVerticalScrollOffset() + view.computeVerticalScrollExtent()
                         val max = view.computeVerticalScrollRange()
-                        if (value == max && max > limit && max <= view.height)
-                            events.invoke(Events.LIST_LIMIT)
+                        if (value - max < 10) events.invoke(Events.LIST_LIMIT)
                         return@setOnTouchListener false
                     }
                     if (onlyLimit) return@setOnTouchListener false
@@ -108,11 +104,5 @@ class ListHelper(
             }
             false
         }
-    }
-
-    private fun initLimit(view: RecyclerView) {
-        if (limit > 0) return
-        val margin = view.context.resources.getDimension(R.dimen.content_margin_bottom).toInt()
-        limit = view.height - margin
     }
 }
