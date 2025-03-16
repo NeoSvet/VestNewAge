@@ -13,6 +13,8 @@ class BrowserHelper {
         private const val AUTORETURN = "autoreturn"
         private const val NUMPAR = "numpar"
         private const val SCALE = "scale"
+        private const val SHOW_REACTION = "reaction"
+        var showReaction = false
     }
 
     // Options
@@ -39,6 +41,7 @@ class BrowserHelper {
         isMiniTop = pref.getBoolean(MITITOP, false)
         isAutoReturn = pref.getBoolean(AUTORETURN, false)
         isNumPar = pref.getBoolean(NUMPAR, false)
+        showReaction = pref.getBoolean(SHOW_REACTION, false)
         if (zoom < 10) zoom = context.convertDpi(100)
     }
 
@@ -52,6 +55,7 @@ class BrowserHelper {
         editor.putBoolean(MITITOP, isMiniTop)
         editor.putBoolean(AUTORETURN, isAutoReturn)
         editor.putBoolean(NUMPAR, isNumPar)
+        editor.putBoolean(SHOW_REACTION, showReaction)
         editor.apply()
     }
 

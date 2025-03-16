@@ -219,7 +219,7 @@
     <string name="publication_of">Публикация от&#160;</string>
     <string name="to_prev">← назад</string>
     <string name="to_next">далее →</string>
-    <string name="search_reaction">Искать реакцию Создателя</string>
+    <string name="show_reaction">Показывать реакцию Создателя</string>
     <string name="foot_reaction">Телеграм канал «Новости от Создателя»:&#160;</string>
     <string name="on_same_day">В этот же день:</string>
     <!--SettingsFragment-->

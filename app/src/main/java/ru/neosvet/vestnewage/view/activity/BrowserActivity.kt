@@ -915,9 +915,11 @@ class BrowserActivity : AppCompatActivity(), ReaderClient.Parent, NeoInterface.P
         else toiler.prevPage()
     }
 
-    override fun searchReaction() {
+    override fun changeReaction(checked: Boolean) {
         binding.content.wvBrowser.let {
-            it.post { toiler.searchReaction(it.contentHeight) }
+            it.post {
+                toiler.switchReaction(if (checked) it.contentHeight else -1)
+            }
         }
 
     }

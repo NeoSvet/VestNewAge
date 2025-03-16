@@ -88,7 +88,7 @@ class BrowserToiler : NeoToiler() {
             publicationOf = context.getString(R.string.publication_of),
             toPrev = context.getString(R.string.to_prev),
             toNext = context.getString(R.string.to_next),
-            searchReaction = context.getString(R.string.search_reaction),
+            showReaction = context.getString(R.string.show_reaction),
             notFoundReaction = context.getString(R.string.not_found_reaction),
             footReaction = context.getString(R.string.foot_reaction)
         )
@@ -184,7 +184,8 @@ class BrowserToiler : NeoToiler() {
             if (withOutPosition) {
                 p = 0f
                 withOutPosition = false
-            } else if (reactionContent.isNotEmpty()) p = -reactionPosition.toFloat()
+            } else if (reactionContent.isNotEmpty())
+                p = -reactionPosition.toFloat()
             postState(
                 BrowserState.Primary(
                     url = FILE + file.toString(),
@@ -203,7 +204,7 @@ class BrowserToiler : NeoToiler() {
         return true
     }
 
-    private fun generatePage(file: File): Boolean { //isNeedUpdate
+    private suspend fun generatePage(file: File): Boolean { //isNeedUpdate
         val linkDay: Int
         if (link.hasDate) {
             val output = App.context.openFileOutput(Files.DATE, Context.MODE_PRIVATE)
@@ -287,10 +288,18 @@ class BrowserToiler : NeoToiler() {
             bw.write("NextPage();' value='" + strings.toNext + "'/>")
             bw.write(Const.BR)
             bw.write(Const.BR)
-            if (linkDay >= DateHelper.MIN_DAYS_REACTIONS && reactionContent.isEmpty()) {
-                bw.write(SCRIPT)
-                bw.write("SearchReaction();' value='" + strings.searchReaction + "'/>")
+            if (linkDay >= DateHelper.MIN_DAYS_REACTIONS) {
+                if (BrowserHelper.showReaction) searchReaction()
+                bw.write("<label><input type='checkbox' onchange='NeoInterface.")
+                bw.write("ChangeReaction(this.checked ? true : false);'");
+                if (BrowserHelper.showReaction) bw.write(" checked>")
+                else bw.write(">")
+                bw.write(strings.showReaction + "</label>")
                 bw.write(Const.BR)
+                if (BrowserHelper.showReaction && reactionContent.isEmpty()) {
+                    bw.write(strings.notFoundReaction)
+                    bw.write(Const.BR)
+                }
                 bw.write(Const.BR)
             }
             bw.flush()
@@ -500,28 +509,39 @@ class BrowserToiler : NeoToiler() {
         dbJournal.close()
     }
 
-    fun searchReaction(heightPage: Int) {
-        reactionPosition = heightPage
+    fun switchReaction(heightPage: Int) {
         scope.launch {
-            val date = DateUnit.putDays(reactionDay).toShortDateString()
-            val storage = AdditionStorage()
-            storage.open()
-            startSearchReaction(storage, date)
-            if (reactionContent.isEmpty() && OnlineObserver.isOnline.value) {
-                postState(BasicState.Loading)
-                val loader = AdditionLoader(NeoClient())
-                loader.load(storage, 0)
-                startSearchReaction(storage, date)
-                if (reactionContent.isEmpty()) {
-                    loader.loadAll(null)
-                    startSearchReaction(storage, date)
-                }
+            if (heightPage == -1) {
+                BrowserHelper.showReaction = false
+                reactionContent = ""
+                openPage(true)
+                return@launch
             }
-            storage.close()
+            BrowserHelper.showReaction = true
+            reactionPosition = heightPage
+            searchReaction()
             if (reactionContent.isEmpty())
                 postState(BasicState.Message(strings.notFoundReaction))
             else openPage(true)
         }
+    }
+
+    private suspend fun searchReaction() {
+        val date = DateUnit.putDays(reactionDay).toShortDateString()
+        val storage = AdditionStorage()
+        storage.open()
+        startSearchReaction(storage, date)
+        if (reactionContent.isEmpty() && OnlineObserver.isOnline.value) {
+            postState(BasicState.Loading)
+            val loader = AdditionLoader(NeoClient())
+            loader.load(storage, 0)
+            startSearchReaction(storage, date)
+            if (reactionContent.isEmpty()) {
+                loader.loadAll(null)
+                startSearchReaction(storage, date)
+            }
+        }
+        storage.close()
     }
 
     private fun startSearchReaction(storage: AdditionStorage, date: String) {

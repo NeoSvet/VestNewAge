@@ -22,7 +22,7 @@ data class BrowserStrings(
     val publicationOf: String,
     val toPrev: String,
     val toNext: String,
-    val searchReaction: String,
+    val showReaction: String,
     val notFoundReaction: String,
     val footReaction: String
 )
