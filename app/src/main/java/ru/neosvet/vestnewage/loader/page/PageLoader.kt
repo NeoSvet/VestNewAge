@@ -1,5 +1,7 @@
 package ru.neosvet.vestnewage.loader.page
 
+import ru.neosvet.vestnewage.App
+import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.loader.BookLoader
 import ru.neosvet.vestnewage.loader.basic.Loader
@@ -55,8 +57,8 @@ class PageLoader(private val client: NeoClient) : Loader {
             if (page.isHead) {
                 s = getTitle(s, storage.name)
                 if (id > 0) storage.insertParagraph(
-                    id,
-                    "<p class='noind'><a href='${link + par}'>$s</a></p>"
+                    id, "<p class='noind'>" + App.context.getString(R.string.on_same_day) +
+                            "<br><a href='${link + par}'>${s?.replace("“", "")}</a></p>"
                 )
                 id = storage.putTitle(s!!, link + par, time)
                 if (exists) storage.deleteParagraphs(id)
