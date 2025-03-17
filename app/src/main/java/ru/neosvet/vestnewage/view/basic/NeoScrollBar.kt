@@ -23,12 +23,13 @@ class NeoScrollBar @JvmOverloads constructor(
     private var isRightScroll = false
     private var isEndScrollAnim = true
     private var isMoveScrollBar = true
+    private var weight = 1
 
     var value: Int
-        get() = maxValue - progress
+        get() = (maxValue - progress) * weight
         set(value) {
             isMoveScrollBar = false
-            progress = maxValue - value
+            progress = maxValue - value / weight
         }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -37,8 +38,14 @@ class NeoScrollBar @JvmOverloads constructor(
             isVisible = true
             moveScrollBar(false)
         }
-        maxValue = max
-        progress = max
+        if (max > 100) {
+            maxValue = max / 100
+            weight = max / maxValue
+        } else {
+            maxValue = max
+            weight = 1
+        }
+        progress = maxValue
         setOnReleaseListener { v ->
             host.onScrolled(max - v)
             scope.launch {
@@ -48,10 +55,8 @@ class NeoScrollBar @JvmOverloads constructor(
         }
         setOnProgressChangeListener { v ->
             host.onPreviewScroll(max - v)
-            if (isMoveScrollBar)
-                moveScrollBar(false)
-            else
-                isMoveScrollBar = true
+            if (isMoveScrollBar) moveScrollBar(false)
+            else isMoveScrollBar = true
         }
         if (!isRightScroll) {
             scope.launch {
