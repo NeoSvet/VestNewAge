@@ -99,7 +99,7 @@ class HomeFragment : NeoFragment(), HomeAdapter.Events {
     }
 
     override fun setStatus(load: Boolean) {
-        if (!load && adapter.loadingIndex > -1) //if error
+        if (!load && initAdapter && adapter.loadingIndex > -1) //if error
             adapter.finishLoading()
     }
 
