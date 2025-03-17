@@ -23,6 +23,7 @@ import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.work.Data
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.bottomappbar.BottomAppBar
 import kotlinx.coroutines.Job
@@ -41,11 +42,36 @@ import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.service.LoaderWorker
 import ru.neosvet.vestnewage.storage.DataBase
 import ru.neosvet.vestnewage.storage.DevStorage
-import ru.neosvet.vestnewage.utils.*
+import ru.neosvet.vestnewage.utils.AdsUtils
+import ru.neosvet.vestnewage.utils.Const
+import ru.neosvet.vestnewage.utils.ErrorUtils
+import ru.neosvet.vestnewage.utils.LaunchUtils
+import ru.neosvet.vestnewage.utils.NotificationUtils
+import ru.neosvet.vestnewage.utils.PromUtils
+import ru.neosvet.vestnewage.utils.ScreenUtils
+import ru.neosvet.vestnewage.utils.WordsUtils
 import ru.neosvet.vestnewage.view.activity.BrowserActivity.Companion.openReader
-import ru.neosvet.vestnewage.view.basic.*
+import ru.neosvet.vestnewage.view.basic.BottomAnim
+import ru.neosvet.vestnewage.view.basic.NeoFragment
+import ru.neosvet.vestnewage.view.basic.NeoScrollBar
+import ru.neosvet.vestnewage.view.basic.NeoSnackbar
+import ru.neosvet.vestnewage.view.basic.NeoToast
+import ru.neosvet.vestnewage.view.basic.StatusButton
 import ru.neosvet.vestnewage.view.dialog.SetNotifDialog
-import ru.neosvet.vestnewage.view.fragment.*
+import ru.neosvet.vestnewage.view.fragment.BookFragment
+import ru.neosvet.vestnewage.view.fragment.CabinetFragment
+import ru.neosvet.vestnewage.view.fragment.CalendarFragment
+import ru.neosvet.vestnewage.view.fragment.HelpFragment
+import ru.neosvet.vestnewage.view.fragment.HomeFragment
+import ru.neosvet.vestnewage.view.fragment.JournalFragment
+import ru.neosvet.vestnewage.view.fragment.MarkersFragment
+import ru.neosvet.vestnewage.view.fragment.MenuFragment
+import ru.neosvet.vestnewage.view.fragment.NewFragment
+import ru.neosvet.vestnewage.view.fragment.SearchFragment
+import ru.neosvet.vestnewage.view.fragment.SettingsFragment
+import ru.neosvet.vestnewage.view.fragment.SiteFragment
+import ru.neosvet.vestnewage.view.fragment.SummaryFragment
+import ru.neosvet.vestnewage.view.fragment.WelcomeFragment
 import ru.neosvet.vestnewage.view.fragment.WelcomeFragment.ItemClicker
 import ru.neosvet.vestnewage.viewmodel.MainToiler
 import ru.neosvet.vestnewage.viewmodel.state.BasicState
@@ -241,11 +267,20 @@ class MainActivity : AppCompatActivity(), ItemClicker {
         Urls.restore()
         utils = LaunchUtils(this)
         utils.checkAdapterNewVersion()
-        utils.openLink(intent)?.let {
-            if (it.tab == -1) exit()
-            firstTab = it.tab
-            firstSection = it.section
-            return
+        try {
+            utils.openLink(intent)?.let {
+                if (it.tab == -1) exit()
+                firstTab = it.tab
+                firstSection = it.section
+                return
+            }
+        } catch (e: Exception) {
+            val utils = ErrorUtils(e)
+            val d = Data.Builder()
+                .putString(Const.TASK, "LaunchUtils")
+                .putString("Data", intent.data.toString())
+                .putString("Path", intent.data?.path.toString())
+            toiler.setPublicState(utils.getErrorState(d.build()))
         }
         firstSection = helper.getFirstSection()
         if (utils.isNeedLoad) {
@@ -585,6 +620,8 @@ class MainActivity : AppCompatActivity(), ItemClicker {
                     frWelcome = WelcomeFragment.newInstance(false, 0)
                 frWelcome?.list?.addAll(state.list)
             }
+
+            is BasicState.Error -> setError(state)
         }
     }
 

@@ -3,6 +3,8 @@ package ru.neosvet.vestnewage.viewmodel
 import android.content.Context
 import android.database.Cursor
 import androidx.work.Data
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import okhttp3.Request
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
@@ -23,6 +25,7 @@ import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
 import ru.neosvet.vestnewage.viewmodel.state.BasicState
 import ru.neosvet.vestnewage.viewmodel.state.ListState
 import ru.neosvet.vestnewage.viewmodel.state.MainState
+import ru.neosvet.vestnewage.viewmodel.state.NeoState
 import java.io.BufferedReader
 import java.io.InputStreamReader
 
@@ -41,6 +44,13 @@ class MainToiler : NeoToiler() {
 
     override suspend fun defaultState() {
         postState(MainState.FirstRun(withSplash))
+    }
+
+    fun setPublicState(state: NeoState) {
+        scope.launch {
+            delay(3000)
+            postState(state)
+        }
     }
 
     override suspend fun doLoad() {
