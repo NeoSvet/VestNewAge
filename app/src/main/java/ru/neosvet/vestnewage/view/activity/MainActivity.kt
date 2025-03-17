@@ -19,6 +19,7 @@ import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.core.view.get
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.ViewModelProvider
@@ -195,7 +196,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
 
     private fun setBottomPanel() = helper.bottomBar?.let { bar ->
         loadMenu(bar)
-        val menuView = bar.menu.getItem(0).actionView as ActionMenuView
+        val menuView = bar.menu[0].actionView as ActionMenuView
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
             menuView.tooltipText = getString(R.string.menu)
         helper.tvNew = menuView.findViewById(R.id.tvNew)
@@ -806,7 +807,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
     }
 
     fun changeMenu(index: Int, item: MenuItem) = helper.bottomBar?.let { bar ->
-        val bottomItem = bar.menu.getItem(index + 1)
+        val bottomItem = bar.menu[index + 1]
         bottomItem.title = item.title
         bottomItem.icon = ContextCompat.getDrawable(this, item.image)
     }
@@ -816,7 +817,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
         var i = 1
         helper.setBottomMenu(home.loadMenu(true))
         helper.bottomMenu.forEach {
-            val item = bar.menu.getItem(i)
+            val item = bar.menu[i]
             val m = if (it == Section.HOME)
                 MenuItem(R.drawable.ic_home, getString(R.string.home_screen))
             else home.getItem(it)

@@ -2,9 +2,12 @@ package ru.neosvet.vestnewage.viewmodel
 
 import android.content.Context
 import android.database.Cursor
+import androidx.core.content.edit
 import androidx.work.Data
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import okhttp3.Request
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
@@ -70,30 +73,32 @@ class MainToiler : NeoToiler() {
         var time: Long
         val storage = PageStorage()
         var cursor: Cursor
-        var s = br.readLine()
         val list = mutableListOf<BasicItem>()
         val loader = PageLoader(client)
         var isUpdate = false
-        while (s != Const.END) {
-            time = s.toLong()
-            s = br.readLine() //link
-            storage.open(s)
-            cursor = storage.getPage(s)
-            if (cursor.moveToFirst()) {
-                val iTime = cursor.getColumnIndex(Const.TIME)
-                if (time > cursor.getLong(iTime)) {
-                    isUpdate = true
-                    loader.download(s, true)
-                    val iTitle = cursor.getColumnIndex(Const.TITLE)
-                    list.add(BasicItem(cursor.getString(iTitle), s).apply {
-                        des = updatedPage
-                    })
+        withContext(Dispatchers.IO) {
+            var s = br.readLine()
+            while (s != Const.END) {
+                time = s.toLong()
+                s = br.readLine() //link
+                storage.open(s)
+                cursor = storage.getPage(s)
+                if (cursor.moveToFirst()) {
+                    val iTime = cursor.getColumnIndex(Const.TIME)
+                    if (time > cursor.getLong(iTime)) {
+                        isUpdate = true
+                        loader.download(s, true)
+                        val iTitle = cursor.getColumnIndex(Const.TITLE)
+                        list.add(BasicItem(cursor.getString(iTitle), s).apply {
+                            des = updatedPage
+                        })
+                    }
                 }
+                s = br.readLine()
+                storage.close()
             }
-            s = br.readLine()
-            storage.close()
+            br.close()
         }
-        br.close()
         if (isUpdate) {
             val styleLoader = StyleLoader()
             styleLoader.download(false)
@@ -120,9 +125,7 @@ class MainToiler : NeoToiler() {
     private fun reInitProm(timeDiff: Int) {
         val pref = App.context.getSharedPreferences(PromUtils.TAG, Context.MODE_PRIVATE)
         if (timeDiff != pref.getInt(Const.TIMEDIFF, 0)) {
-            val editor = pref.edit()
-            editor.putInt(Const.TIMEDIFF, timeDiff)
-            editor.apply()
+            pref.edit { putInt(Const.TIMEDIFF, timeDiff) }
             val time = pref.getInt(Const.TIME, Const.TURN_OFF)
             if (time != Const.TURN_OFF) {
                 val prom = PromUtils(null)

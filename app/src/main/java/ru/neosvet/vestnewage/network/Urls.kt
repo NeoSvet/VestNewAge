@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.widget.Toast
+import androidx.core.net.toUri
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.NeoException
@@ -221,7 +222,7 @@ object Urls {
         val emptyBrowserIntent = Intent(Intent.ACTION_VIEW)
         emptyBrowserIntent.data = Uri.fromParts("http", "", null)
         val targetIntent = Intent(Intent.ACTION_VIEW)
-        targetIntent.data = Uri.parse(url)
+        targetIntent.data = url.toUri()
         targetIntent.selector = emptyBrowserIntent
         targetIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         App.context.startActivity(targetIntent)
@@ -231,7 +232,7 @@ object Urls {
     fun openInApps(url: String) {
         try {
             val intent = Intent(Intent.ACTION_VIEW)
-            intent.data = Uri.parse(url)
+            intent.data = url.toUri()
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             App.context.startActivity(intent)
         } catch (e: java.lang.Exception) {

@@ -8,7 +8,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.CalendarItem
-import ru.neosvet.vestnewage.storage.DataBase
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.helper.DateHelper
 import ru.neosvet.vestnewage.loader.CalendarLoader
@@ -17,6 +16,7 @@ import ru.neosvet.vestnewage.loader.basic.LoadHandlerLite
 import ru.neosvet.vestnewage.loader.page.PageLoader
 import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.network.Urls
+import ru.neosvet.vestnewage.storage.DataBase
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Files
@@ -245,9 +245,7 @@ class CalendarToiler : NeoToiler(), LoadHandlerLite {
         }
         cursor.close()
         storage.close()
-        if (empty)
-            return false
-        return true
+        return !empty
     }
 
     private fun getIndexByDay(d: Int): Int {

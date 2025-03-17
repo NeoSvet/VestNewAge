@@ -15,7 +15,7 @@ class HTMLElem {
                 value.trim { it <= ' ' } else value
         }
 
-    constructor() {}
+    constructor()
 
     constructor(tag: String) {
         this.tag = tag
