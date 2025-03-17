@@ -43,8 +43,11 @@ class PageLoader(private val client: NeoClient) : Loader {
         val page = PageParser(client)
         page.load(Urls.Page + link, "")
         if (singlePage) storage.deleteParagraphs(storage.getPageId(link))
+        val fix = link.contains("02.02.20") || link.contains("16.01.19") ||
+                link.contains("08.10.18")
         var id = 0
         var par = ""
+        var hasNoind = false
         var s: String? = page.currentElem
         val time = System.currentTimeMillis()
         do {
@@ -55,6 +58,9 @@ class PageLoader(private val client: NeoClient) : Loader {
                 }
             }
             if (page.isHead) {
+                if (fix && s?.contains("02.02.20") == true)
+                    s = s?.replace("20.20", "2020")
+                hasNoind = false
                 s = getTitle(s, storage.name)
                 if (id > 0) storage.insertParagraph(
                     id, "<p class='noind'>" + App.context.getString(R.string.on_same_day) +
@@ -64,9 +70,23 @@ class PageLoader(private val client: NeoClient) : Loader {
                 if (exists) storage.deleteParagraphs(id)
                 s = page.nextElem
             }
-            s?.let {
-                if (it.fromHTML.isNotEmpty())
-                    storage.insertParagraph(id, it)
+            s?.let { e ->
+                if (!hasNoind || e.contains("noind")) {
+                    if (e.fromHTML.isNotEmpty())
+                        storage.insertParagraph(id, e)
+                }
+                if (fix && hasNoind) {
+                    hasNoind = false
+                    s = if (e.startsWith("<p><br>")) {
+                        //<p><br>Дополнение к Катрену через 5 часов от Создателя:</p> (16.01.19)
+                        "<p class='noind'><strong" + e.substring(6, e.length - 2) + "strong></p>"
+                    } else if (e.contains(":<"))//<p>Дополнение:</p> (08.10.18)
+                        "<p class='noind'" + e.substring(2)
+                    else null
+                    s?.let { storage.insertParagraph(id, it) }
+                }
+                if (fix && e.contains("noind"))
+                    hasNoind = true //for ignore Дополнение Информации от Создателя (02.02.20)
             }
             s = page.nextElem
         } while (s != null)
@@ -118,11 +138,11 @@ class PageLoader(private val client: NeoClient) : Loader {
         if (line == null) return ""
         var s = line.fromHTML.replace(".20", ".")
         if (s.contains(name)) {
-            s = s.substring(9)
+            s = s.substring(9).replace(Const.KV_CLOSE, "")
             if (s.contains("№"))
-                s = s.substring(s.indexOf("№"), s.length - 1)
+                s = s.substring(s.indexOf("№"))
             else if (s.contains(Const.KV_OPEN))
-                s = s.substring(s.indexOf(Const.KV_OPEN) + 1, s.length - 1)
+                s = s.substring(s.indexOf(Const.KV_OPEN) + 1)
         }
         return s
     }
