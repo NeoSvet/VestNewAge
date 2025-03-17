@@ -2,6 +2,7 @@ package ru.neosvet.vestnewage.storage
 
 import android.annotation.SuppressLint
 import android.content.ContentValues
+import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
@@ -54,11 +55,15 @@ class AdditionStorage : DataBase.Parent {
         orderBy = DataBase.ID + DataBase.DESC + LIMIT + NeoPaging.ON_PAGE
     )
 
-    fun search(date: String) = db.query(
-        table = DataBase.ADDITION,
-        selection = Const.DESCRIPTION + DataBase.LIKE,
-        selectionArg = "${date}%"
-    )
+    fun search(date: String): Cursor {
+        val i = date.lastIndexOf(".")
+        val d = date.substring(0, i) + "%" + date.substring(i + 1) + "%"
+        return db.query(
+            table = DataBase.ADDITION,
+            selection = Const.DESCRIPTION + DataBase.LIKE,
+            selectionArg = d
+        )
+    }
 
     @SuppressLint("Range")
     fun getItem(id: String, withDate: Boolean): BasicItem? {
