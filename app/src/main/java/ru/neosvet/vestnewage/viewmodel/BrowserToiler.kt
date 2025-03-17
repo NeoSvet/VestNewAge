@@ -216,8 +216,7 @@ class BrowserToiler : NeoToiler() {
                 stream.writeInt(linkDay)
                 stream.close()
             }
-            if (reactionDay != linkDay)
-                reactionDay = linkDay
+            reactionDay = linkDay
         } else {
             linkDay = 0
             val f = Files.slash(Files.DATE)
@@ -230,7 +229,8 @@ class BrowserToiler : NeoToiler() {
             val id: Int
             var isNeedUpdate = false
             val d: DateUnit
-            var n = 1
+            var par = 1
+            var n: Int
             if (cursor.moveToFirst()) {
                 val iId = cursor.getColumnIndex(DataBase.ID)
                 id = cursor.getInt(iId)
@@ -268,10 +268,10 @@ class BrowserToiler : NeoToiler() {
                     s = cursor.getString(0)
                     if (poems) {
                         if (isNumPar && !s.contains("noind")) {
-                            bw.write(PAR_POEM)
-                            bw.write("$n. ")
-                            n++
-                            bw.write(s.substring(3))
+                            n = s.indexOf(">") + 1
+                            s = s.substring(0, n) + "$par. " + s.substring(n)
+                            par++
+                            bw.write(s)
                         } else {
                             if (s.contains("href")) nextLink = s
                             bw.write(s)
@@ -296,7 +296,7 @@ class BrowserToiler : NeoToiler() {
                     if (BrowserHelper.showReaction)
                         reactionContent = searchReaction()
                     bw.write("<label><input type='checkbox' onchange='NeoInterface.")
-                    bw.write("ChangeReaction(this.checked ? true : false);'");
+                    bw.write("ChangeReaction(this.checked ? true : false);'")
                     if (BrowserHelper.showReaction) bw.write(" checked>")
                     else bw.write(">")
                     bw.write(strings.showReaction + "</label>")
