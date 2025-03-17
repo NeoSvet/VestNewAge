@@ -3,7 +3,9 @@ package ru.neosvet.vestnewage.viewmodel
 import android.content.ContentValues
 import android.content.Context
 import androidx.work.Data
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DateUnit
@@ -64,7 +66,6 @@ class BrowserToiler : NeoToiler() {
     private var idPage = ""
     private var reactionDay = 0
     private var reactionPosition = 0
-    private var reactionContent = ""
     private val pageLoader: PageLoader by lazy {
         PageLoader(NeoClient())
     }
@@ -181,11 +182,12 @@ class BrowserToiler : NeoToiler() {
                 reLoad()
             } else if (isRefresh.not())
                 p = addJournal()
-            if (withOutPosition) {
+            if (reactionPosition > 0)
+                p = -reactionPosition.toFloat()
+            else if (withOutPosition) {
                 p = 0f
                 withOutPosition = false
-            } else if (reactionContent.isNotEmpty())
-                p = -reactionPosition.toFloat()
+            }
             postState(
                 BrowserState.Primary(
                     url = FILE + file.toString(),
@@ -207,138 +209,146 @@ class BrowserToiler : NeoToiler() {
     private suspend fun generatePage(file: File): Boolean { //isNeedUpdate
         val linkDay: Int
         if (link.hasDate) {
-            val output = App.context.openFileOutput(Files.DATE, Context.MODE_PRIVATE)
-            val stream = DataOutputStream(BufferedOutputStream(output))
             linkDay = link.dateFromLink.timeInDays
-            stream.writeInt(linkDay)
-            stream.close()
-            if (reactionDay != linkDay) {
-                reactionContent = ""
-                reactionDay = linkDay
+            withContext(Dispatchers.IO) {
+                val output = App.context.openFileOutput(Files.DATE, Context.MODE_PRIVATE)
+                val stream = DataOutputStream(BufferedOutputStream(output))
+                stream.writeInt(linkDay)
+                stream.close()
             }
+            if (reactionDay != linkDay)
+                reactionDay = linkDay
         } else {
             linkDay = 0
-            reactionContent = ""
             val f = Files.slash(Files.DATE)
             if (f.exists()) f.delete()
         }
-        val bw = BufferedWriter(FileWriter(file))
-        storage.open(link)
-        var cursor = storage.getPage(link)
-        val id: Int
-        var isNeedUpdate = false
-        val d: DateUnit
-        var n = 1
-        if (cursor.moveToFirst()) {
-            val iId = cursor.getColumnIndex(DataBase.ID)
-            id = cursor.getInt(iId)
-            val iTitle = cursor.getColumnIndex(Const.TITLE)
-            val s = storage.getPageTitle(cursor.getString(iTitle), link)
-            val iTime = cursor.getColumnIndex(Const.TIME)
-            d = DateUnit.putMills(cursor.getLong(iTime))
-            if (storage.isArticle) //обновлять только статьи
-                isNeedUpdate =
-                    DateUnit.initNow().timeInSeconds - d.timeInSeconds > PERIOD_FOR_REFRESH
-            bw.write("<html><head>\n<meta http-equiv='Content-Type' content='text/html; charset=UTF-8'>\n")
-            bw.write("<title>")
-            bw.write(s)
-            bw.write("</title>\n")
-            bw.write("<link rel='stylesheet' type='text/css' href='")
-            bw.flush()
-            bw.write(STYLE.substring(1))
-            bw.write("'>\n</head><body>\n<h1 class='page-title' id='title'>")
-            bw.write(s)
-            bw.write("</h1>\n")
-            bw.flush()
-        } else {
-            //заголовка нет - значит нет и страницы
-            //сюда никогда не попадет, т.к. выше есть проверка existsPage
-            cursor.close()
-            return isNeedUpdate
-        }
-        cursor.close()
-        cursor = storage.getParagraphs(id)
-        nextLink = ""
-        var s: String
-        val poems = link.isPoem
-        if (cursor.moveToFirst()) {
-            do {
-                s = cursor.getString(0)
-                if (poems) {
-                    if (isNumPar && !s.contains("noind")) {
-                        bw.write(PAR_POEM)
-                        bw.write("$n. ")
-                        n++
-                        bw.write(s.substring(3))
-                    } else {
-                        if (s.contains("href")) nextLink = s
-                        bw.write(s)
-                    }
-                } else bw.write(s)
-                bw.write(Const.N)
+        return withContext(Dispatchers.IO) {
+            val bw = BufferedWriter(FileWriter(file))
+            storage.open(link)
+            var cursor = storage.getPage(link)
+            val id: Int
+            var isNeedUpdate = false
+            val d: DateUnit
+            var n = 1
+            if (cursor.moveToFirst()) {
+                val iId = cursor.getColumnIndex(DataBase.ID)
+                id = cursor.getInt(iId)
+                val iTitle = cursor.getColumnIndex(Const.TITLE)
+                val s = storage.getPageTitle(cursor.getString(iTitle), link)
+                val iTime = cursor.getColumnIndex(Const.TIME)
+                d = DateUnit.putMills(cursor.getLong(iTime))
+                if (storage.isArticle) //обновлять только статьи
+                    isNeedUpdate =
+                        DateUnit.initNow().timeInSeconds - d.timeInSeconds > PERIOD_FOR_REFRESH
+                bw.write("<html><head>\n<meta http-equiv='Content-Type' content='text/html; charset=UTF-8'>\n")
+                bw.write("<title>")
+                bw.write(s)
+                bw.write("</title>\n")
+                bw.write("<link rel='stylesheet' type='text/css' href='")
                 bw.flush()
-            } while (cursor.moveToNext())
-        }
-        cursor.close()
-        bw.write("<div style='margin-top:20px' class='print2'>\n")
-        if (isPaging) {
-            bw.write(SCRIPT)
-            bw.write("PrevPage();' value='" + strings.toPrev + "'/> | ")
-            bw.write(SCRIPT)
-            bw.write("NextPage();' value='" + strings.toNext + "'/>")
-            bw.write(Const.BR)
-            bw.write(Const.BR)
-            if (linkDay >= DateHelper.MIN_DAYS_REACTIONS) {
-                if (BrowserHelper.showReaction) searchReaction()
-                bw.write("<label><input type='checkbox' onchange='NeoInterface.")
-                bw.write("ChangeReaction(this.checked ? true : false);'");
-                if (BrowserHelper.showReaction) bw.write(" checked>")
-                else bw.write(">")
-                bw.write(strings.showReaction + "</label>")
+                bw.write(STYLE.substring(1))
+                bw.write("'>\n</head><body>\n<h1 class='page-title' id='title'>")
+                bw.write(s)
+                bw.write("</h1>\n")
+                bw.flush()
+            } else {
+                //заголовка нет - значит нет и страницы
+                //сюда никогда не попадет, т.к. выше есть проверка existsPage
+                cursor.close()
+                return@withContext isNeedUpdate
+            }
+            cursor.close()
+            cursor = storage.getParagraphs(id)
+            nextLink = ""
+            var s: String
+            val poems = link.isPoem
+            if (cursor.moveToFirst()) {
+                do {
+                    s = cursor.getString(0)
+                    if (poems) {
+                        if (isNumPar && !s.contains("noind")) {
+                            bw.write(PAR_POEM)
+                            bw.write("$n. ")
+                            n++
+                            bw.write(s.substring(3))
+                        } else {
+                            if (s.contains("href")) nextLink = s
+                            bw.write(s)
+                        }
+                    } else bw.write(s)
+                    bw.write(Const.N)
+                    bw.flush()
+                } while (cursor.moveToNext())
+            }
+            cursor.close()
+            var reactionContent = ""
+            bw.write("<div style='margin-top:20px' class='print2'>\n")
+            if (isPaging) {
+                bw.write(SCRIPT)
+                bw.write("PrevPage();' value='" + strings.toPrev + "'/> | ")
+                bw.write(SCRIPT)
+                bw.write("NextPage();' value='" + strings.toNext + "'/>")
                 bw.write(Const.BR)
-                if (BrowserHelper.showReaction && reactionContent.isEmpty()) {
-                    bw.write(strings.notFoundReaction)
+                bw.write(Const.BR)
+                if (linkDay >= DateHelper.MIN_DAYS_REACTIONS) {
+//TODO if showReaction==true && reactionPosition==0 then calc reactionPosition?
+                    if (BrowserHelper.showReaction)
+                        reactionContent = searchReaction()
+                    bw.write("<label><input type='checkbox' onchange='NeoInterface.")
+                    bw.write("ChangeReaction(this.checked ? true : false);'");
+                    if (BrowserHelper.showReaction) bw.write(" checked>")
+                    else bw.write(">")
+                    bw.write(strings.showReaction + "</label>")
+                    bw.write(Const.BR)
+                    if (BrowserHelper.showReaction && reactionContent.isEmpty()) {
+                        bw.write(strings.notFoundReaction)
+                        bw.write(Const.BR)
+                    }
                     bw.write(Const.BR)
                 }
-                bw.write(Const.BR)
+                bw.flush()
             }
-            bw.flush()
+            when {
+                isDoctrine -> {
+                    if (link.isDoctrineBook)
+                        bw.write(strings.doctrinePages + link.substring(Const.DOCTRINE.length))
+                    else bw.write(
+                        strings.doctrineFuture +
+                                link.replace(Const.DOCTRINE, Urls.DOCTRINE)
+                    )
+                    bw.write(strings.copyright)
+                    bw.write(DateUnit.initToday().year.toString() + Const.BR)
+                    if (link.isDoctrineBook) bw.write(strings.editionOf + d.toString())
+                    else bw.write(strings.publicationOf + d.toString())
+                }
+
+                isHolyRus -> {
+                    bw.write(strings.holyRusPages + link.substring(Const.HOLY_RUS.length))
+                    bw.write(strings.copyright)
+                    bw.write(DateUnit.initToday().year.toString() + Const.BR)
+                    bw.write(strings.editionOf + d.toString())
+                }
+
+                link.contains("print") -> { // материалы с сайта Откровений
+                    bw.write(strings.copyright)
+                    bw.write(d.year.toString() + Const.BR)
+                }
+
+                else -> {
+                    val url = Urls.Site + link
+                    bw.write(LINK_FORMAT.format(url, url))
+                    bw.write(strings.copyright)
+                    bw.write(d.year.toString() + Const.BR)
+                    bw.write(strings.downloaded + d.toString())
+                }
+            }
+            bw.write("\n</div>")
+            if (reactionContent.isNotEmpty()) bw.write(reactionContent)
+            bw.write("</body></html>")
+            bw.close()
+            isNeedUpdate
         }
-        when {
-            isDoctrine -> {
-                if (link.isDoctrineBook) bw.write(strings.doctrinePages + link.substring(Const.DOCTRINE.length))
-                else bw.write(strings.doctrineFuture + link.replace(Const.DOCTRINE, Urls.DOCTRINE))
-                bw.write(strings.copyright)
-                bw.write(DateUnit.initToday().year.toString() + Const.BR)
-                if (link.isDoctrineBook) bw.write(strings.editionOf + d.toString())
-                else bw.write(strings.publicationOf + d.toString())
-            }
-
-            isHolyRus -> {
-                bw.write(strings.holyRusPages + link.substring(Const.HOLY_RUS.length))
-                bw.write(strings.copyright)
-                bw.write(DateUnit.initToday().year.toString() + Const.BR)
-                bw.write(strings.editionOf + d.toString())
-            }
-
-            link.contains("print") -> { // материалы с сайта Откровений
-                bw.write(strings.copyright)
-                bw.write(d.year.toString() + Const.BR)
-            }
-
-            else -> {
-                val url = Urls.Site + link
-                bw.write(LINK_FORMAT.format(url, url))
-                bw.write(strings.copyright)
-                bw.write(d.year.toString() + Const.BR)
-                bw.write(strings.downloaded + d.toString())
-            }
-        }
-        bw.write("\n</div>")
-        if (reactionContent.isNotEmpty()) bw.write(reactionContent)
-        bw.write("</body></html>")
-        bw.close()
-        return isNeedUpdate
     }
 
     private fun preparingStyle(): Boolean {
@@ -513,44 +523,42 @@ class BrowserToiler : NeoToiler() {
         scope.launch {
             if (heightPage == -1) {
                 BrowserHelper.showReaction = false
-                reactionContent = ""
-                openPage(true)
-                return@launch
+            } else {
+                BrowserHelper.showReaction = true
+                reactionPosition = heightPage
             }
-            BrowserHelper.showReaction = true
-            reactionPosition = heightPage
-            searchReaction()
-            if (reactionContent.isEmpty())
-                postState(BasicState.Message(strings.notFoundReaction))
-            else openPage(true)
+            withOutPosition = true
+            openPage(true)
         }
     }
 
-    private suspend fun searchReaction() {
+    private suspend fun searchReaction(): String {
         val date = DateUnit.putDays(reactionDay).toShortDateString()
         val storage = AdditionStorage()
         storage.open()
-        startSearchReaction(storage, date)
-        if (reactionContent.isEmpty() && OnlineObserver.isOnline.value) {
+        var s = startSearchReaction(storage, date)
+        if (s.isEmpty() && OnlineObserver.isOnline.value) {
             postState(BasicState.Loading)
             val loader = AdditionLoader(NeoClient())
             loader.load(storage, 0)
-            startSearchReaction(storage, date)
-            if (reactionContent.isEmpty()) {
+            s = startSearchReaction(storage, date)
+            if (s.isEmpty()) {
                 loader.loadAll(null)
-                startSearchReaction(storage, date)
+                s = startSearchReaction(storage, date)
             }
         }
         storage.close()
+        return s
     }
 
-    private fun startSearchReaction(storage: AdditionStorage, date: String) {
+    private fun startSearchReaction(storage: AdditionStorage, date: String): String {
         val cursor = storage.search(date)
+        val sb = StringBuilder()
         if (cursor.moveToFirst()) {
             val iLink = cursor.getColumnIndex(Const.LINK)
             val iTitle = cursor.getColumnIndex(Const.TITLE)
             val iDes = cursor.getColumnIndex(Const.DESCRIPTION)
-            val sb = StringBuilder("<h3>")
+            sb.append("<h3>")
             sb.append(cursor.getString(iTitle))
             sb.append("</h3>")
             val s = cursor.getString(iDes)
@@ -582,9 +590,9 @@ class BrowserToiler : NeoToiler() {
                 sb.append("</a>")
                 sb.append("</div>")
             }
-            reactionContent = sb.toString()
-        } else reactionContent = ""
+        }
         cursor.close()
+        return sb.toString()
     }
 
 }
