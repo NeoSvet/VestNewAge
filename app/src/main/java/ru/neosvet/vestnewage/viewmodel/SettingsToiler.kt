@@ -179,6 +179,7 @@ class SettingsToiler : NeoToiler() {
             AlarmClock.EXTRA_MESSAGE,
             App.context.getString(R.string.prom_for_soul_unite)
         )
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         App.context.startActivity(intent)
     }
 
@@ -189,6 +190,7 @@ class SettingsToiler : NeoToiler() {
             AlarmClock.ALARM_SEARCH_MODE_LABEL,
             App.context.getString(R.string.prom_for_soul_unite)
         )
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         App.context.startActivity(intent)
     }
 }

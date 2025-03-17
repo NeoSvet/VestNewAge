@@ -223,6 +223,7 @@ object Urls {
         val targetIntent = Intent(Intent.ACTION_VIEW)
         targetIntent.data = Uri.parse(url)
         targetIntent.selector = emptyBrowserIntent
+        targetIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         App.context.startActivity(targetIntent)
     }
 
