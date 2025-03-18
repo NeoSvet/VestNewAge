@@ -1,18 +1,18 @@
 package ru.neosvet.vestnewage.helper
 
 import android.content.Context
+import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.utils.Const
 
 class CabinetHelper(context: Context) {
     companion object {
         const val TAG = "Cabinet"
-        const val ALTER_URL = "https://neosvet.somee.com/api/otkr?page="
 
         var cookie = ""
         var isAlterPath = false
 
         fun codingUrl(url: String) = if (isAlterPath) {
-            ALTER_URL + url.substring(url.indexOf(".com") + 4)
+            Urls.AlterUrl + url.substring(url.indexOf(".com") + 4)
         } else url
     }
 

@@ -107,7 +107,7 @@ class CabinetClient(
                 view.loadUrl(firstUrl)
                 return
             }
-            if (!url.contains(CabinetHelper.ALTER_URL)) {
+            if (!url.contains(Urls.AlterUrl)) {
                 view.loadUrl(firstUrl)
                 return
             }

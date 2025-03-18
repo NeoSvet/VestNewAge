@@ -46,7 +46,7 @@ class CabinetActivity : AppCompatActivity(), CabinetClient.Parent {
         manager.removeAllCookies {
             manager.setCookie(Urls.MainSite, CabinetHelper.cookie)
             if (CabinetHelper.isAlterPath)
-                manager.setCookie(CabinetHelper.ALTER_URL, CabinetHelper.cookie)
+                manager.setCookie(Urls.AlterUrl, CabinetHelper.cookie)
             wvBrowser.loadUrl(firstUrl)
         }
     }

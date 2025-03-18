@@ -18,7 +18,7 @@ import java.io.FileWriter
 import java.io.InputStreamReader
 
 object Urls {
-    private var TIME = 1684586127068L
+    private var TIME = 1742276438000L
     private const val FILE = "/urls.txt"
     const val PRED_LINK = "/2004/predislovie.html"
     const val DOCTRINE = "https://doktrina.info/"
@@ -48,7 +48,8 @@ object Urls {
         "novosti.html", "", //ADS 30 31
         "databases_vna", "vna/databases", //DATABASES 32 33
         "vna/svyataya-rus/", "", //HOLY_RUS_BASE 34 35
-        "https://doktrina.info/svyataya-rus/"  //HOLY_RUS_SITE 36
+        "https://doktrina.info/svyataya-rus/",  //HOLY_RUS_SITE 36
+        "https://neosvet.somee.com/api/otkr?page=" //ALTER_URL 37
     )
 
     @JvmStatic
@@ -103,6 +104,9 @@ object Urls {
 
     val WebPage: String
         get() = if (isSiteCom) URL[13].ifEmpty { URL[12] } else URL[12]
+
+    val AlterUrl: String
+        get() = URL[37]
 
     //-------- from official site ---------------------------------------------------------------
     @JvmStatic
@@ -205,12 +209,10 @@ object Urls {
             stream.close()
             val file = Files.file(FILE)
             if (file.exists()) file.delete()
-            val wr = BufferedWriter(FileWriter(file))
-            wr.appendLine(TIME.toString())
-            URL.forEach {
-                wr.appendLine(it)
-            }
-            wr.close()
+            val bw = BufferedWriter(FileWriter(file))
+            bw.appendLine(TIME.toString())
+            URL.forEach { bw.appendLine(it) }
+            bw.close()
         } catch (e: Exception) {
             if (e is NeoException && isCom == isSiteCom)
                 update(client, !isSiteCom)
