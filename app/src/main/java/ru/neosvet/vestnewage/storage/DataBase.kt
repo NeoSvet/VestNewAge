@@ -81,17 +81,16 @@ class DataBase(
         else -1
     }
 
-    /*fun update(
+    fun update(
         table: String,
         row: ContentValues,
         whereClause: String,
         whereArgs: Array<String>
     ): Int {
         checkWritable()
-        return if (db.isOpen)
-            db.update(table, row, whereClause, whereArgs)
+        return if (db.isOpen) db.update(table, row, whereClause, whereArgs)
         else -1
-    }*/
+    }
 
     fun update(table: String, row: ContentValues, whereClause: String, whereArg: String): Int {
         checkWritable()
@@ -138,10 +137,9 @@ class DataBase(
         else -1
     }
 
-    /*fun delete(table: String, whereClause: String, whereArgs: Array<String>): Int {
+    fun delete(table: String, whereClause: String, whereArgs: Array<String>): Int {
         checkWritable()
-        return if (db.isOpen)
-            db.delete(table, whereClause, whereArgs)
+        return if (db.isOpen) db.delete(table, whereClause, whereArgs)
         else -1
-    }*/
+    }
 }

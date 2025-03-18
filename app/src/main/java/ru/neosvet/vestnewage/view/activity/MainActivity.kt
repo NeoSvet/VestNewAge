@@ -622,6 +622,13 @@ class MainActivity : AppCompatActivity(), ItemClicker {
                 frWelcome?.list?.addAll(state.list)
             }
 
+            is BasicState.Loading -> {
+                status.loadText()
+                status.setLoad(true)
+            }
+
+            is BasicState.Success -> status.setLoad(false)
+
             is BasicState.Error -> setError(state)
         }
     }

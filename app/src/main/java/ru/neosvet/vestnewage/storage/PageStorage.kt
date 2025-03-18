@@ -7,7 +7,12 @@ import android.database.sqlite.SQLiteDatabase
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DateUnit
-import ru.neosvet.vestnewage.utils.*
+import ru.neosvet.vestnewage.utils.Const
+import ru.neosvet.vestnewage.utils.date
+import ru.neosvet.vestnewage.utils.dateFromLink
+import ru.neosvet.vestnewage.utils.fromHTML
+import ru.neosvet.vestnewage.utils.hasDate
+import ru.neosvet.vestnewage.utils.isPoem
 import java.util.regex.Pattern
 
 class PageStorage : DataBase.Parent {
@@ -438,9 +443,53 @@ class PageStorage : DataBase.Parent {
 
     fun deletePages(links: List<String>) {
         links.forEach {
-            val id = getPageId(it)
-            deleteTitle(id)
-            deleteParagraphs(id)
+            deletePage(it)
         }
+    }
+
+    fun deletePage(link: String) {
+        val id = getPageId(link)
+        deleteTitle(id)
+        deleteParagraphs(id)
+    }
+
+    private fun getParagraph(id: Int, number: Int): String {
+        val cursor = getParagraphs(id)
+        var b = cursor.moveToFirst()
+        var s = ""
+        var i = 1
+        while (b && i < number) {
+            b = cursor.moveToNext()
+            i++
+        }
+        if (b) s = cursor.getString(0)
+        cursor.close()
+        return s
+    }
+
+    fun deleteParagraph(link: String, number: Int) {
+        val id = getPageId(link)
+        if (id == -1) return
+        val p = getParagraph(id, number)
+        db.delete(
+            table = DataBase.PARAGRAPH,
+            whereClause = DataBase.ID + DataBase.Q + " AND " + DataBase.PARAGRAPH + DataBase.Q,
+            whereArgs = arrayOf(id.toString(), p)
+        )
+    }
+
+    fun updateParagraph(link: String, number: Int, par: String) {
+        val id = getPageId(link)
+        if (id == -1) return
+        val p = getParagraph(id, number)
+        val cv = ContentValues()
+        cv.put(DataBase.ID, id)
+        cv.put(DataBase.PARAGRAPH, par)
+        db.update(
+            table = DataBase.PARAGRAPH,
+            row = cv,
+            whereClause = DataBase.ID + DataBase.Q + " AND " + DataBase.PARAGRAPH + DataBase.Q,
+            whereArgs = arrayOf(id.toString(), p)
+        )
     }
 }

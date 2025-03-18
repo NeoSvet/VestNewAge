@@ -22,6 +22,7 @@ import ru.neosvet.vestnewage.network.NetConst
 import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.utils.Const
+import ru.neosvet.vestnewage.utils.Files
 import ru.neosvet.vestnewage.utils.PromUtils
 import ru.neosvet.vestnewage.utils.WordsUtils
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
@@ -30,6 +31,9 @@ import ru.neosvet.vestnewage.viewmodel.state.ListState
 import ru.neosvet.vestnewage.viewmodel.state.MainState
 import ru.neosvet.vestnewage.viewmodel.state.NeoState
 import java.io.BufferedReader
+import java.io.BufferedWriter
+import java.io.FileReader
+import java.io.FileWriter
 import java.io.InputStreamReader
 
 class MainToiler : NeoToiler() {
@@ -65,6 +69,7 @@ class MainToiler : NeoToiler() {
         val hasNew = loader.loadDevAds()
         postState(MainState.Ads(hasNew, loader.warnIndex, timeDiff))
         loadNew()
+        loadPatch()
         postState(BasicState.Success)
     }
 
@@ -105,6 +110,50 @@ class MainToiler : NeoToiler() {
         }
         if (list.isNotEmpty())
             postState(ListState.Primary(list = list))
+    }
+
+    private suspend fun loadPatch() {
+        withContext(Dispatchers.IO) {
+            var number = 0
+            val file = Files.file("/patch")
+            if (file.exists()) {
+                val r = BufferedReader(FileReader(file))
+                number = r.readLine().toInt()
+                r.close()
+                file.delete()
+            }
+            val br = BufferedReader(InputStreamReader(client.getStream(Urls.DevSite + "patch.txt")))
+            val newNumber = br.readLine().toInt()
+            if (number == newNumber) {
+                br.close()
+                return@withContext
+            }
+            postState(BasicState.Loading)
+            try {
+                val storage = PageStorage()
+                var link: String
+                var p: String
+                var cmd = br.readLine()
+                while (cmd != Const.END) {
+                    link = br.readLine()
+                    p = br.readLine()
+                    storage.open(link)
+                    when (cmd) {
+                        "TITLE" -> storage.putTitle(p, link)
+                        "DELETE" -> storage.deletePage(link)
+                        "PUPD" -> storage.updateParagraph(link, p.toInt(), br.readLine())
+                        "PDEL" -> storage.deleteParagraph(link, p.toInt())
+                    }
+                    cmd = br.readLine()
+                }
+                storage.close()
+                br.close()
+                val bw = BufferedWriter(FileWriter(file))
+                bw.write(newNumber.toString())
+                bw.close()
+            } catch (_: Exception) {
+            }
+        }
     }
 
     private fun synchronizationTime(): Int {
