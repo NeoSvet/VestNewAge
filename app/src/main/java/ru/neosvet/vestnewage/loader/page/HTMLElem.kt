@@ -3,7 +3,7 @@ package ru.neosvet.vestnewage.loader.page
 import ru.neosvet.vestnewage.utils.fromHTML
 
 class HTMLElem {
-    var tag: String? = null
+    var tag = ""
     var par = ""
     var start = false
     var end = false

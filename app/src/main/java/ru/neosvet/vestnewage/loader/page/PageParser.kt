@@ -18,9 +18,9 @@ class PageParser(private val client: NeoClient) {
     val text: String
         get() = content.current().html.fromHTML
     val isHead: Boolean
-        get() = if (content.isNotEmpty) content.current().tag?.indexOf(Const.HEAD) == 0 else false
+        get() = if (content.isNotEmpty) content.current().tag.startsWith(Const.HEAD) else false
     val isImage: Boolean
-        get() = if (content.isNotEmpty) content.current().tag?.indexOf(Const.IMAGE) == 0 else false
+        get() = if (content.isNotEmpty) content.current().tag.startsWith(Const.IMAGE) else false
     val isSimple: Boolean
         get() = content.current().let { it.tag == Const.TEXT || (it.start.not() && it.end) }
 
@@ -74,6 +74,7 @@ class PageParser(private val client: NeoClient) {
                 sb.delete(sb.length - 10, sb.length)
         }
         var t = sb.toString()
+
         t = t.replace("&nbsp;", " ")
             .replace("<br> ", "<br>")
             .replace("<span> </span>", " ")
@@ -84,10 +85,10 @@ class PageParser(private val client: NeoClient) {
             .replace("</div>", "")
         val m = t.split("<".toRegex()).toTypedArray()
         var n: Int
+        var i = 0
         var elem: HTMLElem
         var wasNoind = false
         var startPar = false
-        var i = 0
         while (i < m.size) {
             var s = m[i].trim { it <= ' ' }
             if (s.isEmpty()) {
@@ -116,7 +117,7 @@ class PageParser(private val client: NeoClient) {
             if (s.indexOf(">") < n || n == -1)
                 n = s.indexOf(">")
             if (n == -1) n = s.length
-            if (s.indexOf("/") == 0) { //end tag
+            if (s.startsWith("/")) { //end tag
                 elem.tag = s.substring(1, n)
                 if (elem.tag == Const.PAR) startPar = false
                 if (content.isNotEmpty) {
@@ -141,7 +142,9 @@ class PageParser(private val client: NeoClient) {
             elem.end = false
             elem.tag = s.substring(0, n)
             elem.html = m[i].substring(m[i].indexOf(">") + 1)
-            when (elem.tag) {
+            if (elem.tag.startsWith(Const.HEAD))
+                wasNoind = false
+            else when (elem.tag) {
                 Const.LINK -> {
                     if (s.contains("data-ajax-url")) {
                         i++
@@ -192,9 +195,10 @@ class PageParser(private val client: NeoClient) {
                     if (s.contains(Const.CLASS)) {
                         n = s.indexOf(Const.CLASS)
                         s = s.substring(n, s.indexOf("'", n + Const.CLASS.length + 2) + 1)
-                        if (s.contains("poem") && url.contains("poem"))
+                        if (s.contains("poem") && url.contains("poem")) {
                             elem.par = ""
-                        else if (s.contains("noind")) {
+                            wasNoind = false
+                        } else if (s.contains("noind")) {
                             if (wasNoind) {
                                 val e = content.current()
                                 if (e.html.isEmpty()) {
@@ -213,7 +217,10 @@ class PageParser(private val client: NeoClient) {
                                 elem.par = s
                                 wasNoind = true
                             }
-                        } else elem.par = s
+                        } else {
+                            elem.par = s
+                            wasNoind = false
+                        }
                     }
                     if (s.contains(Const.STYLE)) {
                         n = s.indexOf(Const.STYLE)

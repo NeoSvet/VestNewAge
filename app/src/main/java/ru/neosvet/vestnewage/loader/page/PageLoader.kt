@@ -45,11 +45,17 @@ class PageLoader(private val client: NeoClient) : Loader {
         if (singlePage) storage.deleteParagraphs(storage.getPageId(link))
         val fix = link.contains("02.02.20") || link.contains("16.01.19") ||
                 link.contains("08.10.18")
-        var id = 0
+
         var par = ""
         var hasNoind = false
         var s: String? = page.currentElem
         val time = System.currentTimeMillis()
+        var id = link.indexOf("#")
+        val adr = if (id > 0) {
+            par = link.substring(id)
+            link.substring(0, id)
+        } else link
+        id = 0
         do {
             page.link?.let {
                 if (it.startsWith("name:")) {
@@ -64,16 +70,27 @@ class PageLoader(private val client: NeoClient) : Loader {
                 s = getTitle(s, storage.name)
                 if (id > 0) storage.insertParagraph(
                     id, "<p class='noind'>" + App.context.getString(R.string.on_same_day) +
-                            "<br><a href='${link + par}'>${s?.replace("“", "")}</a></p>"
+                            "<br><a href='${adr + par}'>${s?.replace("“", "")}</a></p>"
                 )
-                id = storage.putTitle(s!!, link + par, time)
+                id = storage.putTitle(s!!, adr + par, time)
                 if (exists) storage.deleteParagraphs(id)
                 s = page.nextElem
             }
-            s?.let { e ->
+            s?.let {
+                var e = if (it.contains("<br>"))
+                    it.replace(" <br>", "<br>").replace("<br> ", "<br>")
+                else it
                 if (!hasNoind || e.contains("noind")) {
-                    if (e.fromHTML.isNotEmpty())
+                    if (e.fromHTML.isNotEmpty()) {
+                        if (e.contains("Аминь") && !e.contains("noind")) {
+                            e = "<p class='noind'>" + e.substring(e.indexOf('>') + 1)
+                            page.nextElem?.let {
+                                e = e.substring(0, e.lastIndexOf("</"))
+                                e += "<br>" + it.substring(it.indexOf('>') + 1)
+                            }
+                        }
                         storage.insertParagraph(id, e)
+                    }
                 }
                 if (fix && hasNoind) {
                     hasNoind = false
