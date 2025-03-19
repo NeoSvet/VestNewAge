@@ -63,8 +63,8 @@ class ListHolder(
                 val p = BasicItem(it.first, link)
                 p.des = when {
                     link.contains(".jpg") -> ctx.getString(R.string.image)
-                    link.indexOf("mailto") == 0 -> ctx.getString(R.string.mail)
-                    link.indexOf(Urls.TelegramUrl) == 0 -> {
+                    link.startsWith("mailto") -> ctx.getString(R.string.mail)
+                    link.startsWith(Urls.TelegramUrl) -> {
                         p.title = ctx.getString(R.string.open_post)
                         "[Telegram]"
                     }

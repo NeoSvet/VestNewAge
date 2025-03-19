@@ -255,7 +255,7 @@ class SummaryFragment : NeoFragment(), PagingAdapter.Parent, NeoScrollBar.Host {
                 else if (item.link.isDigitsOnly())
                     Urls.openInApps(Urls.TelegramUrl + item.link)
                 else Urls.openInApps(item.link)
-            } else if (item.link.indexOf("http") == 0)
+            } else if (item.link.startsWith("http"))
                 Urls.openInBrowser(item.link)
             else {
                 openedReader = true

@@ -45,8 +45,8 @@ sealed class SearchRequest {
     ) : SearchRequest() {
         fun equals(helper: SearchHelper): Boolean =
             string == helper.request && isLetterCase == helper.isLetterCase && isEnding == helper.isEnding &&
-                    ((helper.mode != SearchEngine.MODE_TITLES && whereRaw.indexOf(Const.TITLE) != 0) ||
-                            (helper.mode == SearchEngine.MODE_TITLES && whereRaw.indexOf(Const.TITLE) == 0))
+                    ((helper.mode != SearchEngine.MODE_TITLES && !whereRaw.startsWith(Const.TITLE)) ||
+                            (helper.mode == SearchEngine.MODE_TITLES && whereRaw.startsWith(Const.TITLE)))
     }
 }
 

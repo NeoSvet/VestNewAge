@@ -104,7 +104,7 @@ class PageParser(private val client: NeoClient) {
                 i++
                 continue
             }
-            if (s.indexOf(Const.DIV) == 0 || s.indexOf(Const.SPAN) == 0) {
+            if (s.startsWith(Const.DIV) || s.startsWith(Const.SPAN)) {
                 s = s.substring(s.indexOf(">") + 1)
                 if (s.isNotEmpty())
                     content.current().html += s
@@ -164,7 +164,7 @@ class PageParser(private val client: NeoClient) {
                         elem.par = convertUrl(s.substring(n, s.indexOf("\"", n)))
                     else
                         elem.par = convertUrl(s.substring(n, s.indexOf("'", n)))
-                    if (elem.par.contains(".jpg") && elem.par.indexOf("/") == 0)
+                    if (elem.par.contains(".jpg") && elem.par.startsWith("/"))
                         elem.par = Urls.Site + elem.par.substring(1)
                     if (elem.html.isEmpty() && !elem.par.contains(".jpg")) {
                         s = elem.par.substring(elem.par.lastIndexOf("/") + 1)

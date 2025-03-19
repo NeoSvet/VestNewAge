@@ -239,7 +239,7 @@ object Urls {
             App.context.startActivity(intent)
         } catch (e: java.lang.Exception) {
             var s = url.substring(url.indexOf(":") + 1)
-            if (s.indexOf("/") == 0) s = s.substring(2)
+            if (s.startsWith("/")) s = s.substring(2)
             copyAddress(s)
         }
     }

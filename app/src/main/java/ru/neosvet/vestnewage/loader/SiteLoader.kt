@@ -2,17 +2,17 @@ package ru.neosvet.vestnewage.loader
 
 import android.content.ContentValues
 import ru.neosvet.vestnewage.data.BasicItem
-import ru.neosvet.vestnewage.storage.DataBase
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.data.SimpleItem
 import ru.neosvet.vestnewage.loader.page.PageParser
 import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.network.Urls
+import ru.neosvet.vestnewage.storage.DataBase
 import ru.neosvet.vestnewage.storage.DevStorage
 import ru.neosvet.vestnewage.storage.NewsStorage
+import ru.neosvet.vestnewage.storage.UnreadStorage
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Files
-import ru.neosvet.vestnewage.storage.UnreadStorage
 import ru.neosvet.vestnewage.utils.hasDate
 import ru.neosvet.vestnewage.viewmodel.SiteToiler
 import java.io.BufferedReader
@@ -224,7 +224,7 @@ class SiteLoader(
         var url = link
         if (url.contains("files") || url.contains(".mp3") || url.contains(".wma"))
             url = Urls.Site + url.substring(1)
-        if (url.indexOf("/") == 0) url = url.substring(1)
+        if (url.startsWith("/")) url = url.substring(1)
         if (item.link == "@") item.clear()
         item.addLink(head, url)
     }
