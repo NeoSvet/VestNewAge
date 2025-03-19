@@ -141,8 +141,9 @@ class MainToiler : NeoToiler() {
                     when (cmd) {
                         "TITLE" -> storage.putTitle(p, link)
                         "DELETE" -> storage.deletePage(link)
-                        "PUPD" -> storage.updateParagraph(link, p.toInt(), br.readLine())
-                        "PDEL" -> storage.deleteParagraph(link, p.toInt())
+                        "PUPD" -> storage.updateParagraph(link, p, br.readLine())
+                        "PADD" -> storage.addParagraph(link, p)
+                        "PDEL" -> storage.deleteParagraph(link, p)
                     }
                     cmd = br.readLine()
                 }

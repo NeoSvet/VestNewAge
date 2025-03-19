@@ -353,6 +353,20 @@ class PageStorage : DataBase.Parent {
         db.insert(DataBase.PARAGRAPH, cv)
     }
 
+    fun addParagraph(link: String, par: String) {
+        val id = getPageId(link)
+        if (id == -1) return
+        val cursor = db.query(
+            table = DataBase.PARAGRAPH,
+            selection = DataBase.ID + DataBase.Q + " AND " + DataBase.PARAGRAPH + DataBase.Q,
+            selectionArgs = arrayOf(id.toString(), par)
+        )
+        val needAdd = !cursor.moveToFirst()
+        cursor.close()
+        if (needAdd)
+            insertParagraph(id, par)
+    }
+
     private fun updateTitle(link: String, cv: ContentValues): Boolean =
         db.update(Const.TITLE, cv, Const.LINK + DataBase.Q, link) > 0
 
@@ -453,43 +467,27 @@ class PageStorage : DataBase.Parent {
         deleteParagraphs(id)
     }
 
-    private fun getParagraph(id: Int, number: Int): String {
-        val cursor = getParagraphs(id)
-        var b = cursor.moveToFirst()
-        var s = ""
-        var i = 1
-        while (b && i < number) {
-            b = cursor.moveToNext()
-            i++
-        }
-        if (b) s = cursor.getString(0)
-        cursor.close()
-        return s
-    }
-
-    fun deleteParagraph(link: String, number: Int) {
+    fun deleteParagraph(link: String, par: String) {
         val id = getPageId(link)
         if (id == -1) return
-        val p = getParagraph(id, number)
         db.delete(
             table = DataBase.PARAGRAPH,
             whereClause = DataBase.ID + DataBase.Q + " AND " + DataBase.PARAGRAPH + DataBase.Q,
-            whereArgs = arrayOf(id.toString(), p)
+            whereArgs = arrayOf(id.toString(), par)
         )
     }
 
-    fun updateParagraph(link: String, number: Int, par: String) {
+    fun updateParagraph(link: String, oldPar: String, newPar: String) {
         val id = getPageId(link)
         if (id == -1) return
-        val p = getParagraph(id, number)
         val cv = ContentValues()
         cv.put(DataBase.ID, id)
-        cv.put(DataBase.PARAGRAPH, par)
+        cv.put(DataBase.PARAGRAPH, newPar)
         db.update(
             table = DataBase.PARAGRAPH,
             row = cv,
             whereClause = DataBase.ID + DataBase.Q + " AND " + DataBase.PARAGRAPH + DataBase.Q,
-            whereArgs = arrayOf(id.toString(), p)
+            whereArgs = arrayOf(id.toString(), oldPar)
         )
     }
 }
