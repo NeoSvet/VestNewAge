@@ -23,14 +23,19 @@ import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.storage.DataBase
 import ru.neosvet.vestnewage.storage.JournalStorage
 import ru.neosvet.vestnewage.storage.PageStorage
-import ru.neosvet.vestnewage.utils.*
+import ru.neosvet.vestnewage.utils.Const
+import ru.neosvet.vestnewage.utils.Files
+import ru.neosvet.vestnewage.utils.date
+import ru.neosvet.vestnewage.utils.fromHTML
+import ru.neosvet.vestnewage.utils.hasDate
+import ru.neosvet.vestnewage.utils.isDoctrineBook
 import ru.neosvet.vestnewage.viewmodel.basic.BookStrings
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
 import ru.neosvet.vestnewage.viewmodel.state.BasicState
 import ru.neosvet.vestnewage.viewmodel.state.BookState
 import java.io.BufferedInputStream
 import java.io.DataInputStream
-import java.util.*
+import java.util.Random
 
 class BookToiler : NeoToiler(), LoadHandlerLite {
     private var selectedTab = BookTab.POEMS
@@ -195,9 +200,9 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
                     do {
                         s = cursor.getString(iLink)
                         t = cursor.getString(iTitle)
-                        if (t.contains(Const.KV_OPEN))
+                        if (!storage.isOldBook && t.contains(Const.KV_OPEN))
                             t = t.substring(t.indexOf(Const.KV_OPEN) + 1)
-                        if (s.hasDate && !t.contains(s.date))
+                        if (!t.hasDate && s.hasDate)
                             t += " (" + strings.from + " ${s.date})"
                         list.add(BasicItem(t, s))
                     } while (cursor.moveToNext())
