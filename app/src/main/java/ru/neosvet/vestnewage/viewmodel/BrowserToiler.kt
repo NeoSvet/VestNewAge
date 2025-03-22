@@ -338,8 +338,10 @@ class BrowserToiler : NeoToiler() {
                 }
 
                 else -> {
-                    val url = Urls.Site + link
-                    bw.write(LINK_FORMAT.format(url, url))
+                    if (!storage.isOldBook || Urls.isSiteCom) {
+                        val url = Urls.Site + link
+                        bw.write(LINK_FORMAT.format(url, url))
+                    }
                     bw.write(strings.copyright)
                     bw.write(d.year.toString() + Const.BR)
                     bw.write(strings.downloaded + d.toString())
