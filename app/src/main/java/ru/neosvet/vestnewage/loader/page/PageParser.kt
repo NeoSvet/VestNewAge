@@ -43,7 +43,7 @@ class PageParser(private val client: NeoClient) {
                 BufferedReader(InputStreamReader(stream), 1000)
             }
         }
-        if (url.contains("#"))
+        if (url.contains("#") && !url.contains("#1"))
             start = "a name=\"" + url.substring(url.indexOf("#") + 1)
         var line: String? = br.readLine()
         while (line != null) {
@@ -74,16 +74,16 @@ class PageParser(private val client: NeoClient) {
                 sb.delete(sb.length - 10, sb.length)
         }
         var t = sb.toString()
-
         t = t.replace("&nbsp;", " ")
             .replace("<br> ", "<br>")
+            .replace(" <br>", "<br>")
             .replace("<span> </span>", " ")
             .replace("b>", "strong>")
             .replace("</strong> <strong>", " ")
             .replace("em>", "i>")
             .replace("</span>", "")
             .replace("</div>", "")
-        val m = t.split("<".toRegex()).toTypedArray()
+        val m = t.split("<".toRegex())
         var n: Int
         var i = 0
         var elem: HTMLElem
@@ -159,7 +159,6 @@ class PageParser(private val client: NeoClient) {
                                 if (s.contains("\"")) s.substring(n, s.indexOf("\"", n))
                                 else s.substring(n, s.indexOf("'", n))
                         elem.end = true
-                        i++
                         content.add(elem)
                         continue
                     }

@@ -77,9 +77,7 @@ class PageLoader(private val client: NeoClient) : Loader {
                 s = page.nextElem
             }
             s?.let {
-                var e = if (it.contains("<br>"))
-                    it.replace(" <br>", "<br>").replace("<br> ", "<br>")
-                else it
+                var e = it
                 if (!hasNoind || e.contains("noind")) {
                     if (e.fromHTML.isNotEmpty()) {
                         if (e.contains("Аминь") && !e.contains("noind")) {
