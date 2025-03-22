@@ -95,12 +95,11 @@ class PageStorage : DataBase.Parent {
         return if (isArticle || isOtherBook || !link.hasDate || title == link) {
             title
         } else {
-            val s = link.date
             if (link.isPoem) {
-                s + " " + App.context.getString(R.string.poem) + " " +
+                link.date + " " + App.context.getString(R.string.poem) + " " +
                         (if (!title.startsWith("№")) Const.KV_OPEN else "") +
                         title + Const.KV_CLOSE
-            } else if (!title.contains(s)) "$s $title"
+            } else if (!title.hasDate) "${link.date} $title"
             else title
         }
     }
@@ -488,6 +487,20 @@ class PageStorage : DataBase.Parent {
             row = cv,
             whereClause = DataBase.ID + DataBase.Q + " AND " + DataBase.PARAGRAPH + DataBase.Q,
             whereArgs = arrayOf(id.toString(), oldPar)
+        )
+    }
+
+    fun changeLink(oldLink: String, newLink: String) {
+//        val id = getPageId(oldLink)
+//        if (id == -1) return
+        val cv = ContentValues()
+        //cv.put(DataBase.ID, id)
+        cv.put(Const.LINK, newLink)
+        db.update(
+            table = Const.TITLE,
+            row = cv,
+            whereClause = Const.LINK + DataBase.Q,
+            whereArgs = arrayOf(oldLink)
         )
     }
 }
