@@ -2,7 +2,6 @@ package ru.neosvet.vestnewage.loader
 
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
-import ru.neosvet.vestnewage.storage.DataBase
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.helper.SiteHelper
 import ru.neosvet.vestnewage.helper.SummaryHelper
@@ -13,6 +12,7 @@ import ru.neosvet.vestnewage.loader.page.PageLoader
 import ru.neosvet.vestnewage.loader.page.StyleLoader
 import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.network.Urls
+import ru.neosvet.vestnewage.storage.DataBase
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Files
@@ -99,7 +99,7 @@ class MasterLoader : Loader, LoadHandlerLite {
         handler?.postMessage(msg)
         getBookLoader().let {
             it.loadBookList(false)
-            it.loadBook(false,null)
+            it.loadBook(false, null)
         }
         isRun = false
     }
@@ -110,7 +110,7 @@ class MasterLoader : Loader, LoadHandlerLite {
         handler?.postMessage(msg)
         getBookLoader().let {
             it.loadBookList(true)
-            it.loadBook(true,null)
+            it.loadBook(true, null)
         }
         isRun = false
     }
@@ -219,7 +219,8 @@ class MasterLoader : Loader, LoadHandlerLite {
     private fun loadBase(url: String) {
         val name = url.substring(url.lastIndexOf("/") + 1)
         if (DataBase.isBusy(name)) return
-        val stream = clientBase.getStream(url)
+        val stream = if (Urls.isSiteCom) clientBase.getStream("$url.txt")
+        else clientBase.getStream(url)
         val br = BufferedReader(InputStreamReader(stream, Const.ENCODING), 1000)
         val storage = PageStorage()
         storage.open(name, true)

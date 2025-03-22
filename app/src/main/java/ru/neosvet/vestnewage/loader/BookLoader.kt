@@ -47,7 +47,7 @@ class BookLoader(private val client: NeoClient) : Loader {
 
     private fun loadList(url: String) {
         val page = PageParser(client)
-        page.load(url, "page-title")
+        page.load(url, "")
         var a: String?
         var s: String
         var date1: String? = null
