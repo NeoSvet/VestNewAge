@@ -332,19 +332,15 @@ class BrowserToiler : NeoToiler() {
                     bw.write(strings.editionOf + d.toString())
                 }
 
-                link.contains("print") -> { // материалы с сайта Откровений
-                    bw.write(strings.copyright)
-                    bw.write(d.year.toString() + Const.BR)
-                }
-
                 else -> {
                     if (!storage.isOldBook || Urls.isSiteCom) {
                         val url = Urls.Site + link
                         bw.write(LINK_FORMAT.format(url, url))
                     }
                     bw.write(strings.copyright)
-                    bw.write(d.year.toString() + Const.BR)
-                    bw.write(strings.downloaded + d.toString())
+                    bw.write(d.year.toString())
+                    if (!storage.isOldBook)
+                        bw.write(Const.BR + strings.downloaded + d.toString())
                 }
             }
             bw.write("\n</div>")

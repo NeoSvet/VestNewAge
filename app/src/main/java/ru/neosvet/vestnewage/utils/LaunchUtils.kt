@@ -5,19 +5,19 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Build
+import androidx.core.content.edit
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.data.Section
-import ru.neosvet.vestnewage.helper.MainHelper
+import ru.neosvet.vestnewage.helper.DateHelper
 import ru.neosvet.vestnewage.helper.SummaryHelper
 import ru.neosvet.vestnewage.storage.DataBase
+import ru.neosvet.vestnewage.storage.MarkersStorage
+import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.view.activity.BrowserActivity.Companion.openReader
 import ru.neosvet.vestnewage.view.activity.MainActivity
-import java.io.BufferedReader
-import java.io.BufferedWriter
-import java.io.FileReader
-import java.io.FileWriter
+import java.io.File
 
 class LaunchUtils(context: Context) {
     companion object {
@@ -30,8 +30,9 @@ class LaunchUtils(context: Context) {
 
     data class InputData(val tab: Int, val section: Section)
 
-    private val pref: SharedPreferences
-    private val settingsIntent: Intent
+    private val pref: SharedPreferences =
+        context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+    private val settingsIntent: Intent = Intent(context, MainActivity::class.java)
     private val previousVer: Int
     private var notifId = START_ID
     private var notifUtils: NotificationUtils? = null
@@ -40,14 +41,12 @@ class LaunchUtils(context: Context) {
         get() = DateUnit.isLongAgo(pref.getLong(Const.TIME, 0))
 
     init {
-        pref = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
-        settingsIntent = Intent(context, MainActivity::class.java)
         settingsIntent.putExtra(Const.CUR_ID, Section.SETTINGS.toString())
         previousVer = pref.getInt("ver", 0)
         if (previousVer < App.version) {
-            val editor = pref.edit()
-            editor.putInt("ver", App.version)
-            editor.apply()
+            pref.edit {
+                putInt("ver", App.version)
+            }
         }
     }
 
@@ -62,72 +61,31 @@ class LaunchUtils(context: Context) {
             showSummaryNotif()
             return
         }
-        if (previousVer < 65) {
-            val file = Files.parent("/cache/file")
-            if (file.exists()) file.delete()
-        }
-        if (previousVer < 67) {
-            val file = Files.dateBase(DataBase.ADDITION)
-            if (file.exists()) file.delete()
-        }
-        if (previousVer < 69) {
-            val file = Files.dateBase("07.23")
-            if (file.exists()) file.delete()
-        }
-        if (previousVer < 71) {
-            refTips()
-            var pref = App.context.getSharedPreferences(
-                TipUtils.TAG, Context.MODE_PRIVATE
-            )
-            var editor = pref.edit()
-            editor.remove("CALENDAR")
-            editor.apply()
-            pref = App.context.getSharedPreferences(
-                MainHelper.TAG, Context.MODE_PRIVATE
-            )
-            editor = pref.edit()
-            editor.putInt(Const.START_SCEEN, Section.HOME.value)
-            editor.apply()
-            pref = App.context.getSharedPreferences(PromUtils.TAG, Context.MODE_PRIVATE)
-            editor = pref.edit()
-            editor.remove(Const.MODE)
-            editor.apply()
-            listOf(
-                Files.dateBase(DataBase.JOURNAL), Files.dateBase("devads"),
-                Files.dateBase("devads-journal"), Files.slash("news")
-            ).forEach {
-                if (it.exists()) it.delete()
-            }
-        }
+        if (previousVer < 74 && DateHelper.isLoadedOtkr())
+            Thread {
+                removePrintInLinks()
+            }.start()
     }
 
-    private fun refTips() {
-        val f = Files.parent("/shared_prefs/tip.xml")
-        if (!f.exists()) return
-        val a = listOf("MAIN_STAR", "BROWSER_PANEL", "BROWSER_FULLSCREEN")
-        val b = listOf(
-            TipUtils.Type.MAIN.toString(), TipUtils.Type.BROWSER.toString(), ""
-        )
-        val br = BufferedReader(FileReader(f))
-        val sb = StringBuilder()
-        var need: Boolean
-        br.forEachLine {
-            need = true
-            for (i in b.indices) {
-                if (it.contains(a[i])) {
-                    if (b[i].isNotEmpty())
-                        sb.append(it.replace(a[i], b[i]))
-                    need = false
+    private fun removePrintInLinks() {
+        val d = DateUnit.putYearMonth(2004, 8)
+        val storage = PageStorage()
+        val markers = MarkersStorage()
+        val folder = App.context.filesDir.parent?.plus("/databases/")
+        while (d.timeInDays < DateHelper.MIN_DAYS_NEW_BOOK) {
+            if (File(folder + d.my).exists()) {
+                storage.open(d.my)
+                storage.getLinksList().forEach {
+                    if (it.startsWith("print/")) {
+                        val p = it.substring(6)
+                        storage.changeLink(it, p)
+                        markers.changeLink(it, p)
+                    }
                 }
+                storage.close()
             }
-            if (need) sb.append(it)
-            sb.append(Const.N)
+            d.changeMonth(1)
         }
-        br.close()
-        f.delete()
-        val bw = BufferedWriter(FileWriter(f))
-        bw.write(sb.toString())
-        bw.close()
     }
 
     private fun showNotifDownloadAll() {
@@ -257,9 +215,9 @@ class LaunchUtils(context: Context) {
     }
 
     fun updateTime() {
-        val editor = pref.edit()
-        editor.putLong(Const.TIME, System.currentTimeMillis())
-        editor.apply()
+        pref.edit {
+            putLong(Const.TIME, System.currentTimeMillis())
+        }
     }
 
     fun clearSummaryNotif(id: Int) {

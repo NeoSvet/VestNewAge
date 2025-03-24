@@ -2,6 +2,7 @@ package ru.neosvet.vestnewage.viewmodel
 
 import android.content.Context
 import android.net.Uri
+import androidx.core.net.toUri
 import androidx.core.text.isDigitsOnly
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
@@ -370,7 +371,7 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent, SearchEngine.Parent, LoadHan
         isExport = true
         isRun = true
         scope.launch {
-            doExport(Uri.parse(file))
+            doExport(file.toUri())
             postState(SearchState.FinishExport(file))
             isRun = false
             isExport = false
@@ -463,14 +464,12 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent, SearchEngine.Parent, LoadHan
     }
 
     private fun getUrl(link: String): String {
-        val url = link.replace("print/", "")
-        val s = if (url.contains("/"))
-            url.substring(0, url.lastIndexOf("/"))
-        else url
+        val s = if (link.contains("/"))
+            link.substring(0, link.lastIndexOf("/"))
+        else link
         val i = if (s.isDigitsOnly()) s.toInt() else 2016
-        return if (i < 2016) Urls.MainSite + url
-        else Urls.Site + url
-
+        return if (i < 2016) Urls.MainSite + link
+        else Urls.Site + link
     }
 
     fun setArguments(mode: Int, request: String) {
