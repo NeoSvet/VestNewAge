@@ -20,6 +20,7 @@ import ru.neosvet.vestnewage.loader.page.StyleLoader
 import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.network.NetConst
 import ru.neosvet.vestnewage.network.Urls
+import ru.neosvet.vestnewage.storage.MarkersStorage
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.Files
@@ -122,15 +123,16 @@ class MainToiler : NeoToiler() {
                 r.close()
                 file.delete()
             }
-            val br = BufferedReader(InputStreamReader(client.getStream(Urls.DevSite + "patch.txt")))
+            var br =
+                BufferedReader(InputStreamReader(client.getStream(Urls.DevSite + "patch_index.txt")))
             val newNumber = br.readLine().toInt()
-            if (number == newNumber) {
-                br.close()
-                return@withContext
-            }
+            br.close()
+            if (number == newNumber) return@withContext
+            br = BufferedReader(InputStreamReader(client.getStream(Urls.DevSite + "patch.txt")))
             postState(BasicState.Loading)
             try {
                 val storage = PageStorage()
+                var markers: MarkersStorage? = null
                 var link: String
                 var p: String
                 var cmd = br.readLine()
@@ -140,10 +142,16 @@ class MainToiler : NeoToiler() {
                     storage.open(link)
                     when (cmd) {
                         "TITLE" -> storage.putTitle(p, link)
-                        "DELETE" -> storage.deletePage(link)
                         "PUPD" -> storage.updateParagraph(link, p, br.readLine())
                         "PADD" -> storage.addParagraph(link, p)
                         "PDEL" -> storage.deleteParagraph(link, p)
+                        "LINK" -> {
+                            storage.changeLink(link, p)
+                            if (markers == null) markers = MarkersStorage()
+                            markers.changeLink(link, p)
+                        }
+
+                        "DELETE" -> storage.deletePage(link)
                     }
                     cmd = br.readLine()
                 }

@@ -232,4 +232,25 @@ class MarkersStorage : DataBase.Parent {
         cursor.close()
         return result
     }
+
+    fun changeLink(oldLink: String, newLink: String) {
+        val cursor = db.query(
+            table = DataBase.MARKERS,
+            column = DataBase.ID,
+            selection = Const.LINK + DataBase.Q,
+            selectionArg = oldLink
+        )
+        val id = if (cursor.moveToFirst())
+            cursor.getInt(0) else -1
+        cursor.close()
+        if (id == -1) return
+        val cv = ContentValues()
+        cv.put(Const.LINK, newLink)
+        db.update(
+            table = DataBase.MARKERS,
+            row = cv,
+            whereClause = Const.LINK + DataBase.Q,
+            whereArgs = arrayOf(oldLink)
+        )
+    }
 }

@@ -385,10 +385,8 @@ class PageStorage : DataBase.Parent {
         val cursor = getLinks()
         if (cursor.moveToFirst()) {
             // пропускаем первую запись - там только дата изменения списка
-            while (cursor.moveToNext()) {
-                val link = cursor.getString(0)
-                list.add(link)
-            }
+            while (cursor.moveToNext())
+                list.add(cursor.getString(0))
         }
         cursor.close()
         return list
@@ -491,10 +489,8 @@ class PageStorage : DataBase.Parent {
     }
 
     fun changeLink(oldLink: String, newLink: String) {
-//        val id = getPageId(oldLink)
-//        if (id == -1) return
+        if (getPageId(oldLink) == -1) return
         val cv = ContentValues()
-        //cv.put(DataBase.ID, id)
         cv.put(Const.LINK, newLink)
         db.update(
             table = Const.TITLE,
