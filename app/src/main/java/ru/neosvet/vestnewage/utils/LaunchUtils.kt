@@ -144,6 +144,8 @@ class LaunchUtils(context: Context) {
             return InputData(2, Section.SITE)
         val data = intent.data ?: return null
         var link = data.path ?: return null // without host
+        if (link.contains(Const.PRINT))
+            link = link.replace(Const.PRINT, "")
         val mLink = link.substring(1).split("/")
         return when {
             data.host == "chenneling.info" -> {
