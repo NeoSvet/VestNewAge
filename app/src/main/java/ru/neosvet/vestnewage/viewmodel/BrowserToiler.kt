@@ -533,18 +533,21 @@ class BrowserToiler : NeoToiler() {
     }
 
     private suspend fun searchReaction(): String {
-        val date = DateUnit.putDays(reactionDay).toShortDateString()
+        val date = DateUnit.putDays(reactionDay)
+        val d = date.toShortDateString()
         val storage = AdditionStorage()
         storage.open()
-        var s = startSearchReaction(storage, date)
-        if (s.isEmpty() && OnlineObserver.isOnline.value) {
+        var s = startSearchReaction(storage, d)
+        if (s.isEmpty() && OnlineObserver.isOnline.value &&
+            DateUnit.initToday().timeInDays - date.timeInDays < 20
+        ) {
             postState(BasicState.Loading)
             val loader = AdditionLoader(NeoClient())
             loader.load(storage, 0)
-            s = startSearchReaction(storage, date)
+            s = startSearchReaction(storage, d)
             if (s.isEmpty()) {
                 loader.loadAll(null)
-                s = startSearchReaction(storage, date)
+                s = startSearchReaction(storage, d)
             }
         }
         storage.close()
@@ -562,7 +565,8 @@ class BrowserToiler : NeoToiler() {
             sb.append(cursor.getString(iTitle))
             sb.append("</h3>")
             val s = cursor.getString(iDes)
-            if (s.contains("<")) sb.append(s)
+            if (s.contains("<"))
+                sb.append(s.substring(s.indexOf("\n") + 1).replace("<p>", PAR_POEM))
             else {
                 var p = 0
                 s.lines().forEach {
@@ -579,17 +583,17 @@ class BrowserToiler : NeoToiler() {
                     }
                 }
                 sb.append("</p>")
-                sb.append("<div style='margin-top:20px' class='print2'>\n")
-                sb.append(strings.footReaction)
-                sb.append(Const.BR)
-                sb.append("<a href='")
-                val link = Urls.TelegramUrl + cursor.getString(iLink)
-                sb.append(link)
-                sb.append("'>")
-                sb.append(link)
-                sb.append("</a>")
-                sb.append("</div>")
             }
+            sb.append("<div style='margin-top:20px' class='print2'>\n")
+            sb.append(strings.footReaction)
+            sb.append(Const.BR)
+            sb.append("<a href='")
+            val link = Urls.TelegramUrl + cursor.getString(iLink)
+            sb.append(link)
+            sb.append("'>")
+            sb.append(link)
+            sb.append("</a>")
+            sb.append("</div>")
         }
         cursor.close()
         return sb.toString()
