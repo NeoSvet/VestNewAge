@@ -788,13 +788,13 @@ class BrowserActivity : AppCompatActivity(), ReaderClient.Parent, NeoInterface.P
             BasicState.NotLoaded ->
                 toast.show(getString(R.string.not_load_month))
 
-            is BasicState.Error ->
-                if (state.isNeedReport)
-                    status.setError(state)
-                else {
-                    finishLoading()
-                    snackbar.show(binding.fabNav, state.message)
-                }
+            is BasicState.Error -> if (state.isNeedReport) {
+                isBlocked = false
+                status.setError(state)
+            } else {
+                finishLoading()
+                snackbar.show(binding.fabNav, state.message)
+            }
         }
     }
 
