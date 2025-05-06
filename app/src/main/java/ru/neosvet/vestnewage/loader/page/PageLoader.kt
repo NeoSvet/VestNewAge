@@ -68,10 +68,13 @@ class PageLoader(private val client: NeoClient) : Loader {
                     s = s?.replace("20.20", "2020")
                 hasNoind = false
                 s = getTitle(s, storage.name)
-                if (id > 0) storage.insertParagraph(
-                    id, "<p class='noind'>" + App.context.getString(R.string.on_same_day) +
-                            "<br><a href='${adr + par}'>${s?.replace("“", "")}</a></p>"
-                )
+                if (id > 0) {
+                    if (par.isEmpty()) par = "#2"
+                    storage.insertParagraph(
+                        id, "<p class='noind'>" + App.context.getString(R.string.on_same_day) +
+                                "<br><a href='${adr + par}'>${s?.replace("“", "")}</a></p>"
+                    )
+                }
                 id = storage.putTitle(s!!, adr + par, time)
                 if (exists) storage.deleteParagraphs(id)
                 s = page.nextElem
@@ -151,13 +154,16 @@ class PageLoader(private val client: NeoClient) : Loader {
 
     private fun getTitle(line: String?, name: String): String {
         if (line == null) return ""
-        var s = line.fromHTML.replace(".20", ".")
+        var s = line.fromHTML.replace(".20", ".").trim()
         if (s.contains(name)) {
-            s = s.substring(9).replace(Const.KV_CLOSE, "")
-            if (s.contains("№"))
-                s = s.substring(s.indexOf("№"))
-            else if (s.contains(Const.KV_OPEN))
-                s = s.substring(s.indexOf(Const.KV_OPEN) + 1)
+            if (s.length < 10) s = line.fromHTML.trim()
+            else {
+                s = s.substring(9).replace(Const.KV_CLOSE, "")
+                if (s.contains("№"))
+                    s = s.substring(s.indexOf("№"))
+                else if (s.contains(Const.KV_OPEN))
+                    s = s.substring(s.indexOf(Const.KV_OPEN) + 1)
+            }
         }
         return s
     }
