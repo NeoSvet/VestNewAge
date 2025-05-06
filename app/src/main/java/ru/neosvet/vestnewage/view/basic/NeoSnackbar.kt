@@ -17,8 +17,8 @@ class NeoSnackbar {
             view, msg,
             Snackbar.LENGTH_INDEFINITE
         ).setBackgroundTint(context.getColor(R.color.colorPrimary))
-            .setTextColor(context.getColor(android.R.color.white))
-            .setActionTextColor(context.getColor(R.color.colorAccentLight))
+            .setTextColor(context.getColor(R.color.main_color))
+            .setActionTextColor(context.getColor(R.color.title_color))
             .setAction(android.R.string.ok) {
                 if (msg == context.getString(R.string.site_no_response))
                     showAboutNoResponse(context)

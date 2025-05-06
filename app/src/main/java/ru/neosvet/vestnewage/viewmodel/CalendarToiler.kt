@@ -189,7 +189,7 @@ class CalendarToiler : NeoToiler(), LoadHandlerLite {
         if (d.dayWeek != DateUnit.MONDAY.toInt()) {
             if (d.dayWeek == DateUnit.SUNDAY.toInt()) d.changeDay(-6) else d.changeDay(1 - d.dayWeek)
             while (d.month != curMonth) {
-                calendar.add(CalendarItem(d.day, android.R.color.darker_gray))
+                calendar.add(CalendarItem(d.day, R.color.darker_gray))
                 d.changeDay(1)
             }
         }
@@ -198,13 +198,13 @@ class CalendarToiler : NeoToiler(), LoadHandlerLite {
         if (today.month == curMonth)
             n = today.day
         while (d.month == curMonth) {
-            calendar.add(CalendarItem(d.day, android.R.color.white))
+            calendar.add(CalendarItem(d.day, R.color.main_color))
             if (d.day == n)
                 calendar.last().isBold = true
             d.changeDay(1)
         }
         while (d.dayWeek != DateUnit.MONDAY.toInt()) {
-            calendar.add(CalendarItem(d.day, android.R.color.darker_gray))
+            calendar.add(CalendarItem(d.day, R.color.darker_gray))
             d.changeDay(1)
         }
     }

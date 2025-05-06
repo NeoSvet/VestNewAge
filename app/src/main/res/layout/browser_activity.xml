@@ -8,7 +8,6 @@
         android:id="@+id/ivHeadBack"
         android:layout_width="match_parent"
         android:layout_height="@dimen/head_height"
-        android:background="@android:color/black"
         android:scaleType="matrix"
         android:src="@drawable/head_back"
         android:visibility="invisible"
@@ -47,6 +46,7 @@
         android:shadowDy="3"
         android:shadowRadius="3"
         android:text="@string/god_words"
+        android:textColor="@android:color/white"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -60,6 +60,7 @@
         android:shadowDx="3"
         android:shadowDy="3"
         android:shadowRadius="3"
+        android:textColor="@android:color/white"
         app:layout_constraintBottom_toBottomOf="@id/ivHeadBack"
         app:layout_constraintEnd_toEndOf="@id/ivHeadBack" />
 
@@ -69,6 +70,7 @@
         android:layout_height="50dp"
         android:background="@drawable/press"
         android:padding="@dimen/def_indent"
+        app:tint="@android:color/white"
         android:src="@drawable/ic_left"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />

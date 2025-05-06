@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="ic_launcher_background">#000000</color>
+    <color name="colorPrimary">#113366</color>
+    <color name="colorPrimaryDark">#114499</color>
+    <color name="colorAccent">#406092</color>
+    <color name="light_gray">#DDDDDD</color>
+    <color name="darker_gray">#4D4D4D</color>
+    <color name="colorAccentLight">#99CCFF</color>
+    <color name="main_color">#FFFFFF</color>
+    <color name="title_color">#99CCFF</color>
+    <color name="bg_color">#000000</color>
+    <color name="bar_start">#CC99CCFF</color>
+    <color name="bar_end">#DD113366</color>
+    <color name="item_color">#2299CCFF</color>
+    <color name="red">#CC0000</color>
+    <color name="green">#669900</color>
+</resources>

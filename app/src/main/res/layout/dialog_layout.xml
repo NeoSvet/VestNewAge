@@ -13,7 +13,7 @@
         android:layout_margin="@dimen/half_indent"
         android:layout_weight="1"
         android:paddingHorizontal="@dimen/half_indent"
-        android:textColor="@color/colorAccentLight" />
+        android:textColor="@color/title_color" />
 
     <View
         android:layout_width="match_parent"

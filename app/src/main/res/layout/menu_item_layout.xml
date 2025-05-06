@@ -23,7 +23,7 @@
             android:layout_margin="3dp"
             android:background="@drawable/new_oval"
             android:padding="2dp"
-            android:textColor="@android:color/white"
+            android:textColor="@color/main_color"
             android:textSize="10sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />

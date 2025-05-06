@@ -6,15 +6,15 @@
     android:viewportHeight="64">
 
     <path
-        android:fillColor="#FFFFFF"
+        android:fillColor="@color/main_color"
         android:strokeWidth="1"
         android:pathData="M53.893796,21.326365l-42.903931,0c-1.887773,0 -3.432314,-1.551583 -3.432314,-3.447962s1.544542,-3.447962 3.432314,-3.447962l42.903931,0c1.887773,0 3.432314,1.551583 3.432314,3.447962s-1.544542,3.447962 -3.432314,3.447962z" />
     <path
-        android:fillColor="#FFFFFF"
+        android:fillColor="@color/main_color"
         android:strokeWidth="1"
         android:pathData="M53.893796,50.668525l-42.903931,0c-1.887773,0 -3.432314,-1.551583 -3.432314,-3.447962s1.544542,-3.447962 3.432314,-3.447962l42.903931,0c1.887773,0 3.432314,1.551583 3.432314,3.447962s-1.544542,3.447962 -3.432314,3.447962z" />
     <path
-        android:fillColor="#FFFFFF"
+        android:fillColor="@color/main_color"
         android:strokeWidth="1"
         android:pathData="M53.893796,35.997445l-42.903931,0c-1.887773,0 -3.432314,-1.551583 -3.432314,-3.447962s1.544542,-3.447962 3.432314,-3.447962l42.903931,0c1.887773,0 3.432314,1.551583 3.432314,3.447962s-1.544542,3.447962 -3.432314,3.447962z" />
 </vector>

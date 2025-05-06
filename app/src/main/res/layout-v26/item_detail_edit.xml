@@ -19,7 +19,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/half_indent"
             android:padding="@dimen/half_indent"
-            android:textColor="@color/colorAccentLight"
+            android:textColor="@color/title_color"
             app:layout_constraintEnd_toStartOf="@id/move"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />

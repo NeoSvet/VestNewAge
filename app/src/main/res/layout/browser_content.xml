@@ -34,7 +34,7 @@
             app:layout_constraintBottom_toBottomOf="@id/tilSearch"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="@id/tilSearch"
-            app:tint="@android:color/white" />
+            app:tint="@color/main_color" />
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/tilSearch"

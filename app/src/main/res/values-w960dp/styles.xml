@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <style name="Label">
-        <item name="android:textColor">@android:color/white</item>
+        <item name="android:textColor">@color/main_color</item>
         <item name="android:textSize">24sp</item>
         <item name="android:fontFamily">@font/myriad</item>
     </style>
@@ -12,7 +12,7 @@
         <item name="android:textSize">20sp</item>
     </style>
     <style name="Title">
-        <item name="android:textColor">@color/colorAccentLight</item>
+        <item name="android:textColor">@color/title_color</item>
         <item name="android:textSize">28sp</item>
         <item name="android:fontFamily">@font/myriad</item>
     </style>

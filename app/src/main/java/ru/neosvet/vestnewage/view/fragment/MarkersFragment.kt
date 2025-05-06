@@ -20,17 +20,17 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.R
-import ru.neosvet.vestnewage.storage.DataBase
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.data.MarkerItem
 import ru.neosvet.vestnewage.databinding.MarkersFragmentBinding
+import ru.neosvet.vestnewage.storage.DataBase
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.ScreenUtils
 import ru.neosvet.vestnewage.view.activity.MarkerActivity
 import ru.neosvet.vestnewage.view.basic.NeoFragment
 import ru.neosvet.vestnewage.view.basic.fromDpi
-import ru.neosvet.vestnewage.view.dialog.MessageDialog
 import ru.neosvet.vestnewage.view.dialog.InputDialog
+import ru.neosvet.vestnewage.view.dialog.MessageDialog
 import ru.neosvet.vestnewage.view.dialog.PromptDialog
 import ru.neosvet.vestnewage.view.list.MarkerAdapter
 import ru.neosvet.vestnewage.view.list.helper.MarkersListHelper
@@ -179,11 +179,11 @@ class MarkersFragment : NeoFragment(), MarkersListHelper.Events, MarkerHolder.Ev
                 ),
                 leftButton = SwipeButton(
                     ContextCompat.getDrawable(ctx, R.drawable.ic_edit),
-                    ContextCompat.getColor(ctx, android.R.color.holo_green_dark)
+                    ContextCompat.getColor(ctx, R.color.green)
                 ),
                 rightButton = SwipeButton(
                     ContextCompat.getDrawable(ctx, R.drawable.ic_clear),
-                    ContextCompat.getColor(ctx, android.R.color.holo_red_dark)
+                    ContextCompat.getColor(ctx, R.color.red)
                 )
             )
         }.also { listHelper = it }
