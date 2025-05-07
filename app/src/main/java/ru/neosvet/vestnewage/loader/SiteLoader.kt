@@ -253,11 +253,10 @@ class SiteLoader(
     fun loadDevAds(): Boolean {
         if (time == -1L)
             time = storage.getTime()
-        val t = time
         var hasNew = false
         val br = BufferedReader(InputStreamReader(client.getStream(Urls.DevAds)))
         val s = br.readLine()
-        if (s.toLong() > t) {
+        if (s.toLong() > time) {
             time = s.toLong()
             if (update(br)) {
                 hasNew = true
