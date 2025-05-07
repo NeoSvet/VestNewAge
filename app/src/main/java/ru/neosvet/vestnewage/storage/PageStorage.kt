@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteDatabase
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DateUnit
+import ru.neosvet.vestnewage.data.StorageSearchable
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.date
 import ru.neosvet.vestnewage.utils.dateFromLink
@@ -15,7 +16,7 @@ import ru.neosvet.vestnewage.utils.hasDate
 import ru.neosvet.vestnewage.utils.isPoem
 import java.util.regex.Pattern
 
-class PageStorage : DataBase.Parent {
+class PageStorage : DataBase.Parent, StorageSearchable {
     companion object {
         @JvmStatic
         fun getDatePage(link: String): String {
@@ -390,34 +391,37 @@ class PageStorage : DataBase.Parent {
 
     fun getListAll(): Cursor = db.query(Const.TITLE)
 
-    fun rawQuery(from: String, where: String): Cursor =
-        db.rawQuery("SELECT * FROM $from WHERE $where")
+    override fun searchWhere(from: String, link: String?, where: String): Cursor {
+        val w = if (link == null) where
+        else "${DataBase.ID}='${getPageId(link)}' AND (" + where + ")"
+        return db.rawQuery("SELECT * FROM $from WHERE $w")
+    }
 
-    fun searchParagraphs(link: String, operator: String, find: String): Cursor = db.query(
+    override fun searchParagraphs(link: String, operator: String, find: String): Cursor = db.query(
         table = DataBase.PARAGRAPH,
         selection = DataBase.ID + DataBase.Q + " AND " + DataBase.PARAGRAPH + operator,
         selectionArgs = arrayOf(getPageId(link).toString(), find)
     )
 
-    fun searchParagraphs(operator: String, find: String): Cursor = db.query(
+    override fun searchParagraphs(operator: String, find: String): Cursor = db.query(
         table = DataBase.PARAGRAPH,
         selection = DataBase.PARAGRAPH + operator,
         selectionArg = find
     )
 
-    fun searchTitle(link: String, operator: String, find: String): Cursor = db.query(
+    override fun searchTitle(link: String, operator: String, find: String): Cursor = db.query(
         table = Const.TITLE,
         selection = Const.LINK + DataBase.Q + " AND " + Const.TITLE + operator,
         selectionArgs = arrayOf(link, find)
     )
 
-    fun searchTitle(operator: String, find: String): Cursor = db.query(
+    override fun searchTitle(operator: String, find: String): Cursor = db.query(
         table = Const.TITLE,
         selection = Const.TITLE + operator,
         selectionArg = find
     )
 
-    fun searchLink(find: String): Cursor = db.query(
+    override fun searchLink(find: String): Cursor = db.query(
         table = Const.TITLE,
         selection = Const.LINK + DataBase.LIKE,
         selectionArg = "%$find%"

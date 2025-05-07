@@ -8,13 +8,14 @@ import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.BasicItem
 import ru.neosvet.vestnewage.data.DateUnit
+import ru.neosvet.vestnewage.data.StorageSearchable
 import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.fromHTML
 import ru.neosvet.vestnewage.view.list.BasicAdapter
 import ru.neosvet.vestnewage.view.list.paging.NeoPaging
 
-class AdditionStorage : DataBase.Parent {
+class AdditionStorage : DataBase.Parent, StorageSearchable {
     companion object {
         private const val LIMIT = " limit "
         private const val LINK = "href=\""
@@ -55,7 +56,43 @@ class AdditionStorage : DataBase.Parent {
         orderBy = DataBase.ID + DataBase.DESC + LIMIT + NeoPaging.ON_PAGE
     )
 
-    fun search(date: String): Cursor {
+    override fun searchWhere(from: String, link: String?, where: String): Cursor {
+        val w = if (link == null) where
+        else "(${DataBase.ID}='${link}' OR ${Const.TIME} LIKE '%${link}%') AND (" + where + ")"
+        return db.rawQuery("SELECT * FROM $from WHERE $w")
+    }
+
+    override fun searchParagraphs(link: String, operator: String, find: String): Cursor = db.query(
+        table = DataBase.ADDITION,
+        selection = Const.LINK + DataBase.Q + " AND " + Const.DESCRIPTION + operator,
+        selectionArgs = arrayOf(link, find)
+    )
+
+    override fun searchParagraphs(operator: String, find: String): Cursor = db.query(
+        table = DataBase.ADDITION,
+        selection = Const.DESCRIPTION + operator,
+        selectionArg = find
+    )
+
+    override fun searchTitle(link: String, operator: String, find: String): Cursor = db.query(
+        table = DataBase.ADDITION,
+        selection = Const.LINK + DataBase.Q + " AND " + Const.TITLE + operator,
+        selectionArgs = arrayOf(link, find)
+    )
+
+    override fun searchTitle(operator: String, find: String): Cursor = db.query(
+        table = DataBase.ADDITION,
+        selection = Const.TITLE + operator,
+        selectionArg = find
+    )
+
+    override fun searchLink(find: String): Cursor = db.query(
+        table = DataBase.ADDITION,
+        selection = Const.LINK + DataBase.LIKE + " OR " + Const.TIME + DataBase.LIKE,
+        selectionArg = "%$find%"
+    )
+
+    fun searchByDate(date: String): Cursor {
         val i = date.lastIndexOf(".")
         val d = date.substring(0, i) + "%" + date.substring(i + 1) + "%"
         return db.query(

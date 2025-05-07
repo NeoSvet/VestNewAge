@@ -87,8 +87,8 @@ class SearchHelper(context: Context) {
 
     fun loadLastResult() { //Toiler
         label = pref.getString(LABEL, "")!!
-        if (label.contains("“"))
-            request = label.substring(label.indexOf("“") + 1, label.indexOf(Const.N) - 2)
+        if (label.contains(Const.KV_OPEN))
+            request = label.substring(label.indexOf(Const.KV_OPEN) + 1, label.indexOf(Const.N) - 2)
     }
 
     fun saveLastResult() { //Toiler

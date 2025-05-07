@@ -1,11 +1,21 @@
 package ru.neosvet.vestnewage.data
 
+import android.database.Cursor
 import ru.neosvet.vestnewage.helper.SearchHelper
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.SearchEngine
 
 enum class SearchScreen {
     EMPTY, DEFAULT, RESULTS
+}
+
+interface StorageSearchable {
+    fun searchWhere(from: String, link: String?, where: String): Cursor
+    fun searchParagraphs(link: String, operator: String, find: String): Cursor
+    fun searchParagraphs(operator: String, find: String): Cursor
+    fun searchTitle(link: String, operator: String, find: String): Cursor
+    fun searchTitle(operator: String, find: String): Cursor
+    fun searchLink(find: String): Cursor
 }
 
 data class SearchItem(
@@ -40,13 +50,12 @@ sealed class SearchRequest {
         val isLetterCase: Boolean,  //for equals
         val isEnding: Boolean,  //for equals
         var link: String? = null,  //for equals
-        val whereRaw: String,
-        var where: String = ""
+        val where: String
     ) : SearchRequest() {
         fun equals(helper: SearchHelper): Boolean =
             string == helper.request && isLetterCase == helper.isLetterCase && isEnding == helper.isEnding &&
-                    ((helper.mode != SearchEngine.MODE_TITLES && !whereRaw.startsWith(Const.TITLE)) ||
-                            (helper.mode == SearchEngine.MODE_TITLES && whereRaw.startsWith(Const.TITLE)))
+                    ((helper.mode != SearchEngine.MODE_TITLES && !where.startsWith(Const.TITLE)) ||
+                            (helper.mode == SearchEngine.MODE_TITLES && where.startsWith(Const.TITLE)))
     }
 }
 

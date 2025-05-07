@@ -13,6 +13,7 @@ import android.view.inputmethod.EditorInfo
 import android.widget.ArrayAdapter
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.text.isDigitsOnly
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import androidx.core.widget.doAfterTextChanged
@@ -28,6 +29,7 @@ import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.data.SearchScreen
 import ru.neosvet.vestnewage.databinding.SearchFragmentBinding
 import ru.neosvet.vestnewage.helper.SearchHelper
+import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.SearchEngine
 import ru.neosvet.vestnewage.utils.TipUtils
@@ -417,6 +419,10 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent,
 
     private fun showResult(max: Int) {
         binding?.run {
+            if (toiler.isTelegram) {
+                content.sSearchInResults.setSelection(0)
+                content.sSearchInResults.isEnabled = false
+            } else content.sSearchInResults.isEnabled = true
             bPanelSwitch.isVisible = true
             if (content.pAdditionSet.isVisible)
                 bPanelSwitch.setImageResource(R.drawable.ic_top)
@@ -494,6 +500,10 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent,
     override fun onItemClick(index: Int, item: BasicItem) {
         when (RequestAdapter.getType(item)) {
             RequestAdapter.Type.NORMAL -> {
+                if (item.link.isDigitsOnly()) {
+                    Urls.openInApps(Urls.TelegramUrl + item.link)
+                    return
+                }
                 val s = when {
                     helper.mode == SearchEngine.MODE_TITLES -> null
                     helper.mode == SearchEngine.MODE_LINKS -> null

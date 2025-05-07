@@ -555,7 +555,7 @@ class BrowserToiler : NeoToiler() {
     }
 
     private fun startSearchReaction(storage: AdditionStorage, date: String): String {
-        val cursor = storage.search(date)
+        val cursor = storage.searchByDate(date)
         val sb = StringBuilder()
         if (cursor.moveToFirst()) {
             val iLink = cursor.getColumnIndex(Const.LINK)

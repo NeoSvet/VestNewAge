@@ -24,7 +24,6 @@ import ru.neosvet.vestnewage.loader.basic.LoadHandlerLite
 import ru.neosvet.vestnewage.loader.page.PageLoader
 import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.network.Urls
-import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.storage.SearchStorage
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.SearchEngine
@@ -45,6 +44,7 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent, SearchEngine.Parent, LoadHan
     override lateinit var strings: SearchStrings
         private set
     private var labelMode = ""
+    private var iMode = -1
     private lateinit var helper: SearchHelper
     private var loadDate: String? = null
     private var loadLink: String? = null
@@ -64,17 +64,19 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent, SearchEngine.Parent, LoadHan
     private var jobResults: Job? = null
     private var jobTitle: Job? = null
 
+    val isTelegram
+        get() = iMode == SearchEngine.MODE_TELEGRAM
+
     override fun init(context: Context) {
         helper = SearchHelper(context)
         if (labelMode.isNotEmpty()) { //from argument
-            helper.mode = lastPercent
+            helper.mode = iMode
             helper.request = labelMode
             lastPercent = -1
             labelMode = ""
         }
         engine = SearchEngine(
             storage = storage,
-            pages = PageStorage(),
             helper = helper,
             parent = this
         )
@@ -222,12 +224,13 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent, SearchEngine.Parent, LoadHan
 
     fun startSearch(request: String, mode: Int) {
         if (isRun) cancel()
+        isRun = true
         helper.request = request
+        iMode = mode
+        labelMode = if (mode >= SearchEngine.MODE_RESULT_TEXT)
+            strings.searchInResults
+        else strings.listMode[mode]
         scope.launch {
-            isRun = true
-            labelMode = if (mode >= SearchEngine.MODE_RESULT_TEXT)
-                strings.searchInResults
-            else strings.listMode[mode]
             engine.startSearch(mode)
             isRun = false
         }
@@ -235,8 +238,19 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent, SearchEngine.Parent, LoadHan
 
     fun showLastResult() {
         scope.launch {
+            iMode = -1
             val count = getResultCount()
-            if (count > 0) helper.loadLastResult()
+            storage.isDesc = helper.isDesc
+            if (count > 0) {
+                helper.loadLastResult()
+                for (i in strings.listMode.indices) {
+                    val s = strings.listMode[i].substring(strings.listMode[i].indexOf(" ") + 1)
+                    if (helper.label.contains(s)) {
+                        iMode = i
+                        break
+                    }
+                }
+            }
             postState(SearchState.Results(count, true))
         }
     }
@@ -473,7 +487,7 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent, SearchEngine.Parent, LoadHan
     }
 
     fun setArguments(mode: Int, request: String) {
-        lastPercent = mode
+        iMode = mode
         labelMode = request
     }
 
