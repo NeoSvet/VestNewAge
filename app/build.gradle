@@ -7,10 +7,10 @@ android {
     compileSdk 35
     defaultConfig {
         applicationId 'ru.neosvet.vestnewage'
-        minSdk 23
+        minSdk 24
         targetSdk 35
-        versionCode 74
-        versionName '5.3'
+        versionCode 75
+        versionName '5.4'
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
     }
     buildTypes {
