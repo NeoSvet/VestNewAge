@@ -156,7 +156,9 @@ class HomeWidget : AppWidgetProvider() {
     private fun writeJournal(bw: BufferedWriter) {
         val journal = JournalStorage()
         journal.getLastItem()?.let {
-            bw.write(it.first) //title
+            if (it.first.contains(Const.KV_OPEN))
+                bw.write(it.first.substring(it.first.indexOf(Const.KV_OPEN) + 1)) //title
+            else bw.write(it.first) //title
             bw.newLine()
             bw.write(it.second) //link
             bw.newLine()

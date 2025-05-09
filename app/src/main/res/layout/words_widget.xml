@@ -9,12 +9,10 @@
         style="@style/Button"
         android:layout_width="40dp"
         android:layout_height="40dp"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
         android:layout_margin="@dimen/half_indent"
         android:contentDescription="@string/app_name"
         android:scaleType="fitXY"
-        android:src="@drawable/star" />
+        android:src="@drawable/icon" />
 
     <TextView
         style="@style/Label"
@@ -25,7 +23,7 @@
         android:paddingHorizontal="45dp"
         android:paddingVertical="@dimen/half_indent"
         android:text="@string/god_words"
-        android:textSize="16sp" />
+        android:textSize="14sp" />
 
     <ImageButton
         android:id="@+id/btn_refresh"
