@@ -36,8 +36,8 @@ class SearchEngine(
     companion object {
         const val MODE_EPISTLES = 0
         const val MODE_POEMS = 1
-        const val MODE_TITLES = 2
-        const val MODE_BOOK = 3
+        const val MODE_BOOK = 2
+        const val MODE_TITLES = 3
         const val MODE_LINKS = 4
         const val MODE_SITE = 5
         const val MODE_TELEGRAM = 6
