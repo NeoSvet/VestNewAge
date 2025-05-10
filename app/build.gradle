@@ -34,14 +34,14 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation 'androidx.core:core-ktx:1.15.0'
+    implementation 'androidx.core:core-ktx:1.16.0'
     implementation 'com.google.android.material:material:1.12.0'
     implementation 'androidx.appcompat:appcompat:1.7.0'
     implementation 'com.squareup.okhttp3:okhttp:5.0.0-alpha.11'
     implementation 'me.leolin:ShortcutBadger:1.1.22@aar'
     implementation 'com.jakewharton.threetenabp:threetenabp:1.4.0' //for DateUnit
-    implementation 'androidx.work:work-runtime:2.10.0'
-    implementation 'androidx.work:work-runtime-ktx:2.10.0'
+    implementation 'androidx.work:work-runtime:2.10.1'
+    implementation 'androidx.work:work-runtime-ktx:2.10.1'
     implementation 'androidx.constraintlayout:constraintlayout:2.2.1'
     implementation 'androidx.core:core-splashscreen:1.0.1'
     implementation 'androidx.paging:paging-runtime-ktx:3.3.6'
