@@ -207,7 +207,6 @@
         android:id="@+id/fabAction"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:foregroundTint="@android:color/white"
         android:visibility="gone"
         app:layout_anchor="@id/bottomBar"
         app:srcCompat="@drawable/star" />
