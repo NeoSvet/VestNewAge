@@ -114,7 +114,7 @@ class HelpToiler : ViewModel() {
     private fun getTips(): List<HelpItem> {
         if (listTips.isEmpty()) {
             val icons = arrayOf(
-                R.drawable.little_star, R.drawable.ic_menu, R.drawable.ic_search
+                R.drawable.icon, R.drawable.ic_menu, R.drawable.ic_search
             )
             for (i in icons.indices)
                 listTips.add(
