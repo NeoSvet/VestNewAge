@@ -38,6 +38,7 @@
         android:shadowDy="3"
         android:shadowRadius="3"
         android:text="@string/god_words"
+        android:textColor="@android:color/white"
         android:visibility="gone"
         app:layout_constraintEnd_toEndOf="@id/ivHeadBack"
         app:layout_constraintTop_toTopOf="@id/ivHeadBack" />
@@ -52,6 +53,7 @@
         android:shadowDx="3"
         android:shadowDy="3"
         android:shadowRadius="3"
+        android:textColor="@android:color/white"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="@id/ivHeadBack"
         app:layout_constraintEnd_toEndOf="@id/ivHeadBack" />
