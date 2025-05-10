@@ -144,7 +144,7 @@
     <string name="auto_return_panels">Автовозврат панелей</string>
     <string name="num_par">Нумерация абзацев</string>
     <string name="light_theme">Светлое оформление</string>
-    <string name="dark_theme">Темное оформление</string>
+    <string name="dark_theme">Тёмное оформление</string>
     <string name="go_to_last_place">Перейти к прошлому месту?</string>
     <string name="not_load_month">Месяц не загружен</string>
     <string name="not_found_reaction">Реакция не найдена</string>
