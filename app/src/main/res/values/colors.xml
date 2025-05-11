@@ -6,11 +6,10 @@
     <color name="colorAccent">#5C9AFA</color>
     <color name="light_gray">#666666</color>
     <color name="darker_gray">#B2B2B2</color>
-    <color name="colorAccentLight">#1177BB</color>
+    <color name="colorAccentLight">#2266BB</color>
     <color name="main_color">#000000</color>
-    <color name="title_color">#2266BB</color>
     <color name="bg_color">#FFFFFF</color>
-    <color name="bar_start">#CC2D71C3</color>
+    <color name="bar_start">#CC2266BB</color>
     <color name="bar_end">#DD9AC1FD</color>
     <color name="item_color">#222266BB</color>
     <color name="red">#FD5858</color>

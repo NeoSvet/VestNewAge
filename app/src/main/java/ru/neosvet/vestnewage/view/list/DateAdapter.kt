@@ -4,6 +4,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import ru.neosvet.vestnewage.R
 
@@ -52,23 +53,37 @@ class DateAdapter(
     override fun onBindViewHolder(holder: ViewHolder, pos: Int) {
         holder.tv.text = data[pos]
         when (pos) {
-            maxPos, minPos ->
-                if (pos == selected) holder.bg.setBackgroundResource(R.drawable.cell_bg_all)
-                else holder.bg.setBackgroundResource(R.drawable.cell_bg_epi)
+            maxPos, minPos -> {
+                holder.bg.setBackgroundResource(R.drawable.cell_bg_epi)
+                if (pos == selected)
+                    setColor(holder.tv, R.color.bg_color)
+                else setColor(holder.tv, android.R.color.transparent)
+            }
 
-            selected ->
-                holder.bg.setBackgroundResource(R.drawable.cell_bg_poe)
+            selected -> {
+                holder.bg.setBackgroundResource(R.drawable.cell_bg_none)
+                setColor(holder.tv, R.color.bg_color)
+            }
 
             in (maxPos + 1) until minYear -> {
                 holder.bg.setBackgroundResource(R.drawable.cell_bg_none)
+                setColor(holder.tv, android.R.color.transparent)
                 holder.bg.isEnabled = false
             }
 
-            else ->
+            else -> {
                 holder.bg.setBackgroundResource(R.drawable.cell_bg_none)
+                setColor(holder.tv, android.R.color.transparent)
+            }
         }
         holder.tv.tag = pos
         holder.tv.setOnClickListener(click)
+    }
+
+    private fun setColor(view: TextView, color: Int) {
+        view.setBackgroundColor(
+            ContextCompat.getColor(view.context, color)
+        )
     }
 
     override fun getItemCount() = data.size

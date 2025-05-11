@@ -16,10 +16,10 @@
                 android:startY="10.0"
                 android:type="linear">
                 <item
-                    android:color="@color/main_color"
+                    android:color="@color/colorAccentLight"
                     android:offset="0.0" />
                 <item
-                    android:color="@color/darker_gray"
+                    android:color="@color/colorAccent"
                     android:offset="1.0" />
             </gradient>
         </aapt:attr>
