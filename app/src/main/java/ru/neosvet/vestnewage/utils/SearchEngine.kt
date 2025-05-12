@@ -641,6 +641,7 @@ class SearchEngine(
         startId: Int,
         isSelect: Boolean
     ): MutableList<SearchItem> {
+        if (cursor.isClosed) return mutableListOf()
         if (!cursor.moveToFirst()) {
             cursor.close()
             return mutableListOf()
@@ -694,6 +695,7 @@ class SearchEngine(
         startId: Int,
         isSelect: Boolean
     ): MutableList<SearchItem> {
+        if (cursor.isClosed) return mutableListOf()
         if (!cursor.moveToFirst()) {
             cursor.close()
             return mutableListOf()
@@ -724,6 +726,7 @@ class SearchEngine(
         startId: Int,
         isSelect: Boolean
     ): MutableList<SearchItem> {
+        if (cursor.isClosed) return mutableListOf()
         if (!cursor.moveToFirst()) {
             cursor.close()
             return mutableListOf()
