@@ -1,8 +1,9 @@
 package ru.neosvet.vestnewage.helper
 
 import android.content.Context
+import androidx.core.content.edit
 import ru.neosvet.vestnewage.utils.Const
-import ru.neosvet.vestnewage.view.basic.convertDpi
+import ru.neosvet.vestnewage.view.basic.convertToDpi
 
 class BrowserHelper {
     companion object {
@@ -42,21 +43,21 @@ class BrowserHelper {
         isAutoReturn = pref.getBoolean(AUTORETURN, false)
         isNumPar = pref.getBoolean(NUMPAR, false)
         showReaction = pref.getBoolean(SHOW_REACTION, false)
-        if (zoom < 10) zoom = context.convertDpi(100)
+        if (zoom < 10) zoom = context.convertToDpi(100)
     }
 
     fun save(context: Context) {
         if (zoom == 0) return
         val pref = context.getSharedPreferences(TAG, Context.MODE_PRIVATE)
-        val editor = pref.edit()
-        editor.putInt(THEME, if (isLightTheme) 0 else 1)
-        editor.putInt(SCALE, zoom)
-        editor.putBoolean(NAVBUTTONS, isNavButton)
-        editor.putBoolean(MITITOP, isMiniTop)
-        editor.putBoolean(AUTORETURN, isAutoReturn)
-        editor.putBoolean(NUMPAR, isNumPar)
-        editor.putBoolean(SHOW_REACTION, showReaction)
-        editor.apply()
+        pref.edit {
+            putInt(THEME, if (isLightTheme) 0 else 1)
+            putInt(SCALE, zoom)
+            putBoolean(NAVBUTTONS, isNavButton)
+            putBoolean(MITITOP, isMiniTop)
+            putBoolean(AUTORETURN, isAutoReturn)
+            putBoolean(NUMPAR, isNumPar)
+            putBoolean(SHOW_REACTION, showReaction)
+        }
     }
 
     fun setSearchString(s: String) {

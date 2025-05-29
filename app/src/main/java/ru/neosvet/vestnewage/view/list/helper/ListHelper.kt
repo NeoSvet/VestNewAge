@@ -5,7 +5,7 @@ import android.graphics.Canvas
 import android.view.MotionEvent
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
-import ru.neosvet.vestnewage.view.basic.convertDpi
+import ru.neosvet.vestnewage.view.basic.convertToDpi
 import kotlin.math.abs
 
 class ListHelper(
@@ -15,6 +15,7 @@ class ListHelper(
     enum class Events {
         SWIPE_LEFT, SWIPE_RIGHT, LIST_LIMIT
     }
+
     private var timeEvent = 0L
 
     private val callback = object : ItemTouchHelper.SimpleCallback(
@@ -60,7 +61,7 @@ class ListHelper(
     fun attach(view: RecyclerView) {
         initTouchListener(view)
         if (onlyLimit) return
-        distanceForSwipe = view.context.convertDpi(distanceForSwipe)
+        distanceForSwipe = view.context.convertToDpi(distanceForSwipe)
         val helper = ItemTouchHelper(callback)
         helper.attachToRecyclerView(view)
     }

@@ -15,7 +15,7 @@ import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.BasicItem
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.ScreenUtils
-import ru.neosvet.vestnewage.view.basic.convertDpi
+import ru.neosvet.vestnewage.view.basic.convertToDpi
 import ru.neosvet.vestnewage.view.list.BasicAdapter
 
 class WelcomeFragment : BottomSheetDialogFragment() {
@@ -52,11 +52,11 @@ class WelcomeFragment : BottomSheetDialogFragment() {
             val d = dialog as BottomSheetDialog
             val sheetId = com.google.android.material.R.id.design_bottom_sheet
             d.findViewById<View>(sheetId)?.let { bottomSheet ->
-                val height = requireContext().convertDpi(175)
+                val height = requireContext().convertToDpi(175)
                 BottomSheetBehavior.from(bottomSheet).setPeekHeight(height)
             }
         }
-        val rvBottom = view.findViewById(R.id.rvBottom) as RecyclerView
+        val rvBottom: RecyclerView = view.findViewById(R.id.rvBottom)
         rvBottom.layoutManager = GridLayoutManager(requireContext(), ScreenUtils.span)
         rvBottom.adapter = adapter
         arguments?.let { parseArguments(it) }

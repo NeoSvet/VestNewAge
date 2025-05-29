@@ -157,7 +157,7 @@ class NeoTab @JvmOverloads constructor(
         rvTab.children.forEach {
             w += it.measuredWidth
         }
-        w -= context.convertDpi(2)
+        w -= context.convertToDpi(2)
         if (root.measuredWidth > w)
             root.updateLayoutParams<ConstraintLayout.LayoutParams> {
                 width = w

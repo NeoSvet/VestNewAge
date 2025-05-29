@@ -16,7 +16,7 @@ import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.HomeItem
 import ru.neosvet.vestnewage.data.Section
 import ru.neosvet.vestnewage.helper.HomeHelper
-import ru.neosvet.vestnewage.view.basic.convertDpi
+import ru.neosvet.vestnewage.view.basic.convertToDpi
 import ru.neosvet.vestnewage.view.basic.fromDpi
 
 interface HomeHolder {
@@ -55,7 +55,7 @@ class HomeBaseHolder(
         } else {
             ivIcon.isVisible = true
             tvLine1.updatePadding(
-                left = tvLine1.context.convertDpi(50)
+                left = tvLine1.context.convertToDpi(50)
             )
             ivIcon.setImageDrawable(ContextCompat.getDrawable(ivIcon.context, icon))
         }
@@ -116,8 +116,8 @@ class HomeMenuHolder(
     fun setCell(index: Int, section: Section) {
         val point = HomeHelper.getSectionPoint(section, false)
         val mId = mIds[index]
-        val iv = root.findViewById(mId[1]) as ImageView
-        val tv = root.findViewById(mId[2]) as TextView
+        val iv: ImageView = root.findViewById(mId[1])
+        val tv: TextView = root.findViewById(mId[2])
         iv.setImageDrawable(ContextCompat.getDrawable(iv.context, point.x))
         tv.text = tv.context.getString(point.y)
         root.findViewById<View>(mId[0]).setOnClickListener {
