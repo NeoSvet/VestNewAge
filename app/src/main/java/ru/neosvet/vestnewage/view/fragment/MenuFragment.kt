@@ -6,10 +6,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
-import androidx.core.view.updateLayoutParams
+import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.MenuItem
 import ru.neosvet.vestnewage.data.Section
@@ -17,7 +18,6 @@ import ru.neosvet.vestnewage.utils.ScreenUtils
 import ru.neosvet.vestnewage.utils.ScreenUtils.isTabletLand
 import ru.neosvet.vestnewage.view.activity.MainActivity
 import ru.neosvet.vestnewage.view.list.MenuAdapter
-import ru.neosvet.vestnewage.view.list.helper.ScrollHelper
 
 class MenuFragment : Fragment() {
     companion object {
@@ -34,7 +34,6 @@ class MenuFragment : Fragment() {
     private lateinit var rvMenu: RecyclerView
     private val adapter = MenuAdapter(this::onItemClick)
     private var isFullScreen = false
-    private var scroll: ScrollHelper? = null
 
     override fun onAttach(context: Context) {
         act = activity as MainActivity?
@@ -42,7 +41,6 @@ class MenuFragment : Fragment() {
     }
 
     override fun onDestroyView() {
-        scroll?.deAttach()
         act = null
         super.onDestroyView()
     }
@@ -75,9 +73,7 @@ class MenuFragment : Fragment() {
                 FrameLayout.LayoutParams.MATCH_PARENT
             )
         if (isTabletLand.not()) {
-            rvMenu.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                bottomMargin = resources.getDimension(R.dimen.content_margin_bottom).toInt()
-            }
+            rvMenu.updatePadding(bottom = App.CONTENT_BOTTOM_INDENT)
             isFullScreen = true
         }
         initList()

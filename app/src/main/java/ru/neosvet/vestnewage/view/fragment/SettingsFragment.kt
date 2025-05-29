@@ -17,9 +17,13 @@ import android.view.animation.AnimationUtils
 import android.widget.TextView
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
+import androidx.core.content.edit
+import androidx.core.net.toUri
 import androidx.core.view.isVisible
+import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
+import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.CheckItem
 import ru.neosvet.vestnewage.data.DateUnit
@@ -108,6 +112,9 @@ class SettingsFragment : NeoFragment() {
                 if (ScreenUtils.isWide) 2 else 1
             )
             rvSettings.adapter = adapter
+            pAlarm.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                bottomMargin = App.CONTENT_BOTTOM_INDENT
+            }
         }
     }
 
@@ -193,7 +200,8 @@ class SettingsFragment : NeoFragment() {
                 isChecked = Urls.isSiteCom
             )
         )
-        adapter.addItem(SettingsItem.CheckList(
+        adapter.addItem(
+            SettingsItem.CheckList(
             title = getString(R.string.base),
             isSingleSelect = false,
             list = list,
@@ -207,9 +215,9 @@ class SettingsFragment : NeoFragment() {
                     Const.PROM_FLOAT
                 } else
                     Const.START_NEW
-                val editor = prefMain.edit()
-                editor.putBoolean(name, checked)
-                editor.apply()
+                prefMain.edit {
+                    putBoolean(name, checked)
+                }
             }
         ))
     }
@@ -233,7 +241,8 @@ class SettingsFragment : NeoFragment() {
         list.add(
             CheckItem(title = getString(R.string.summary), isChecked = screen == list.size)
         )
-        adapter.addItem(SettingsItem.CheckList(
+        adapter.addItem(
+            SettingsItem.CheckList(
             title = getString(R.string.start_screen),
             isSingleSelect = true,
             list = list,
@@ -314,7 +323,8 @@ class SettingsFragment : NeoFragment() {
             zeroMargin = true, onChecked = this::onCheckItem
         )
 
-        adapter.addItem(SettingsItem.Notification(
+        adapter.addItem(
+            SettingsItem.Notification(
             title = getString(R.string.notif_new),
             offLabel = getString(R.string.less),
             onLabel = getString(R.string.often),
@@ -355,9 +365,9 @@ class SettingsFragment : NeoFragment() {
             2 -> Const.DOCTRINE
             else -> Const.PLACE //3
         }
-        val editor = prefSummary.edit()
-        editor.putBoolean(name, check)
-        editor.apply()
+        prefSummary.edit {
+            putBoolean(name, check)
+        }
         return CheckAdapter.ACTION_NONE
     }
 
@@ -384,7 +394,8 @@ class SettingsFragment : NeoFragment() {
             zeroMargin = true, onChecked = this::onPromItem
         )
 
-        adapter.addItem(SettingsItem.Notification(
+        adapter.addItem(
+            SettingsItem.Notification(
             title = getString(R.string.notif_prom),
             offLabel = getString(R.string.advance),
             onLabel = getString(R.string.prom),
@@ -426,10 +437,11 @@ class SettingsFragment : NeoFragment() {
     }
 
     private fun initDefaultSection() {
-        val pack = Uri.parse("package:${requireContext().packageName}")
+        val pack = "package:${requireContext().packageName}".toUri()
 
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
-            adapter.addItem(SettingsItem.Message(
+            adapter.addItem(
+                SettingsItem.Message(
                 title = getString(R.string.about_default),
                 text = getString(R.string.info_default) + Const.N
                         + getString(R.string.info_default_a),
@@ -442,7 +454,8 @@ class SettingsFragment : NeoFragment() {
             return
         }
 
-        adapter.addItem(SettingsItem.Message(
+        adapter.addItem(
+            SettingsItem.Message(
             title = getString(R.string.about_default),
             text = getString(R.string.info_default) + Const.N
                     + getString(R.string.info_default_b),
@@ -456,7 +469,8 @@ class SettingsFragment : NeoFragment() {
 
     private fun initMessageSection() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-            adapter.addItem(SettingsItem.Message(
+            adapter.addItem(
+                SettingsItem.Message(
                 title = getString(R.string.about_manager),
                 text = getString(R.string.info_manager),
                 buttonLabel = "",
@@ -465,7 +479,8 @@ class SettingsFragment : NeoFragment() {
             return
         }
 
-        adapter.addItem(SettingsItem.Message(
+        adapter.addItem(
+            SettingsItem.Message(
             title = getString(R.string.about_manager),
             text = getString(R.string.info_manager) + Const.NN
                     + getString(R.string.info_battery),
@@ -478,9 +493,9 @@ class SettingsFragment : NeoFragment() {
     }
 
     private fun setStartScreen(value: Int) {
-        val editor = prefMain.edit()
-        editor.putInt(Const.START_SCEEN, value)
-        editor.apply()
+        prefMain.edit {
+            putInt(Const.START_SCEEN, value)
+        }
         val main = Intent(act, MainActivity::class.java)
         main.putExtra(Const.START_SCEEN, false)
         startActivity(main)
@@ -500,9 +515,9 @@ class SettingsFragment : NeoFragment() {
     }
 
     private fun saveProm(value: Int) {
-        val editor = prefProm.edit()
-        editor.putInt(Const.TIME, if (value == PROM_MAX) Const.TURN_OFF else value)
-        editor.apply()
+        prefProm.edit {
+            putInt(Const.TIME, if (value == PROM_MAX) Const.TURN_OFF else value)
+        }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             setAlarmNew(value)

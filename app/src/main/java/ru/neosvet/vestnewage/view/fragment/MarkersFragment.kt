@@ -2,7 +2,6 @@ package ru.neosvet.vestnewage.view.fragment
 
 import android.app.Activity
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -11,7 +10,9 @@ import android.view.animation.AnimationUtils
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.core.content.ContextCompat
+import androidx.core.net.toUri
 import androidx.core.view.isVisible
+import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
@@ -19,6 +20,7 @@ import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.data.MarkerItem
@@ -165,6 +167,9 @@ class MarkersFragment : NeoFragment(), MarkersListHelper.Events, MarkerHolder.Ev
 
     private fun setViews() = binding?.run {
         setListEvents(rvList)
+        pFileOperation.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+            bottomMargin = App.CONTENT_BOTTOM_INDENT
+        }
     }
 
     private fun getListHelper(): MarkersListHelper =
@@ -406,7 +411,7 @@ class MarkersFragment : NeoFragment(), MarkersListHelper.Events, MarkerHolder.Ev
                 if (it == PromptDialog.Result.Yes) {
                     val sendIntent = Intent(Intent.ACTION_SEND)
                     sendIntent.type = "text/plain"
-                    sendIntent.putExtra(Intent.EXTRA_STREAM, Uri.parse(file))
+                    sendIntent.putExtra(Intent.EXTRA_STREAM, file.toUri())
                     startActivity(sendIntent)
                 }
                 toiler.clearStates()

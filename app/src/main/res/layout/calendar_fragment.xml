@@ -4,8 +4,7 @@
     android:layout_width="wrap_content"
     android:layout_height="match_parent"
     android:paddingHorizontal="@dimen/quarter_indent"
-    android:paddingTop="@dimen/quarter_indent"
-    android:paddingBottom="@dimen/content_margin_bottom">
+    android:paddingTop="@dimen/quarter_indent">
 
     <ru.neosvet.vestnewage.view.basic.NeoTab
         android:id="@+id/p_year"

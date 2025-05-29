@@ -3,7 +3,6 @@ package ru.neosvet.vestnewage.view.fragment
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.view.KeyEvent
 import android.view.LayoutInflater
@@ -13,6 +12,7 @@ import android.view.inputmethod.EditorInfo
 import android.widget.ArrayAdapter
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.net.toUri
 import androidx.core.text.isDigitsOnly
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
@@ -23,6 +23,7 @@ import androidx.paging.PagingData
 import androidx.recyclerview.widget.GridLayoutManager
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.BasicItem
 import ru.neosvet.vestnewage.data.DateUnit
@@ -304,6 +305,9 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent,
             )
             exportResult.launch(intent)
         }
+        rvRequests.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+            bottomMargin = App.CONTENT_BOTTOM_INDENT
+        }
     }
 
     private fun parseFileResult(data: Intent) {
@@ -549,7 +553,7 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent,
                 if (it == PromptDialog.Result.Yes) {
                     val sendIntent = Intent(Intent.ACTION_SEND)
                     sendIntent.type = "text/plain"
-                    sendIntent.putExtra(Intent.EXTRA_STREAM, Uri.parse(file))
+                    sendIntent.putExtra(Intent.EXTRA_STREAM, file.toUri())
                     startActivity(sendIntent)
                 }
                 toiler.clearStates()

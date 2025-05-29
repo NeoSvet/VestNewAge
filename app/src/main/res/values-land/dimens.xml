@@ -9,7 +9,6 @@
     <integer name="top_minus">90</integer>
     <dimen name="head_height">100dp</dimen>
     <dimen name="list_height">200dp</dimen>
-    <dimen name="content_margin_bottom">60dp</dimen>
     <dimen name="above_toast">110dp</dimen>
     <dimen name="login_width">350dp</dimen>
 </resources>

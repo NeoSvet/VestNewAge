@@ -4,10 +4,11 @@ import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.view.View
 import android.view.ViewPropertyAnimator
-import ru.neosvet.vestnewage.R
+import ru.neosvet.vestnewage.App
 
 class BottomAnim(private val view: View) {
-    private val addition = view.context.resources.getDimension(R.dimen.content_margin_bottom)
+    private val addition: Int
+        get() = App.CONTENT_BOTTOM_INDENT
     private var anim: ViewPropertyAnimator? = null
     private val animListener = object : AnimatorListenerAdapter() {
         override fun onAnimationEnd(animation: Animator) {

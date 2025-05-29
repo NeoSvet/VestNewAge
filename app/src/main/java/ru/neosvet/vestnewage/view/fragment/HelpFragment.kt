@@ -6,13 +6,14 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AlertDialog
-import androidx.core.view.updateLayoutParams
+import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.launch
+import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.HelpItem
 import ru.neosvet.vestnewage.network.Urls
@@ -64,12 +65,10 @@ class HelpFragment : Fragment() {
     }
 
     private fun initView(container: View) {
-        val rv = container.findViewById(R.id.rvList) as RecyclerView
+        val rv: RecyclerView = container.findViewById(R.id.rvList)
         rv.layoutManager = GridLayoutManager(requireContext(), 1)
         rv.adapter = adapter
-        rv.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-            bottomMargin = resources.getDimension(R.dimen.content_margin_bottom).toInt()
-        }
+        rv.updatePadding(bottom = App.CONTENT_BOTTOM_INDENT)
     }
 
     private fun onChangedState(state: NeoState) {

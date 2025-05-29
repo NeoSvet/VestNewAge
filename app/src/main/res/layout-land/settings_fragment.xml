@@ -8,14 +8,13 @@
         android:id="@+id/rv_settings"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginBottom="@dimen/title_margin_bottom"
+        android:paddingBottom="100dp"
         app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/p_alarm"
         android:layout_width="@dimen/dialog_width_land"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/content_margin_bottom"
         android:background="@drawable/field"
         android:clickable="true"
         android:focusable="true"

@@ -6,9 +6,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
+import androidx.core.view.updateLayoutParams
+import androidx.core.view.updatePadding
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.HomeItem
 import ru.neosvet.vestnewage.data.MenuItem
@@ -93,8 +96,12 @@ class HomeFragment : NeoFragment(), HomeAdapter.Events {
 
     @SuppressLint("ClickableViewAccessibility")
     private fun initView(container: View) {
-        rvList = container.findViewById(R.id.rv_list) as RecyclerView
-        rvMenu = container.findViewById(R.id.rv_menu) as RecyclerView
+        rvList = container.findViewById(R.id.rv_list)
+        rvMenu = container.findViewById(R.id.rv_menu)
+        rvMenu.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+            bottomMargin = App.CONTENT_BOTTOM_INDENT
+        }
+        rvList.updatePadding(bottom = App.CONTENT_BOTTOM_INDENT)
         rvMenu.layoutManager = GridLayoutManager(context, 2)
     }
 

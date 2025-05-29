@@ -7,9 +7,12 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.view.Gravity
 import android.view.View
+import android.view.ViewGroup
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
+import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
@@ -26,6 +29,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.work.Data
 import com.google.android.material.appbar.AppBarLayout
+import com.google.android.material.appbar.CollapsingToolbarLayout
 import com.google.android.material.bottomappbar.BottomAppBar
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -58,6 +62,7 @@ import ru.neosvet.vestnewage.view.basic.NeoScrollBar
 import ru.neosvet.vestnewage.view.basic.NeoSnackbar
 import ru.neosvet.vestnewage.view.basic.NeoToast
 import ru.neosvet.vestnewage.view.basic.StatusButton
+import ru.neosvet.vestnewage.view.basic.convertToDpi
 import ru.neosvet.vestnewage.view.dialog.SetNotifDialog
 import ru.neosvet.vestnewage.view.fragment.BookFragment
 import ru.neosvet.vestnewage.view.fragment.CabinetFragment
@@ -80,6 +85,7 @@ import ru.neosvet.vestnewage.viewmodel.state.ListState
 import ru.neosvet.vestnewage.viewmodel.state.MainState
 import ru.neosvet.vestnewage.viewmodel.state.NeoState
 import kotlin.math.absoluteValue
+
 
 class MainActivity : AppCompatActivity(), ItemClicker {
     companion object {
@@ -109,6 +115,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
     private var isShowBottomArea = true
     private var animTitle: BottomAnim? = null
     private var animButton: BottomAnim? = null
+    private lateinit var tvGodWords: TextView
     private val snackbar = NeoSnackbar()
     private val toiler: MainToiler by lazy {
         ViewModelProvider(this)[MainToiler::class.java]
@@ -152,8 +159,11 @@ class MainActivity : AppCompatActivity(), ItemClicker {
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     private fun doCheckPermission() {
         val n = POST_NOTIFICATIONS
-        if (ContextCompat.checkSelfPermission(this, n) == PackageManager.PERMISSION_DENIED)
-            ActivityCompat.requestPermissions(this, arrayOf(n), 1)
+        if (ContextCompat.checkSelfPermission(
+                this,
+                n
+            ) == PackageManager.PERMISSION_DENIED
+        ) ActivityCompat.requestPermissions(this, arrayOf(n), 1)
     }
 
     private fun runObserve() {
@@ -166,7 +176,8 @@ class MainActivity : AppCompatActivity(), ItemClicker {
     }
 
     private fun initWords() {
-        findViewById<View>(R.id.tvGodWords).setOnClickListener {
+        tvGodWords = findViewById(R.id.tvGodWords)
+        tvGodWords.setOnClickListener {
             val words = WordsUtils()
             words.showAlert(this, this::openSearch)
         }
@@ -197,8 +208,8 @@ class MainActivity : AppCompatActivity(), ItemClicker {
     private fun setBottomPanel() = helper.bottomBar?.let { bar ->
         loadMenu(bar)
         val menuView = bar.menu[0].actionView as ActionMenuView
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-            menuView.tooltipText = getString(R.string.menu)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) menuView.tooltipText =
+            getString(R.string.menu)
         helper.tvNew = menuView.findViewById(R.id.tvNew)
         helper.checkNew()
         menuView.setOnClickListener {
@@ -277,8 +288,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
             }
         } catch (e: Exception) {
             val utils = ErrorUtils(e)
-            val d = Data.Builder()
-                .putString(Const.TASK, "LaunchUtils")
+            val d = Data.Builder().putString(Const.TASK, "LaunchUtils")
                 .putString("Data", intent.data.toString())
                 .putString("Path", intent.data?.path.toString())
             toiler.setPublicState(utils.getErrorState(d.build()))
@@ -314,6 +324,40 @@ class MainActivity : AppCompatActivity(), ItemClicker {
         showWelcome()
     }
 
+    private fun updateIndent() {
+        helper.bottomBar?.let { bar ->
+            lifecycleScope.launch {
+                while (bar.measuredHeight == 0) delay(100)
+                checkFullScreen()
+                App.CONTENT_BOTTOM_INDENT = bar.measuredHeight + baseContext.convertToDpi(30)
+                helper.tvTitle?.let {
+                    App.CONTENT_BOTTOM_INDENT = bar.measuredHeight + it.measuredHeight
+                    it.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                        bottomMargin = bar.measuredHeight
+                    }
+                }
+                helper.tvToast.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                    bottomMargin = App.CONTENT_BOTTOM_INDENT
+                }
+                helper.vsbScrollBar.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                    bottomMargin = App.CONTENT_BOTTOM_INDENT
+                }
+                helper.tvPromTimeFloat.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                    bottomMargin = App.CONTENT_BOTTOM_INDENT
+                }
+            }
+        }
+    }
+
+    private fun checkFullScreen() {
+        val location = IntArray(2)
+        helper.topBar?.getLocationOnScreen(location)
+        if (location[1] == 0) //fullScreen
+            tvGodWords.updateLayoutParams<CollapsingToolbarLayout.LayoutParams> {
+                gravity = Gravity.BOTTOM
+            }
+    }
+
     private fun showHead() {
         if (helper.topBar == null) {
             findViewById<View>(R.id.ivHeadBack).isVisible = true
@@ -342,8 +386,8 @@ class MainActivity : AppCompatActivity(), ItemClicker {
 
     override fun onResume() {
         super.onResume()
-        if (curFragment == null && jobFinishStar?.isCancelled == true)
-            finishFlashStar()
+        updateIndent()
+        if (curFragment == null && jobFinishStar?.isCancelled == true) finishFlashStar()
         prom?.resume()
     }
 
@@ -472,8 +516,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
                 if (tab == -1) { //first isRun
                     val frHelp = HelpFragment.newInstance(0)
                     fragmentTransaction.replace(R.id.my_fragment, frHelp)
-                } else
-                    fragmentTransaction.replace(R.id.my_fragment, HelpFragment())
+                } else fragmentTransaction.replace(R.id.my_fragment, HelpFragment())
             }
 
             Section.EPISTLES -> curFragment =
@@ -492,8 +535,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
                 }
         }
         firstTab = 0
-        if (supportFragmentManager.isDestroyed.not())
-            fragmentTransaction.commit()
+        if (supportFragmentManager.isDestroyed.not()) fragmentTransaction.commit()
     }
 
     private fun setMenu(section: Section, savePrev: Boolean) {
@@ -540,8 +582,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
             statusBack == StatusBack.EXIT -> finish()
 
             helper.prevSection != null -> helper.prevSection?.let {
-                if (it == Section.SITE)
-                    setSection(it, false, SiteTab.SITE.value)
+                if (it == Section.SITE) setSection(it, false, SiteTab.SITE.value)
                 else setSection(it, false)
                 helper.prevSection = null
             }
@@ -553,8 +594,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
                 statusBack = StatusBack.EXIT
                 lifecycleScope.launch {
                     delay(3000)
-                    if (statusBack == StatusBack.EXIT)
-                        statusBack = StatusBack.PAGE
+                    if (statusBack == StatusBack.EXIT) statusBack = StatusBack.PAGE
                 }
             }
         }
@@ -580,12 +620,10 @@ class MainActivity : AppCompatActivity(), ItemClicker {
         val ads = AdsUtils(storage, this)
         ads.getItem(warn)?.let { item ->
             val builder = AlertDialog.Builder(this, R.style.NeoDialog)
-                .setTitle(getString(R.string.warning) + " " + item.title)
-                .setMessage(item.des)
+                .setTitle(getString(R.string.warning) + " " + item.title).setMessage(item.des)
                 .setNegativeButton(getString(android.R.string.ok)) { dialog: DialogInterface, _ ->
                     dialog.dismiss()
-                }
-                .setOnDismissListener { showWelcome() }
+                }.setOnDismissListener { showWelcome() }
             if (item.link.isNotEmpty()) {
                 builder.setPositiveButton(getString(R.string.open_link)) { _, _ ->
                     Urls.openInApps(item.link)
@@ -608,8 +646,8 @@ class MainActivity : AppCompatActivity(), ItemClicker {
         when (state) {
             is MainState.Ads -> {
                 utils.updateTime()
-                if (state.timediff.absoluteValue > LIMIT_DIFF_SEC || state.hasNew)
-                    frWelcome = WelcomeFragment.newInstance(state.hasNew, state.timediff)
+                if (state.timediff.absoluteValue > LIMIT_DIFF_SEC || state.hasNew) frWelcome =
+                    WelcomeFragment.newInstance(state.hasNew, state.timediff)
                 if (state.warnIndex > -1) showWarnAds(state.warnIndex)
             }
 
@@ -617,8 +655,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
             is MainState.FirstRun -> firstRun(state)
 
             is ListState.Primary -> {
-                if (frWelcome == null)
-                    frWelcome = WelcomeFragment.newInstance(false, 0)
+                if (frWelcome == null) frWelcome = WelcomeFragment.newInstance(false, 0)
                 frWelcome?.list?.addAll(state.list)
             }
 
@@ -635,15 +672,13 @@ class MainActivity : AppCompatActivity(), ItemClicker {
 
     private fun firstRun(state: MainState.FirstRun) {
         val intent = intent
-        if (firstTab == 0)
-            firstTab = intent.getIntExtra(Const.TAB, 0)
+        if (firstTab == 0) firstTab = intent.getIntExtra(Const.TAB, 0)
         if (helper.isFirstRun) firstTab = -1
         else {
             intent.getStringExtra(Const.CUR_ID)
             if (firstSection == Section.MENU) updateNew()
         }
-        if (intent.getBooleanExtra(Const.DIALOG, false))
-            helper.showDownloadDialog()
+        if (intent.getBooleanExtra(Const.DIALOG, false)) helper.showDownloadDialog()
         if (state.withSplash.not()) {
             finishFlashStar()
             intent.getStringExtra(Const.SEARCH)?.let {
@@ -660,17 +695,15 @@ class MainActivity : AppCompatActivity(), ItemClicker {
         else unblocked()
         curSection = Section.valueOf(state.curSection)
 
-        if (supportFragmentManager.fragments.isEmpty() ||
-            (isSideMenu && curSection == Section.MENU)
-        ) setSection(firstSection, false)
+        if (supportFragmentManager.fragments.isEmpty() || (isSideMenu && curSection == Section.MENU)) setSection(
+            firstSection,
+            false
+        )
         if (isSideMenu) setMenuFragment()
-        else if (curSection != Section.MENU)
-            statusBack = StatusBack.PAGE
+        else if (curSection != Section.MENU) statusBack = StatusBack.PAGE
         updateNew()
-        if (state.shownDwnDialog)
-            showDownloadDialog()
-        if (state.isEditor)
-            startEditMenu()
+        if (state.shownDwnDialog) showDownloadDialog()
+        if (state.isEditor) startEditMenu()
     }
 
     fun onAction(title: String) {
@@ -799,8 +832,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
     }
 
     fun setScrollBar(value: Int) {
-        if (value == -1)
-            helper.vsbScrollBar.value = helper.vsbScrollBar.maxValue
+        if (value == -1) helper.vsbScrollBar.value = helper.vsbScrollBar.maxValue
         else helper.vsbScrollBar.value = value
     }
 
@@ -825,8 +857,10 @@ class MainActivity : AppCompatActivity(), ItemClicker {
         helper.setBottomMenu(home.loadMenu(true))
         helper.bottomMenu.forEach {
             val item = bar.menu[i]
-            val m = if (it == Section.HOME)
-                MenuItem(R.drawable.ic_home, getString(R.string.home_screen))
+            val m = if (it == Section.HOME) MenuItem(
+                R.drawable.ic_home,
+                getString(R.string.home_screen)
+            )
             else home.getItem(it)
             item.title = m.title
             item.icon = ContextCompat.getDrawable(this, m.image)

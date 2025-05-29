@@ -9,8 +9,10 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.widget.PopupMenu
 import androidx.core.view.isVisible
+import androidx.core.view.updatePadding
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
+import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.CalendarItem
 import ru.neosvet.vestnewage.databinding.CalendarFragmentBinding
@@ -91,6 +93,7 @@ class CalendarFragment : NeoFragment() {
         pYear.setDescription(getString(R.string.to_prev_year), getString(R.string.to_next_year))
         pMonth.fixWidth(1.3f)
         pYear.fixWidth(1f)
+        root.updatePadding(bottom = App.CONTENT_BOTTOM_INDENT)
     }
 
     private fun openLink(link: String) {

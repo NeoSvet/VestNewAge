@@ -8,14 +8,12 @@
         android:id="@+id/rv_list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginBottom="@dimen/content_margin_bottom"
         app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_menu"
         android:layout_width="wrap_content"
         android:layout_height="200dp"
-        android:layout_marginBottom="@dimen/content_margin_bottom"
         android:background="@drawable/field"
         android:paddingHorizontal="@dimen/quarter_indent"
         android:paddingVertical="6dp"
