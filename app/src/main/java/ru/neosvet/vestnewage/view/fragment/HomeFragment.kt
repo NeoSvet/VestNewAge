@@ -58,7 +58,6 @@ class HomeFragment : NeoFragment(), HomeAdapter.Events {
         ViewModelProvider(this)[HomeToiler::class.java]
 
     override fun onDestroyView() {
-        act?.unlockHead()
         super.onDestroyView()
     }
 

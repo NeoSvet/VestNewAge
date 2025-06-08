@@ -196,7 +196,6 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent,
     }
 
     override fun onDestroyView() {
-        act?.unlockHead()
         adRequest.save()
         binding = null
         super.onDestroyView()
@@ -219,16 +218,12 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent,
                 act?.let {
                     moveExportButton(true)
                     it.initScrollBar(0, null)
-                    it.lockHead()
                     it.blocked()
                 }
                 pStatus.isVisible = true
                 etSearch.isEnabled = false
             } else {
-                act?.let {
-                    it.unlockHead()
-                    it.unblocked()
-                }
+                act?.unblocked()
                 pStatus.isVisible = false
                 etSearch.isEnabled = true
             }
@@ -320,7 +315,6 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent,
     }
 
     private fun showAdditionPanel() {
-        act?.lockHead()
         binding?.run {
             bPanelSwitch.setImageResource(R.drawable.ic_top)
             content.pAdditionSet.isVisible = true
@@ -571,8 +565,6 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent,
     }
 
     override fun onChangePage(page: Int) {
-        if (page > 0)
-            act?.lockHead()
         isUserScroll = false
         act?.setScrollBar(page)
         isUserScroll = true
@@ -585,7 +577,6 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent,
         else act?.let {
             it.showToast(getString(R.string.finish_list))
             if (endList) act?.setScrollBar(-1)
-            else it.unlockHead()
         }
     }
 

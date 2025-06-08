@@ -58,8 +58,6 @@ class MainHelper(private val act: MainActivity) {
     var svMain: NestedScrollView? = null
     var ivHeadBack: ImageView
         private set
-    val bottomAreaIsHide: Boolean
-        get() = fabAction.isVisible.not() && bottomBar?.isVisible == false
     var frMenu: MenuFragment? = null
     var tvNew: TextView? = null
     var pStatus: View

@@ -154,8 +154,6 @@ class JournalFragment : NeoFragment(), PagingAdapter.Parent, NeoScrollBar.Host {
     }
 
     override fun onChangePage(page: Int) {
-        if (page > 0)
-            act?.lockHead()
         isUserScroll = false
         act?.setScrollBar(page)
         isUserScroll = true
@@ -167,7 +165,6 @@ class JournalFragment : NeoFragment(), PagingAdapter.Parent, NeoScrollBar.Host {
         else act?.let {
             it.showToast(getString(R.string.finish_list))
             if (endList) act?.setScrollBar(-1)
-            else it.unlockHead()
         }
     }
 

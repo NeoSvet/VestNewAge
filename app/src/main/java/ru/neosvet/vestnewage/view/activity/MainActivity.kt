@@ -20,7 +20,6 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.ActionMenuView
-import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
@@ -32,7 +31,6 @@ import androidx.core.view.updatePadding
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.work.Data
-import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.CollapsingToolbarLayout
 import com.google.android.material.bottomappbar.BottomAppBar
 import kotlinx.coroutines.Job
@@ -61,7 +59,6 @@ import ru.neosvet.vestnewage.utils.PromUtils
 import ru.neosvet.vestnewage.utils.ScreenUtils
 import ru.neosvet.vestnewage.utils.WordsUtils
 import ru.neosvet.vestnewage.view.activity.BrowserActivity.Companion.openReader
-import ru.neosvet.vestnewage.view.basic.BottomAnim
 import ru.neosvet.vestnewage.view.basic.NeoFragment
 import ru.neosvet.vestnewage.view.basic.NeoScrollBar
 import ru.neosvet.vestnewage.view.basic.NeoSnackbar
@@ -114,11 +111,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
     private var statusBack = StatusBack.EXIT
 
     private lateinit var launchUtils: LaunchUtils
-    private var jobBottomArea: Job? = null
     private var jobFinishStar: Job? = null
-    private var isShowBottomArea = true
-    private var animTitle: BottomAnim? = null
-    private var animButton: BottomAnim? = null
     private lateinit var tvGodWords: TextView
     private val snackbar = NeoSnackbar()
     private val toiler: MainToiler by lazy {
@@ -153,7 +146,6 @@ class MainActivity : AppCompatActivity(), ItemClicker {
         super.onCreate(savedInstanceState)
         setBottomPanel()
         initStatusButton()
-        initAnim()
         initWords()
         if (!ScreenUtils.isTabletLand && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
             initInsetsUtils()
@@ -462,13 +454,6 @@ class MainActivity : AppCompatActivity(), ItemClicker {
         } else helper.topBar!!.isVisible = true
     }
 
-    private fun initAnim() = helper.run {
-        fabAction.post {
-            tvTitle?.let { animTitle = BottomAnim(it) }
-            animButton = BottomAnim(fabAction)
-        }
-    }
-
     override fun onDestroy() {
         toast.destroy()
         super.onDestroy()
@@ -659,7 +644,6 @@ class MainActivity : AppCompatActivity(), ItemClicker {
 
                 helper.shownActionMenu -> helper.hideActionMenu()
                 curFragment?.onBackPressed() == false -> return
-                helper.bottomAreaIsHide -> showBottomArea()
 
                 firstSection == Section.NEW -> {
                     firstSection = helper.getFirstSection()
@@ -804,33 +788,6 @@ class MainActivity : AppCompatActivity(), ItemClicker {
         curFragment?.onAction(title)
     }
 
-    fun hideBottomArea() {
-        if (isBlocked || isShowBottomArea.not()) return
-        jobBottomArea?.cancel()
-        helper.run {
-            bottomBar?.performHide()
-            isShowBottomArea = false
-            animTitle?.hide()
-            animButton?.hide()
-        }
-        jobBottomArea = lifecycleScope.launch {
-            delay(1500)
-            showBottomArea()
-        }
-    }
-
-    fun showBottomArea() {
-        if (isBlocked) return
-        jobBottomArea?.cancel()
-        if (status.isVisible || isShowBottomArea) return
-        isShowBottomArea = true
-        helper.run {
-            bottomBar?.performShow()
-            animTitle?.show()
-            animButton?.show()
-        }
-    }
-
     fun blocked() = helper.run {
         isBlocked = true
         tipAction.hide()
@@ -860,25 +817,6 @@ class MainActivity : AppCompatActivity(), ItemClicker {
         prom = if (isFloat) PromUtils(helper.tvPromTimeFloat)
         else PromUtils(helper.tvPromTimeHead)
         prom?.show()
-    }
-
-    fun lockHead() {
-        val collapsingBar: CollapsingToolbarLayout = findViewById(R.id.collapsingBar)
-        if (collapsingBar.minimumHeight > 0) return
-        helper.topBar?.let {
-            it.setExpanded(false)
-            it.isVisible = false
-        }
-        helper.svMain?.updateLayoutParams<CoordinatorLayout.LayoutParams> {
-            behavior = null
-        }
-    }
-
-    fun unlockHead() {
-        helper.svMain?.updateLayoutParams<CoordinatorLayout.LayoutParams> {
-            behavior = AppBarLayout.ScrollingViewBehavior()
-        }
-        helper.topBar?.isVisible = true
     }
 
     fun setError(error: BasicState.Error) {

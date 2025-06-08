@@ -6,16 +6,17 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.core.view.updateLayoutParams
+import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.network.OnlineObserver
 import ru.neosvet.vestnewage.view.activity.MainActivity
-import ru.neosvet.vestnewage.view.list.helper.ScrollHelper
 import ru.neosvet.vestnewage.view.list.helper.ListHelper
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
 import ru.neosvet.vestnewage.viewmodel.state.BasicState
@@ -29,7 +30,6 @@ abstract class NeoFragment : Fragment() {
     protected val neotoiler: NeoToiler by lazy {
         initViewModel()
     }
-    private var scroll: ScrollHelper? = null
     private var root: View? = null
     private var connectWatcher: Job? = null
     protected var isBlocked = false
@@ -76,7 +76,6 @@ abstract class NeoFragment : Fragment() {
     }
 
     override fun onDestroyView() {
-        scroll?.deAttach()
         act = null
         super.onDestroyView()
     }
@@ -166,15 +165,13 @@ abstract class NeoFragment : Fragment() {
         }
     }
 
+    abstract fun onChangedInsets(insets: android.graphics.Insets)
+
     protected fun setListEvents(list: RecyclerView, onlyLimit: Boolean = true) {
-        scroll = ScrollHelper {
-            if (it == ScrollHelper.Events.SCROLL_END)
-                act?.hideBottomArea()
-        }.apply { attach(list) }
+        list.updatePadding(bottom = App.CONTENT_BOTTOM_INDENT)
         val helper = ListHelper(onlyLimit) {
             when (it) {
-                ListHelper.Events.LIST_LIMIT ->
-                    act?.hideBottomArea()
+                ListHelper.Events.LIST_LIMIT -> {}
 
                 ListHelper.Events.SWIPE_LEFT ->
                     swipeLeft()
