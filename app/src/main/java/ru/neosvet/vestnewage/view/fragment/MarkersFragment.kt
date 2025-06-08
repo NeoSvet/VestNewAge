@@ -13,6 +13,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
+import androidx.core.view.updatePadding
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
@@ -299,6 +300,10 @@ class MarkersFragment : NeoFragment(), MarkersListHelper.Events, MarkerHolder.Ev
             }
             startRotate()
         }
+    }
+
+    override fun onChangedInsets(insets: android.graphics.Insets) {
+        binding?.run { rvList.updatePadding(bottom = App.CONTENT_BOTTOM_INDENT) }
     }
 
     override fun onChangedOtherState(state: NeoState) {

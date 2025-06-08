@@ -2,26 +2,30 @@ package ru.neosvet.vestnewage.view.activity
 
 import android.annotation.SuppressLint
 import android.app.ActivityManager
-import android.content.Context
 import android.content.Intent
+import android.graphics.Insets
+import android.os.Build
 import android.os.Bundle
 import android.view.KeyEvent
 import android.view.MenuItem
 import android.view.MotionEvent
 import android.view.View
-import android.view.Window
+import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import androidx.activity.OnBackPressedCallback
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.ActionMenuView
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.view.children
+import androidx.core.view.get
 import androidx.core.view.isVisible
+import androidx.core.view.updateLayoutParams
 import androidx.core.view.updatePadding
 import androidx.core.widget.doAfterTextChanged
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import com.google.android.material.imageview.ShapeableImageView
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -34,19 +38,20 @@ import ru.neosvet.vestnewage.network.OnlineObserver
 import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.storage.UnreadStorage
 import ru.neosvet.vestnewage.utils.Const
+import ru.neosvet.vestnewage.utils.InsetsUtils
 import ru.neosvet.vestnewage.utils.PromUtils
 import ru.neosvet.vestnewage.utils.ScreenUtils
 import ru.neosvet.vestnewage.utils.TipUtils
 import ru.neosvet.vestnewage.utils.WordsUtils
 import ru.neosvet.vestnewage.utils.isDoctrineBook
 import ru.neosvet.vestnewage.utils.isPoem
-import ru.neosvet.vestnewage.view.basic.BottomAnim
 import ru.neosvet.vestnewage.view.basic.NeoSnackbar
 import ru.neosvet.vestnewage.view.basic.NeoToast
 import ru.neosvet.vestnewage.view.basic.SoftKeyboard
 import ru.neosvet.vestnewage.view.basic.StatusButton
 import ru.neosvet.vestnewage.view.basic.Y
-import ru.neosvet.vestnewage.view.basic.convertDpi
+import ru.neosvet.vestnewage.view.basic.convertToDpi
+import ru.neosvet.vestnewage.view.basic.defIndent
 import ru.neosvet.vestnewage.view.basic.fromDpi
 import ru.neosvet.vestnewage.view.browser.HeadBar
 import ru.neosvet.vestnewage.view.browser.NeoInterface
@@ -86,7 +91,6 @@ class BrowserActivity : AppCompatActivity(), ReaderClient.Parent, NeoInterface.P
     private lateinit var headBar: HeadBar
     private lateinit var prom: PromUtils
     private lateinit var menu: NeoMenu
-    private var animButton: BottomAnim? = null
     private var navIsTop = false
     private var isSearch = false
     private var twoPointers = false
@@ -111,6 +115,7 @@ class BrowserActivity : AppCompatActivity(), ReaderClient.Parent, NeoInterface.P
     private var positionFactor = 1f
     private var bottomX = 0
     private var position = 0f
+    private var headResId = R.drawable.head_back
 
     private val positionOnPage: Float
         get() = binding.content.wvBrowser.run {
@@ -128,7 +133,6 @@ class BrowserActivity : AppCompatActivity(), ReaderClient.Parent, NeoInterface.P
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        supportRequestWindowFeature(Window.FEATURE_NO_TITLE)
         binding = BrowserActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
         ScreenUtils.init(this) // for logo in topBar
@@ -138,6 +142,8 @@ class BrowserActivity : AppCompatActivity(), ReaderClient.Parent, NeoInterface.P
         setViews()
         setContent()
         initWords()
+        if (!ScreenUtils.isTabletLand && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
+            initInsetsUtils()
         if (savedInstanceState == null) {
             initArguments()
             TipUtils.showTipIfNeed(TipUtils.Type.BROWSER)
@@ -159,6 +165,101 @@ class BrowserActivity : AppCompatActivity(), ReaderClient.Parent, NeoInterface.P
         changeArguments()
     }
 
+    @RequiresApi(Build.VERSION_CODES.S)
+    private fun initInsetsUtils() {
+        val utils = InsetsUtils(binding.ivHeadBack, this)
+        utils.applyInsets = { insets ->
+            if (binding.ivHeadBack.isVisible) {
+                setVerticalInsets(insets)
+                if (utils.isSideNavBar)
+                    setSideInsets(insets)
+                true
+            } else false
+        }
+        utils.init(window)
+    }
+
+    @RequiresApi(Build.VERSION_CODES.S)
+    private fun setSideInsets(insets: Insets) {
+        binding.tvPromTimeFloat.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+            leftMargin = insets.left
+        }
+        binding.tvGodWords.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+            rightMargin = insets.right
+        }
+        binding.btnBack.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+            leftMargin = insets.left
+        }
+        binding.btnFullScreen.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+            leftMargin = insets.left + defIndent
+        }
+        binding.bottomBar.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+            leftMargin = insets.left
+            rightMargin = insets.right
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.S)
+    private fun setVerticalInsets(insets: Insets) {
+        PromBottom(false)
+        setSwitchHead(insets.top)
+        binding.tvGodWords.updateLayoutParams<ConstraintLayout.LayoutParams> {
+            topToTop = -1
+            bottomToBottom = R.id.ivHeadBack
+        }
+        binding.btnBack.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+            topMargin = insets.top / 2
+        }
+
+        if (insets.bottom > 0)
+            binding.bottomBar.updatePadding(bottom = insets.bottom - baseContext.defIndent)
+        binding.bottomBar.children.first()
+            .addOnLayoutChangeListener { v, _, top, _, _, _, _, _, _ ->
+                if (top > 0) v.top = 0
+            }
+        binding.bottomBar.addOnLayoutChangeListener { v, _, _, _, _, _, _, _, _ ->
+            if (v.minimumHeight < v.measuredHeight)
+                v.minimumHeight = v.measuredHeight
+        }
+        binding.content.wvBrowser.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+            leftMargin = insets.left
+            rightMargin = insets.right
+            bottomMargin = insets.bottom
+        }
+    }
+
+    private fun setSwitchHead(statusHeight: Int) {
+        val h = statusHeight + statusHeight / 2
+        if (h > headBar.collapsedH)
+            headBar.collapsedH = h
+        headBar.switchGone = {
+            if (headBar.isHided) {
+                binding.ivHeadFront.isVisible = true
+                binding.btnBack.isVisible = true
+                binding.ivHeadBack.setImageResource(headResId)
+            } else {
+                binding.ivHeadFront.isVisible = false
+                binding.btnBack.isVisible = false
+                binding.ivHeadBack.setImageResource(R.drawable.topbar_bg)
+                binding.ivHeadBack.updateLayoutParams<ViewGroup.LayoutParams> {
+                    height = statusHeight
+                }
+            }
+        }
+        if (headBar.isBlocked) {
+            headBar.hide()
+            headBar.unblocked()
+        }
+    }
+
+    private fun PromBottom(withoutBar: Boolean) {
+        if (!binding.tvPromTimeFloat.isVisible) return
+        binding.tvPromTimeFloat.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+            bottomMargin = if (withoutBar) baseContext.defIndent
+            else binding.bottomBar.measuredHeight + baseContext.convertToDpi(5)
+        }
+    }
+
     private fun applyHelper() {
         helper.load(this)
         currentScale = helper.zoom / 100f
@@ -174,7 +275,7 @@ class BrowserActivity : AppCompatActivity(), ReaderClient.Parent, NeoInterface.P
                 etSearch.updatePadding(
                     right = fromDpi(R.dimen.def_indent)
                 )
-                bClear.isVisible = false
+                btnClear.isVisible = false
             }
         }
     }
@@ -317,8 +418,8 @@ class BrowserActivity : AppCompatActivity(), ReaderClient.Parent, NeoInterface.P
     }
 
     private fun setViews() = binding.run {
-        bBack.setOnClickListener {
-            val m = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+        btnBack.setOnClickListener {
+            val m = getSystemService(ACTIVITY_SERVICE) as ActivityManager
             val act = m.appTasks[0].taskInfo.baseActivity
             if (act == null || act.shortClassName.contains(localClassName)) {
                 val intent = Intent(this@BrowserActivity, MainActivity::class.java)
@@ -438,7 +539,7 @@ class BrowserActivity : AppCompatActivity(), ReaderClient.Parent, NeoInterface.P
             }
             false
         }
-        bPrev.setOnClickListener {
+        btnPrev.setOnClickListener {
             if (helper.prevSearch()) {
                 etSearch.setText(helper.request)
                 findRequest()
@@ -447,7 +548,7 @@ class BrowserActivity : AppCompatActivity(), ReaderClient.Parent, NeoInterface.P
                 wvBrowser.findNext(false)
             }
         }
-        bNext.setOnClickListener {
+        btnNext.setOnClickListener {
             if (helper.nextSearch()) {
                 etSearch.setText(helper.request)
                 findRequest()
@@ -460,12 +561,12 @@ class BrowserActivity : AppCompatActivity(), ReaderClient.Parent, NeoInterface.P
             if (isDoneCounting)
                 searchIndex = activeMatchOrdinal
         }
-        bClose.setOnClickListener { closeSearch() }
+        btnClose.setOnClickListener { closeSearch() }
         etSearch.doAfterTextChanged {
             if (etSearch.isEnabled)
-                bClear.isVisible = it?.isNotEmpty() ?: false
+                btnClear.isVisible = it?.isNotEmpty() ?: false
         }
-        bClear.setOnClickListener { etSearch.setText("") }
+        btnClear.setOnClickListener { etSearch.setText("") }
     }
 
     private fun scrollEvent() {
@@ -479,14 +580,19 @@ class BrowserActivity : AppCompatActivity(), ReaderClient.Parent, NeoInterface.P
     }
 
     private fun bottomHide() {
-        animButton?.hide()
+        binding.fabNav.hide()
         binding.bottomBar.performHide()
+        PromBottom(true)
     }
 
     private fun bottomShow() {
         if (isSearch) return
-        animButton?.show()
+        binding.fabNav.show()
+        binding.fabNav.post {
+            binding.fabNav.alpha = 0.5f
+        }
         binding.bottomBar.performShow()
+        PromBottom(false)
     }
 
     private fun setNavButton(scrollY: Int) {
@@ -516,7 +622,7 @@ class BrowserActivity : AppCompatActivity(), ReaderClient.Parent, NeoInterface.P
         headBar = HeadBar(
             mainView = ivHeadBack,
             distanceForHide = if (ScreenUtils.isLand) 50 else 100,
-            additionViews = listOf(tvGodWords, btnFullScreen)
+            additionViews = listOf(tvGodWords, tvPromTimeHead, btnFullScreen)
         ) {
             when {
                 link.contains(Const.DOCTRINE) -> Urls.openInBrowser(Urls.DoctrineSite)
@@ -545,19 +651,19 @@ class BrowserActivity : AppCompatActivity(), ReaderClient.Parent, NeoInterface.P
         if (ivHeadBack.isVisible) return@run
         when {
             type == BrowserState.Type.DOCTRINE -> {
-                setDoctrineBack(ivHeadBack)
+                setDoctrineBack()
                 if (link.isDoctrineBook)
                     ivHeadFront.setImageResource(R.drawable.head_front_db)
                 else ivHeadFront.setImageResource(R.drawable.head_front_d)
             }
 
             type == BrowserState.Type.HOLY_RUS -> {
-                setDoctrineBack(ivHeadBack)
+                setDoctrineBack()
                 ivHeadFront.setImageResource(R.drawable.head_front_r)
             }
 
-            ScreenUtils.isWide && isBigHead -> ivHeadBack.setImageResource(R.drawable.head_back_tablet)
-            ScreenUtils.isLand -> ivHeadBack.setImageResource(R.drawable.head_back_land)
+            ScreenUtils.isWide && isBigHead -> setHeadResource(R.drawable.head_back_tablet)
+            ScreenUtils.isLand -> setHeadResource(R.drawable.head_back_land)
         }
         if (headBar.isHided) return@run
         ivHeadBack.isVisible = true
@@ -567,25 +673,30 @@ class BrowserActivity : AppCompatActivity(), ReaderClient.Parent, NeoInterface.P
         }
     }
 
-    private fun setDoctrineBack(ivHeadBack: ShapeableImageView) {
+    private fun setDoctrineBack() {
         if (ScreenUtils.isWide && isBigHead)
-            ivHeadBack.setImageResource(R.drawable.head_back_tablet_d)
+            setHeadResource(R.drawable.head_back_tablet_d)
         else if (ScreenUtils.isLand)
-            ivHeadBack.setImageResource(R.drawable.head_back_land_d)
-        else ivHeadBack.setImageResource(R.drawable.head_back_d)
+            setHeadResource(R.drawable.head_back_land_d)
+        else setHeadResource(R.drawable.head_back_d)
+    }
+
+    private fun setHeadResource(resId: Int) {
+        headResId = resId
+        binding.ivHeadBack.setImageResource(resId)
     }
 
     @SuppressLint("ClickableViewAccessibility")
     private fun setBottomBar() = binding.run {
         bottomBar.menu.let { main ->
-            main.getItem(0).subMenu?.let {
+            main[0].subMenu?.let {
                 menu = NeoMenu(
-                    refresh = main.getItem(4),
-                    buttons = it.getItem(0),
-                    top = it.getItem(1),
-                    autoreturn = it.getItem(2),
-                    numpar = it.getItem(3),
-                    theme = it.getItem(4)
+                    refresh = main[4],
+                    buttons = it[0],
+                    top = it[1],
+                    autoreturn = it[2],
+                    numpar = it[3],
+                    theme = it[4]
                 )
             }
         }
@@ -641,7 +752,7 @@ class BrowserActivity : AppCompatActivity(), ReaderClient.Parent, NeoInterface.P
 
                 R.id.nav_opt_scale, R.id.nav_src_scale -> {
                     helper.zoom = if (it.itemId == R.id.nav_opt_scale)
-                        convertDpi(100) else 100
+                        convertToDpi(100) else 100
                     helper.save(this@BrowserActivity)
                     helper.zoom = 0
                     openReader(link, null)
@@ -684,12 +795,10 @@ class BrowserActivity : AppCompatActivity(), ReaderClient.Parent, NeoInterface.P
         if (helper.isNavButton) {
             btnFullScreen.isVisible = tvGodWords.isVisible
             btnFullScreen.tag = null
-            animButton = null
             setNavButton(content.wvBrowser.scrollY)
         } else {
             btnFullScreen.isVisible = false
             btnFullScreen.tag = "v"
-            animButton = BottomAnim(binding.fabNav)
             fabNav.setImageResource(R.drawable.ic_fullscreen)
         }
     }
@@ -851,8 +960,7 @@ class BrowserActivity : AppCompatActivity(), ReaderClient.Parent, NeoInterface.P
         if (isFullScreen) binding.bottomBar.post {
             switchFullScreen(true)
         } else bottomUnblocked()
-        if (!state.bottom)
-            bottomHide()
+        if (!state.bottom) bottomHide()
         when (state.head) {
             0.toByte() -> headBar.hide()
             1.toByte() -> binding.ivHeadBack.post {
@@ -894,12 +1002,14 @@ class BrowserActivity : AppCompatActivity(), ReaderClient.Parent, NeoInterface.P
     private fun bottomBlocked() {
         binding.fabNav.isVisible = false
         binding.bottomBar.isVisible = false
+        PromBottom(true)
     }
 
     private fun bottomUnblocked() {
         if (isSearch) return
         binding.fabNav.isVisible = true
         binding.bottomBar.isVisible = true
+        PromBottom(false)
     }
 
     override fun changePage(next: Boolean) {

@@ -6,8 +6,10 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.view.isVisible
+import androidx.core.view.updatePadding
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
+import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.BasicItem
 import ru.neosvet.vestnewage.data.BookRnd
@@ -153,6 +155,10 @@ class BookFragment : NeoFragment() {
             pYear.isVisible = false
             pMonth.isVisible = false
         }
+    }
+
+    override fun onChangedInsets(insets: android.graphics.Insets) {
+        binding?.run { rvBook.updatePadding(bottom = App.CONTENT_BOTTOM_INDENT) }
     }
 
     @SuppressLint("SetTextI18n")

@@ -98,16 +98,24 @@ class HomeFragment : NeoFragment(), HomeAdapter.Events {
     private fun initView(container: View) {
         rvList = container.findViewById(R.id.rv_list)
         rvMenu = container.findViewById(R.id.rv_menu)
-        rvMenu.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-            bottomMargin = App.CONTENT_BOTTOM_INDENT
-        }
-        rvList.updatePadding(bottom = App.CONTENT_BOTTOM_INDENT)
         rvMenu.layoutManager = GridLayoutManager(context, 2)
+        rvList.post { setIndent() }
     }
 
     override fun setStatus(load: Boolean) {
         if (!load && initAdapter && adapter.loadingIndex > -1) //if error
             adapter.finishLoading()
+    }
+
+    override fun onChangedInsets(insets: android.graphics.Insets) {
+        setIndent()
+    }
+
+    private fun setIndent() {
+        rvMenu.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+            bottomMargin = App.CONTENT_BOTTOM_INDENT
+        }
+        rvList.updatePadding(bottom = App.CONTENT_BOTTOM_INDENT)
     }
 
     override fun onChangedOtherState(state: NeoState) {

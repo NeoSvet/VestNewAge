@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/root"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -14,10 +15,9 @@
             android:id="@+id/collapsingBar"
             android:layout_width="match_parent"
             android:layout_height="@dimen/head_height"
-            android:background="@android:color/black"
-            app:contentScrim="@android:color/black"
+            app:contentScrim="@color/navigationBarColor"
             app:layout_scrollFlags="scroll|exitUntilCollapsed"
-            app:scrimVisibleHeightTrigger="40dp">
+            app:scrimVisibleHeightTrigger="50dp">
 
             <com.google.android.material.imageview.ShapeableImageView
                 android:id="@+id/ivHeadBack"
@@ -40,7 +40,7 @@
                 android:id="@+id/tvGodWords"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="top|end"
+                android:layout_gravity="bottom|end"
                 android:paddingHorizontal="@dimen/def_indent"
                 android:paddingVertical="@dimen/half_indent"
                 android:shadowColor="@android:color/black"
@@ -54,7 +54,7 @@
                 android:id="@+id/tvPromTimeHead"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="bottom|end"
+                android:layout_gravity="bottom|start"
                 android:paddingHorizontal="@dimen/def_indent"
                 android:paddingVertical="@dimen/half_indent"
                 android:shadowColor="@android:color/black"

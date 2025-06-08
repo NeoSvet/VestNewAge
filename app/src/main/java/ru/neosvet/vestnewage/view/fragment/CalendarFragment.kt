@@ -93,7 +93,10 @@ class CalendarFragment : NeoFragment() {
         pYear.setDescription(getString(R.string.to_prev_year), getString(R.string.to_next_year))
         pMonth.fixWidth(1.3f)
         pYear.fixWidth(1f)
-        root.updatePadding(bottom = App.CONTENT_BOTTOM_INDENT)
+    }
+
+    override fun onChangedInsets(insets: android.graphics.Insets) {
+        binding?.run { root.updatePadding(bottom = App.CONTENT_BOTTOM_INDENT) }
     }
 
     private fun openLink(link: String) {

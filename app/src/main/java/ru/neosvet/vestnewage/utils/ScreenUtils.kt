@@ -1,8 +1,8 @@
 package ru.neosvet.vestnewage.utils
 
 import android.app.Activity
-import android.graphics.Point
 import android.os.Build
+import android.util.DisplayMetrics
 
 object ScreenUtils {
     enum class Type {
@@ -31,25 +31,31 @@ object ScreenUtils {
     val span: Int
         get() = if (isWide) 2 else 1
 
+    @JvmStatic
+    var width: Int = 0
+        private set
+    var height: Int = 0
+        private set
+
     fun init(activity: Activity) {
-        val width: Int
-        val height: Int
-        val density = activity.resources.displayMetrics.density
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             val d = activity.windowManager.currentWindowMetrics
-            width = (d.bounds.width() / density).toInt()
-            height = (d.bounds.height() / density).toInt()
+            width = d.bounds.width()
+            height = d.bounds.height()
         } else {
-            val p = Point(0, 0)
-            activity.windowManager.defaultDisplay.getRealSize(p)
-            width = (p.x / density).toInt()
-            height = (p.y / density).toInt()
+            val metrics = DisplayMetrics()
+            activity.windowManager.defaultDisplay.getMetrics(metrics)
+            width = metrics.widthPixels
+            height = metrics.heightPixels
         }
-        isWide = width > 415
+        val density = activity.resources.displayMetrics.density
+        val w = (width / density).toInt()
+        val h = (height / density).toInt()
+        isWide = w > 415
         type = when {
-            width > 1000 && width > height -> Type.TABLET_LAND
-            height > 1000 -> Type.TABLET_PORT
-            width > height -> Type.PHONE_LAND
+            w > 1000 && w > h -> Type.TABLET_LAND
+            h > 1000 -> Type.TABLET_PORT
+            w > h -> Type.PHONE_LAND
             else -> Type.PHONE_PORT
         }
     }

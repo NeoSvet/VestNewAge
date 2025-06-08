@@ -3,8 +3,10 @@ package ru.neosvet.vestnewage.view.fragment
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.core.view.updatePadding
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
+import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.BasicItem
 import ru.neosvet.vestnewage.data.CabinetScreen
@@ -66,6 +68,10 @@ class CabinetFragment : NeoFragment(), CabinetAdapter.Host {
         toolbar.setNavigationOnClickListener {
             onBackPressed()
         }
+    }
+
+    override fun onChangedInsets(insets: android.graphics.Insets) {
+        binding?.run { rvList.updatePadding(bottom = App.CONTENT_BOTTOM_INDENT) }
     }
 
     override fun onChangedOtherState(state: NeoState) {

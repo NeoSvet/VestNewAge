@@ -4,12 +4,14 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.view.isVisible
+import androidx.core.view.updatePadding
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.paging.PagingData
 import androidx.recyclerview.widget.GridLayoutManager
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.BasicItem
 import ru.neosvet.vestnewage.databinding.TabFragmentBinding
@@ -167,6 +169,10 @@ class JournalFragment : NeoFragment(), PagingAdapter.Parent, NeoScrollBar.Host {
             if (endList) act?.setScrollBar(-1)
             else it.unlockHead()
         }
+    }
+
+    override fun onChangedInsets(insets: android.graphics.Insets) {
+        binding?.run { rvList.updatePadding(bottom = App.CONTENT_BOTTOM_INDENT) }
     }
 
     override fun onChangedOtherState(state: NeoState) {

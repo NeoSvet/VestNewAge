@@ -16,6 +16,7 @@ import androidx.core.net.toUri
 import androidx.core.text.isDigitsOnly
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
+import androidx.core.view.updatePadding
 import androidx.core.widget.doAfterTextChanged
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -362,6 +363,10 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent,
             it.dismissDropDown()
         }
         hideRequests()
+    }
+
+    override fun onChangedInsets(insets: android.graphics.Insets) {
+        binding?.run { content.rvSearch.updatePadding(bottom = App.CONTENT_BOTTOM_INDENT) }
     }
 
     override fun onChangedOtherState(state: NeoState) {

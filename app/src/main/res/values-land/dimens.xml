@@ -6,7 +6,7 @@
     <dimen name="string_size">29dp</dimen>
     <dimen name="margin_side">85dp</dimen>
     <dimen name="margin_top">48dp</dimen>
-    <integer name="top_minus">90</integer>
+    <dimen name="top_minus">90dp</dimen>
     <dimen name="head_height">100dp</dimen>
     <dimen name="list_height">200dp</dimen>
     <dimen name="above_toast">110dp</dimen>

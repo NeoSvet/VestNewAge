@@ -4,15 +4,19 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.core.view.updatePadding
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
+import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.BasicItem
 import ru.neosvet.vestnewage.data.Section
 import ru.neosvet.vestnewage.data.SiteTab
 import ru.neosvet.vestnewage.databinding.TabFragmentBinding
 import ru.neosvet.vestnewage.network.Urls
-import ru.neosvet.vestnewage.utils.*
+import ru.neosvet.vestnewage.utils.Const
+import ru.neosvet.vestnewage.utils.ScreenUtils
+import ru.neosvet.vestnewage.utils.isPoem
 import ru.neosvet.vestnewage.view.activity.BrowserActivity.Companion.openReader
 import ru.neosvet.vestnewage.view.basic.NeoFragment
 import ru.neosvet.vestnewage.view.basic.onSizeChange
@@ -129,6 +133,10 @@ class SiteFragment : NeoFragment() {
             url.contains(".jp") || url.contains(".mp") -> Urls.openInBrowser(Urls.Site + url)
             else -> openReader(url, null)
         }
+    }
+
+    override fun onChangedInsets(insets: android.graphics.Insets) {
+        binding?.run { rvList.updatePadding(bottom = App.CONTENT_BOTTOM_INDENT) }
     }
 
     override fun onChangedOtherState(state: NeoState) {

@@ -6,6 +6,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.core.content.edit
 import androidx.core.view.isVisible
 import androidx.core.widget.NestedScrollView
 import androidx.recyclerview.widget.GridLayoutManager
@@ -55,6 +56,8 @@ class MainHelper(private val act: MainActivity) {
     var bottomBar: BottomAppBar? = null
     var topBar: AppBarLayout? = null
     var svMain: NestedScrollView? = null
+    var ivHeadBack: ImageView
+        private set
     val bottomAreaIsHide: Boolean
         get() = fabAction.isVisible.not() && bottomBar?.isVisible == false
     var frMenu: MenuFragment? = null
@@ -68,6 +71,8 @@ class MainHelper(private val act: MainActivity) {
     var tvScroll: TextView
         private set
     var vsbScrollBar: NeoScrollBar
+        private set
+    var tvPromTimeHead: TextView
         private set
 
     val unread = UnreadStorage()
@@ -90,6 +95,7 @@ class MainHelper(private val act: MainActivity) {
         tvPromTimeFloat = act.findViewById(R.id.tvPromTimeFloat)
         fabAction = act.findViewById(R.id.fabAction)
         vsbScrollBar = act.findViewById(R.id.vsbScrollBar)
+        tvPromTimeHead = act.findViewById(R.id.tvPromTimeHead)
         val rvAction = act.findViewById<RecyclerView>(R.id.rvAction)
         tipAction = NeoTip(act, rvAction)
         tipAction.autoHide = false
@@ -101,7 +107,7 @@ class MainHelper(private val act: MainActivity) {
             else act.onAction(TAG)
         }
 
-        val ivHeadBack = act.findViewById<ImageView>(R.id.ivHeadBack)
+        ivHeadBack = act.findViewById<ImageView>(R.id.ivHeadBack)
         ivHeadBack.setOnClickListener {
             Urls.openInBrowser(Urls.Site)
         }
@@ -128,11 +134,7 @@ class MainHelper(private val act: MainActivity) {
 
     private fun initFirst() = pref.getBoolean(FIRST, true).also {
         isFirst = it
-        if (it) {
-            val editor = pref.edit()
-            editor.putBoolean(FIRST, false)
-            editor.apply()
-        }
+        if (it) pref.edit { putBoolean(FIRST, false) }
     }
 
     fun getFirstSection(): Section {

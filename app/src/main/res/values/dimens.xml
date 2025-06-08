@@ -7,10 +7,9 @@
     <dimen name="cell_font">26dp</dimen>
     <dimen name="margin_side">5dp</dimen>
     <dimen name="margin_top">0dp</dimen>
-    <integer name="top_minus">180</integer>
+    <dimen name="top_minus">180dp</dimen>
     <integer name="night">0</integer>
     <dimen name="bottom_bar_height">56dp</dimen>
-    <dimen name="head_collapsed_height">50dp</dimen>
     <dimen name="head_height">175dp</dimen>
     <dimen name="head_margin">10dp</dimen>
     <dimen name="dialog_width_land">500dp</dimen>

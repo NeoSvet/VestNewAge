@@ -3,22 +3,27 @@ package ru.neosvet.vestnewage.view.activity
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
-import android.util.DisplayMetrics
 import android.view.KeyEvent
 import android.view.View
+import android.view.ViewGroup
 import android.view.animation.Animation
 import android.view.inputmethod.EditorInfo
 import android.widget.SeekBar
 import android.widget.SeekBar.OnSeekBarChangeListener
 import androidx.activity.OnBackPressedCallback
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.children
 import androidx.core.view.isVisible
+import androidx.core.view.updateLayoutParams
 import androidx.core.widget.doAfterTextChanged
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
+import com.google.android.material.appbar.AppBarLayout
 import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.MarkerScreen
@@ -28,10 +33,14 @@ import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.storage.DataBase
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.utils.Const
+import ru.neosvet.vestnewage.utils.InsetsUtils
+import ru.neosvet.vestnewage.utils.ScreenUtils
 import ru.neosvet.vestnewage.utils.fromHTML
 import ru.neosvet.vestnewage.view.basic.NeoToast
 import ru.neosvet.vestnewage.view.basic.ResizeAnim
 import ru.neosvet.vestnewage.view.basic.SoftKeyboard
+import ru.neosvet.vestnewage.view.basic.defIndent
+import ru.neosvet.vestnewage.view.basic.fromDpi
 import ru.neosvet.vestnewage.view.list.CheckAdapter
 import ru.neosvet.vestnewage.viewmodel.MarkerToiler
 import ru.neosvet.vestnewage.viewmodel.state.BasicState
@@ -113,6 +122,7 @@ class MarkerActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = MarkerActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        ScreenUtils.init(this)
         initActivity()
         initContent()
         setResult(RESULT_CANCELED)
@@ -121,6 +131,8 @@ class MarkerActivity : AppCompatActivity() {
         }
         runObserve()
         onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
+        if (!ScreenUtils.isTabletLand && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
+            initInsetsUtils()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -247,11 +259,7 @@ class MarkerActivity : AppCompatActivity() {
             onBackPressedCallback.handleOnBackPressed()
         }
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        val metrics = DisplayMetrics()
-        windowManager.defaultDisplay.getMetrics(metrics)
-        val density = resources.displayMetrics.density
-        val topMinus = resources.getInteger(R.integer.top_minus)
-        heightDialog = metrics.heightPixels - (topMinus * density).toInt()
+        heightDialog = ScreenUtils.height - baseContext.fromDpi(R.dimen.top_minus)
         rvList.layoutManager = GridLayoutManager(this@MarkerActivity, 1)
         sbPos.setOnSeekBarChangeListener(object : OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
@@ -302,7 +310,7 @@ class MarkerActivity : AppCompatActivity() {
             val s = tvPos.text.toString()
             var t = s
             while (sbPos.progress > 4 && s == t) {
-                sbPos.progress = sbPos.progress - 5
+                sbPos.progress -= 5
                 t = newProgPos()
             }
             tvPos.text = t
@@ -311,11 +319,42 @@ class MarkerActivity : AppCompatActivity() {
             val s = tvPos.text.toString()
             var t = s
             while (sbPos.progress < 996 && s == t) {
-                sbPos.progress = sbPos.progress + 5
+                sbPos.progress += 5
                 t = newProgPos()
             }
             tvPos.text = t
         }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.S)
+    private fun initInsetsUtils() {
+        val utils = InsetsUtils(binding.toolbar, this)
+        utils.applyInsets = { insets ->
+            val m = insets.top - baseContext.defIndent
+            binding.toolbar.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                topMargin = m
+            }
+            binding.root.children.forEach {
+                if (it !is AppBarLayout && it != utils.navBar)
+                    it.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                        topMargin += m
+                    }
+            }
+
+
+            if (utils.isSideNavBar) binding.root.children.forEach {
+                if (it != utils.navBar) it.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                    leftMargin += insets.left
+                    rightMargin += insets.right
+                }
+            }
+            binding.fabOk.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                bottomMargin += insets.bottom
+            }
+            heightDialog -= insets.bottom
+            true
+        }
+        utils.init(window)
     }
 
     @SuppressLint("Range")

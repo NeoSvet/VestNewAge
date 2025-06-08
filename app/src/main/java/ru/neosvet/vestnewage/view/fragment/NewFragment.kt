@@ -5,9 +5,11 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.updatePadding
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.BasicItem
 import ru.neosvet.vestnewage.storage.DevStorage
@@ -17,10 +19,10 @@ import ru.neosvet.vestnewage.view.activity.BrowserActivity.Companion.openReader
 import ru.neosvet.vestnewage.view.basic.NeoFragment
 import ru.neosvet.vestnewage.view.list.BasicAdapter
 import ru.neosvet.vestnewage.viewmodel.NewToiler
-import ru.neosvet.vestnewage.viewmodel.state.NeoState
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
 import ru.neosvet.vestnewage.viewmodel.state.BasicState
 import ru.neosvet.vestnewage.viewmodel.state.ListState
+import ru.neosvet.vestnewage.viewmodel.state.NeoState
 import ru.neosvet.vestnewage.viewmodel.state.NewState
 
 class NewFragment : NeoFragment() {
@@ -31,6 +33,7 @@ class NewFragment : NeoFragment() {
         get() = getString(R.string.new_section)
     private var itemAds: BasicItem? = null
     private var openedReader = false
+    private lateinit var rvList: RecyclerView
     private val ads: AdsUtils by lazy {
         AdsUtils(DevStorage(), requireContext())
     }
@@ -60,6 +63,10 @@ class NewFragment : NeoFragment() {
             openedReader = false
             toiler.openList()
         }
+    }
+
+    override fun onChangedInsets(insets: android.graphics.Insets) {
+        rvList.updatePadding(bottom = App.CONTENT_BOTTOM_INDENT)
     }
 
     override fun onChangedOtherState(state: NeoState) {
@@ -92,10 +99,10 @@ class NewFragment : NeoFragment() {
 
     @SuppressLint("ClickableViewAccessibility")
     private fun initView(container: View) {
-        val rv = container.findViewById(R.id.rvList) as RecyclerView
-        rv.layoutManager = GridLayoutManager(requireContext(), ScreenUtils.span)
-        rv.adapter = adapter
-        setListEvents(rv)
+        rvList = container.findViewById(R.id.rvList)
+        rvList.layoutManager = GridLayoutManager(requireContext(), ScreenUtils.span)
+        rvList.adapter = adapter
+        setListEvents(rvList)
     }
 
     private fun onItemClick(index: Int, item: BasicItem) {

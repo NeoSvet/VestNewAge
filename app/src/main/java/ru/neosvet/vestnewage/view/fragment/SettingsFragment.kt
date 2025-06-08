@@ -21,6 +21,7 @@ import androidx.core.content.edit
 import androidx.core.net.toUri
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
+import androidx.core.view.updatePadding
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
 import ru.neosvet.vestnewage.App
@@ -112,9 +113,6 @@ class SettingsFragment : NeoFragment() {
                 if (ScreenUtils.isWide) 2 else 1
             )
             rvSettings.adapter = adapter
-            pAlarm.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                bottomMargin = App.CONTENT_BOTTOM_INDENT
-            }
         }
     }
 
@@ -131,6 +129,15 @@ class SettingsFragment : NeoFragment() {
     override fun onDestroyView() {
         binding = null
         super.onDestroyView()
+    }
+
+    override fun onChangedInsets(insets: android.graphics.Insets) {
+        binding?.run {
+            rvSettings.updatePadding(bottom = App.CONTENT_BOTTOM_INDENT)
+            pAlarm.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                bottomMargin = App.CONTENT_BOTTOM_INDENT
+            }
+        }
     }
 
     override fun onChangedOtherState(state: NeoState) {
@@ -202,24 +209,24 @@ class SettingsFragment : NeoFragment() {
         )
         adapter.addItem(
             SettingsItem.CheckList(
-            title = getString(R.string.base),
-            isSingleSelect = false,
-            list = list,
-            onChecked = { index, checked ->
-                if (index == 2) {
-                    Urls.setCom(checked)
-                    return@CheckList
+                title = getString(R.string.base),
+                isSingleSelect = false,
+                list = list,
+                onChecked = { index, checked ->
+                    if (index == 2) {
+                        Urls.setCom(checked)
+                        return@CheckList
+                    }
+                    val name = if (index == 0) {
+                        act?.setFloatProm(checked)
+                        Const.PROM_FLOAT
+                    } else
+                        Const.START_NEW
+                    prefMain.edit {
+                        putBoolean(name, checked)
+                    }
                 }
-                val name = if (index == 0) {
-                    act?.setFloatProm(checked)
-                    Const.PROM_FLOAT
-                } else
-                    Const.START_NEW
-                prefMain.edit {
-                    putBoolean(name, checked)
-                }
-            }
-        ))
+            ))
     }
 
     private fun initScreenSection() {
@@ -243,14 +250,14 @@ class SettingsFragment : NeoFragment() {
         )
         adapter.addItem(
             SettingsItem.CheckList(
-            title = getString(R.string.start_screen),
-            isSingleSelect = true,
-            list = list,
-            onChecked = { index, _ ->
-                val i = if (ScreenUtils.isTablet) index + 1 else index
-                setStartScreen(i)
-            }
-        ))
+                title = getString(R.string.start_screen),
+                isSingleSelect = true,
+                list = list,
+                onChecked = { index, _ ->
+                    val i = if (ScreenUtils.isTablet) index + 1 else index
+                    setStartScreen(i)
+                }
+            ))
     }
 
     private fun initClearSection() {
@@ -325,26 +332,26 @@ class SettingsFragment : NeoFragment() {
 
         adapter.addItem(
             SettingsItem.Notification(
-            title = getString(R.string.notif_new),
-            offLabel = getString(R.string.less),
-            onLabel = getString(R.string.often),
-            listAdapter = adapterCheck,
-            valueSeek = v,
-            maxSeek = CHECK_MAX,
-            changeValue = this::setCheckTime,
-            fixValue = this::saveCheck,
-            onClick = {
-                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-                    dialog = SetNotifDialog(requireActivity(), SummaryHelper.TAG)
-                    dialog?.show()
-                } else {
-                    val intent = Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS)
-                        .putExtra(Settings.EXTRA_APP_PACKAGE, act!!.packageName)
-                        .putExtra(Settings.EXTRA_CHANNEL_ID, NotificationUtils.CHANNEL_SUMMARY)
-                    startActivity(intent)
+                title = getString(R.string.notif_new),
+                offLabel = getString(R.string.less),
+                onLabel = getString(R.string.often),
+                listAdapter = adapterCheck,
+                valueSeek = v,
+                maxSeek = CHECK_MAX,
+                changeValue = this::setCheckTime,
+                fixValue = this::saveCheck,
+                onClick = {
+                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+                        dialog = SetNotifDialog(requireActivity(), SummaryHelper.TAG)
+                        dialog?.show()
+                    } else {
+                        val intent = Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS)
+                            .putExtra(Settings.EXTRA_APP_PACKAGE, act!!.packageName)
+                            .putExtra(Settings.EXTRA_CHANNEL_ID, NotificationUtils.CHANNEL_SUMMARY)
+                        startActivity(intent)
+                    }
                 }
-            }
-        ))
+            ))
     }
 
     private fun initCheckList(label: List<String>, value: List<Boolean>): List<CheckItem> {
@@ -396,26 +403,26 @@ class SettingsFragment : NeoFragment() {
 
         adapter.addItem(
             SettingsItem.Notification(
-            title = getString(R.string.notif_prom),
-            offLabel = getString(R.string.advance),
-            onLabel = getString(R.string.prom),
-            listAdapter = adapterProm,
-            valueSeek = v,
-            maxSeek = PROM_MAX,
-            changeValue = this::setPromTime,
-            fixValue = this::saveProm,
-            onClick = {
-                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-                    dialog = SetNotifDialog(requireActivity(), PromUtils.TAG)
-                    dialog?.show()
-                } else {
-                    val intent = Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS)
-                        .putExtra(Settings.EXTRA_APP_PACKAGE, act!!.packageName)
-                        .putExtra(Settings.EXTRA_CHANNEL_ID, NotificationUtils.CHANNEL_PROM)
-                    startActivity(intent)
+                title = getString(R.string.notif_prom),
+                offLabel = getString(R.string.advance),
+                onLabel = getString(R.string.prom),
+                listAdapter = adapterProm,
+                valueSeek = v,
+                maxSeek = PROM_MAX,
+                changeValue = this::setPromTime,
+                fixValue = this::saveProm,
+                onClick = {
+                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+                        dialog = SetNotifDialog(requireActivity(), PromUtils.TAG)
+                        dialog?.show()
+                    } else {
+                        val intent = Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS)
+                            .putExtra(Settings.EXTRA_APP_PACKAGE, act!!.packageName)
+                            .putExtra(Settings.EXTRA_CHANNEL_ID, NotificationUtils.CHANNEL_PROM)
+                        startActivity(intent)
+                    }
                 }
-            }
-        ))
+            ))
 
         binding?.run {
             btnAlarmTo3Hours.setOnClickListener(this@SettingsFragment::clickAlarm)
@@ -442,54 +449,54 @@ class SettingsFragment : NeoFragment() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
             adapter.addItem(
                 SettingsItem.Message(
-                title = getString(R.string.about_default),
-                text = getString(R.string.info_default) + Const.N
-                        + getString(R.string.info_default_a),
-                buttonLabel = getString(R.string.set_),
-                onClick = {
-                    val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, pack)
-                    startActivity(intent)
-                }
-            ))
+                    title = getString(R.string.about_default),
+                    text = getString(R.string.info_default) + Const.N
+                            + getString(R.string.info_default_a),
+                    buttonLabel = getString(R.string.set_),
+                    onClick = {
+                        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, pack)
+                        startActivity(intent)
+                    }
+                ))
             return
         }
 
         adapter.addItem(
             SettingsItem.Message(
-            title = getString(R.string.about_default),
-            text = getString(R.string.info_default) + Const.N
-                    + getString(R.string.info_default_b),
-            buttonLabel = getString(R.string.set_),
-            onClick = {
-                val intent = Intent(Settings.ACTION_APP_OPEN_BY_DEFAULT_SETTINGS, pack)
-                startActivity(intent)
-            }
-        ))
+                title = getString(R.string.about_default),
+                text = getString(R.string.info_default) + Const.N
+                        + getString(R.string.info_default_b),
+                buttonLabel = getString(R.string.set_),
+                onClick = {
+                    val intent = Intent(Settings.ACTION_APP_OPEN_BY_DEFAULT_SETTINGS, pack)
+                    startActivity(intent)
+                }
+            ))
     }
 
     private fun initMessageSection() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
             adapter.addItem(
                 SettingsItem.Message(
-                title = getString(R.string.about_manager),
-                text = getString(R.string.info_manager),
-                buttonLabel = "",
-                onClick = {}
-            ))
+                    title = getString(R.string.about_manager),
+                    text = getString(R.string.info_manager),
+                    buttonLabel = "",
+                    onClick = {}
+                ))
             return
         }
 
         adapter.addItem(
             SettingsItem.Message(
-            title = getString(R.string.about_manager),
-            text = getString(R.string.info_manager) + Const.NN
-                    + getString(R.string.info_battery),
-            buttonLabel = getString(R.string.set_battery),
-            onClick = {
-                val intent = Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)
-                startActivity(intent)
-            }
-        ))
+                title = getString(R.string.about_manager),
+                text = getString(R.string.info_manager) + Const.NN
+                        + getString(R.string.info_battery),
+                buttonLabel = getString(R.string.set_battery),
+                onClick = {
+                    val intent = Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)
+                    startActivity(intent)
+                }
+            ))
     }
 
     private fun setStartScreen(value: Int) {

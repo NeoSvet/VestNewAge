@@ -20,7 +20,7 @@
         android:visibility="gone">
 
         <ImageButton
-            android:id="@+id/bClose"
+            android:id="@+id/btnClose"
             android:layout_width="@dimen/string_size"
             android:layout_height="@dimen/string_size"
             android:layout_gravity="center_vertical"
@@ -43,8 +43,8 @@
             android:layout_height="wrap_content"
             android:layout_margin="0dp"
             android:hint="@string/search"
-            app:layout_constraintEnd_toStartOf="@id/bPrev"
-            app:layout_constraintStart_toEndOf="@id/bClose"
+            app:layout_constraintEnd_toStartOf="@id/btnPrev"
+            app:layout_constraintStart_toEndOf="@id/btnClose"
             app:layout_constraintTop_toTopOf="parent">
 
             <com.google.android.material.textfield.TextInputEditText
@@ -58,7 +58,7 @@
         </com.google.android.material.textfield.TextInputLayout>
 
         <ImageView
-            android:id="@+id/bClear"
+            android:id="@+id/btnClear"
             style="@style/InTextFieldButton"
             android:layout_marginTop="@dimen/half_indent"
             android:visibility="gone"
@@ -67,7 +67,7 @@
             app:layout_constraintTop_toTopOf="@id/tilSearch" />
 
         <ImageButton
-            android:id="@+id/bPrev"
+            android:id="@+id/btnPrev"
             android:layout_width="@dimen/string_size"
             android:layout_height="@dimen/string_size"
             android:layout_gravity="center_vertical"
@@ -79,11 +79,11 @@
             android:scaleType="fitXY"
             android:src="@drawable/ic_left"
             app:layout_constraintBottom_toBottomOf="@id/tilSearch"
-            app:layout_constraintEnd_toStartOf="@id/bNext"
+            app:layout_constraintEnd_toStartOf="@id/btnNext"
             app:layout_constraintTop_toTopOf="@id/tilSearch" />
 
         <ImageButton
-            android:id="@+id/bNext"
+            android:id="@+id/btnNext"
             android:layout_width="@dimen/string_size"
             android:layout_height="@dimen/string_size"
             android:layout_gravity="center_vertical"

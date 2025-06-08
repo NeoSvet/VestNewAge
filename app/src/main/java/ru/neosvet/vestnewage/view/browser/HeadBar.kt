@@ -9,6 +9,7 @@ import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
+import ru.neosvet.vestnewage.view.basic.convertToDpi
 import kotlin.math.absoluteValue
 
 class HeadBar(
@@ -25,21 +26,24 @@ class HeadBar(
     private val goneDistance = distanceForHide * 2
     private var time: Long = 0
     private val goneH = 1
-    private var collapsedH = 0
+    var collapsedH = 0
     private var expandedH = 0
+    private var minOffsetY = 10
     private var state = State.EXPANDED
     private var isTop = true
     private var isNotExpandable = false
-    private var isBlocked = false
+    var isBlocked = false
+        private set
+
+    var switchGone: (() -> Unit)? = null
     val isHided: Boolean
         get() = state == State.GONE
-
     val isExpanded: Boolean
         get() = state == State.EXPANDED && isBlocked.not()
 
     private val anHide = AnimationUtils.loadAnimation(App.context, R.anim.hide)
     private val anShow = AnimationUtils.loadAnimation(App.context, R.anim.show)
-    private var isFristAnim = true
+    private var isFirstAnim = true
 
     init {
         mainView.setOnClickListener {
@@ -54,9 +58,9 @@ class HeadBar(
         }
         mainView.post {
             expandedH = mainView.height
-            collapsedH =
-                mainView.context.resources.getDimension(R.dimen.head_collapsed_height).toInt()
+            collapsedH = mainView.context.convertToDpi(50)
         }
+        minOffsetY = mainView.context.convertToDpi(minOffsetY)
     }
 
     private fun initAnim() {
@@ -64,8 +68,8 @@ class HeadBar(
         anHide.duration = 300
         anShow.setAnimationListener(object : Animation.AnimationListener {
             override fun onAnimationStart(animation: Animation) {
-                if (isFristAnim.not()) return
-                isFristAnim = false
+                if (isFirstAnim.not()) return
+                isFirstAnim = false
                 for (v in additionViews)
                     v.isVisible = v.tag == null
             }
@@ -76,8 +80,8 @@ class HeadBar(
         anHide.setAnimationListener(object : Animation.AnimationListener {
             override fun onAnimationStart(animation: Animation) {}
             override fun onAnimationEnd(animation: Animation) {
-                if (isFristAnim.not()) return
-                isFristAnim = false
+                if (isFirstAnim.not()) return
+                isFirstAnim = false
                 for (v in additionViews)
                     v.isVisible = false
             }
@@ -87,18 +91,20 @@ class HeadBar(
     }
 
     private fun changeEnd() {
-        time = System.currentTimeMillis()
         state = when (mainView.height) {
             goneH -> {
-                mainView.isVisible = false
+                if (switchGone == null) mainView.isVisible = false
                 State.GONE
             }
 
             expandedH -> State.EXPANDED
-            else -> State.COLLAPSED
+            else -> {
+                if (isHided) switchGone?.invoke()
+                State.COLLAPSED
+            }
         }
         if (state == State.EXPANDED) {
-            isFristAnim = true
+            isFirstAnim = true
             for (v in additionViews) {
                 if (v.tag == null && !v.isVisible)
                     v.startAnimation(anShow)
@@ -108,15 +114,20 @@ class HeadBar(
     }
 
     private fun changeHeight(h: Int) {
-        if (System.currentTimeMillis() - time < 500) return
         blocked()
         mainView.clearAnimation()
         if (h != expandedH) {
-            isFristAnim = true
+            isFirstAnim = true
             for (v in additionViews) {
                 if (v.tag == null && v.isVisible)
                     v.startAnimation(anHide)
             }
+        }
+        if (h == goneH && switchGone != null) {
+            switchGone?.invoke()
+            state = State.GONE
+            unblocked()
+            return
         }
         val i = mainView.height
         val v = h - i
@@ -141,7 +152,9 @@ class HeadBar(
 
     fun onScrollHost(y: Int, oldY: Int): Boolean {
         if (isBlocked) return false
-        if ((y - oldY).absoluteValue < 10) return false
+        if (System.currentTimeMillis() - time < 500) return false
+        if ((y - oldY).absoluteValue < minOffsetY) return false
+        time = System.currentTimeMillis()
         isTop = y > oldY
         when (state) {
             State.EXPANDED ->
@@ -161,11 +174,8 @@ class HeadBar(
     fun expanded() {
         if (isBlocked) return
         mainView.isVisible = true
-        if (isNotExpandable)
-            changeHeight(collapsedH)
-        else
-            changeHeight(expandedH)
-        time = System.currentTimeMillis()
+        if (isNotExpandable) changeHeight(collapsedH)
+        else changeHeight(expandedH)
     }
 
     fun hide() {

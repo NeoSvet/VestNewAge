@@ -3,20 +3,27 @@ package ru.neosvet.vestnewage.view.activity
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.view.MotionEvent
 import android.view.View
+import android.view.ViewGroup
 import android.webkit.CookieManager
 import android.webkit.WebView
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.isVisible
+import androidx.core.view.updateLayoutParams
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.helper.CabinetHelper
 import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.utils.Const
+import ru.neosvet.vestnewage.utils.InsetsUtils
+import ru.neosvet.vestnewage.utils.ScreenUtils
 import ru.neosvet.vestnewage.view.basic.StatusButton
+import ru.neosvet.vestnewage.view.basic.defIndent
 import ru.neosvet.vestnewage.view.browser.CabinetClient
 import ru.neosvet.vestnewage.view.dialog.MessageDialog
 
@@ -86,6 +93,40 @@ class CabinetActivity : AppCompatActivity(), CabinetClient.Parent {
             false
         }
         status = StatusButton(this, findViewById(R.id.pStatus))
+        if (!ScreenUtils.isTabletLand && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
+            initInsetsUtils(toolbar)
+    }
+
+    @RequiresApi(Build.VERSION_CODES.S)
+    private fun initInsetsUtils(bar: View) {
+        val utils = InsetsUtils(bar, this)
+        utils.applyInsets = { insets ->
+            val m = insets.top - baseContext.defIndent
+            bar.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                topMargin = m
+            }
+            wvBrowser.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                topMargin += m
+            }
+
+            if (utils.isSideNavBar) {
+                bar.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                    leftMargin = insets.left
+                    rightMargin = insets.right
+                }
+                wvBrowser.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                    leftMargin = insets.left
+                    rightMargin = insets.right
+                }
+            }
+            findViewById<View>(R.id.pStatus).updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                leftMargin += insets.left
+                rightMargin += insets.right
+                bottomMargin += insets.bottom
+            }
+            true
+        }
+        utils.init(window)
     }
 
     override fun startLoad() {

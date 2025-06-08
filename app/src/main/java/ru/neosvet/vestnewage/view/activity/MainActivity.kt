@@ -5,6 +5,7 @@ import android.annotation.SuppressLint
 import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Insets
 import android.os.Build
 import android.os.Bundle
 import android.view.Gravity
@@ -12,6 +13,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
 import androidx.annotation.RequiresApi
@@ -22,9 +24,11 @@ import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.core.view.children
 import androidx.core.view.get
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
+import androidx.core.view.updatePadding
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.work.Data
@@ -50,6 +54,7 @@ import ru.neosvet.vestnewage.storage.DevStorage
 import ru.neosvet.vestnewage.utils.AdsUtils
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.ErrorUtils
+import ru.neosvet.vestnewage.utils.InsetsUtils
 import ru.neosvet.vestnewage.utils.LaunchUtils
 import ru.neosvet.vestnewage.utils.NotificationUtils
 import ru.neosvet.vestnewage.utils.PromUtils
@@ -62,7 +67,7 @@ import ru.neosvet.vestnewage.view.basic.NeoScrollBar
 import ru.neosvet.vestnewage.view.basic.NeoSnackbar
 import ru.neosvet.vestnewage.view.basic.NeoToast
 import ru.neosvet.vestnewage.view.basic.StatusButton
-import ru.neosvet.vestnewage.view.basic.convertToDpi
+import ru.neosvet.vestnewage.view.basic.defIndent
 import ru.neosvet.vestnewage.view.dialog.SetNotifDialog
 import ru.neosvet.vestnewage.view.fragment.BookFragment
 import ru.neosvet.vestnewage.view.fragment.CabinetFragment
@@ -86,7 +91,6 @@ import ru.neosvet.vestnewage.viewmodel.state.MainState
 import ru.neosvet.vestnewage.viewmodel.state.NeoState
 import kotlin.math.absoluteValue
 
-
 class MainActivity : AppCompatActivity(), ItemClicker {
     companion object {
         private const val LIMIT_DIFF_SEC = 4
@@ -109,7 +113,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
     private var isEditor = false
     private var statusBack = StatusBack.EXIT
 
-    private lateinit var utils: LaunchUtils
+    private lateinit var launchUtils: LaunchUtils
     private var jobBottomArea: Job? = null
     private var jobFinishStar: Job? = null
     private var isShowBottomArea = true
@@ -151,19 +155,34 @@ class MainActivity : AppCompatActivity(), ItemClicker {
         initStatusButton()
         initAnim()
         initWords()
+        if (!ScreenUtils.isTabletLand && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
+            initInsetsUtils()
+        else setIndent()
         setFloatProm(helper.isFloatPromTime)
         runObserve()
         onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
     }
 
+    private fun setIndent() = helper.bottomBar?.let { bar ->
+        lifecycleScope.launch {
+            while (bar.measuredHeight == 0) delay(50)
+            bar.post {
+                App.CONTENT_BOTTOM_INDENT = bar.measuredHeight
+                helper.tvTitle?.let {
+                    it.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                        bottomMargin = App.CONTENT_BOTTOM_INDENT
+                    }
+                    App.CONTENT_BOTTOM_INDENT += it.measuredHeight
+                }
+            }
+        }
+    }
+
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     private fun doCheckPermission() {
         val n = POST_NOTIFICATIONS
-        if (ContextCompat.checkSelfPermission(
-                this,
-                n
-            ) == PackageManager.PERMISSION_DENIED
-        ) ActivityCompat.requestPermissions(this, arrayOf(n), 1)
+        if (ContextCompat.checkSelfPermission(this, n) == PackageManager.PERMISSION_DENIED)
+            ActivityCompat.requestPermissions(this, arrayOf(n), 1)
     }
 
     private fun runObserve() {
@@ -208,8 +227,8 @@ class MainActivity : AppCompatActivity(), ItemClicker {
     private fun setBottomPanel() = helper.bottomBar?.let { bar ->
         loadMenu(bar)
         val menuView = bar.menu[0].actionView as ActionMenuView
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) menuView.tooltipText =
-            getString(R.string.menu)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+            menuView.tooltipText = getString(R.string.menu)
         helper.tvNew = menuView.findViewById(R.id.tvNew)
         helper.checkNew()
         menuView.setOnClickListener {
@@ -277,10 +296,10 @@ class MainActivity : AppCompatActivity(), ItemClicker {
 
     private fun initLaunch() {
         Urls.restore()
-        utils = LaunchUtils(this)
-        utils.checkAdapterNewVersion()
+        launchUtils = LaunchUtils(this)
+        launchUtils.checkAdapterNewVersion()
         try {
-            utils.openLink(intent)?.let {
+            launchUtils.openLink(intent)?.let {
                 if (it.tab == -1) exit()
                 firstTab = it.tab
                 firstSection = it.section
@@ -294,7 +313,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
             toiler.setPublicState(utils.getErrorState(d.build()))
         }
         firstSection = helper.getFirstSection()
-        if (utils.isNeedLoad) {
+        if (launchUtils.isNeedLoad) {
             NeoClient.deleteTempFiles()
             toiler.load()
         }
@@ -303,8 +322,8 @@ class MainActivity : AppCompatActivity(), ItemClicker {
     fun setFragment(fragment: NeoFragment) {
         title = fragment.title
         curFragment = fragment
-        helper.svMain?.post {
-            fragment.updateRoot(helper.svMain!!.height)
+        helper.svMain?.let {
+            it.post { fragment.updateRoot(it.height) }
         }
     }
 
@@ -324,46 +343,122 @@ class MainActivity : AppCompatActivity(), ItemClicker {
         showWelcome()
     }
 
-    private fun updateIndent() {
+    @RequiresApi(Build.VERSION_CODES.S)
+    private fun initInsetsUtils() {
+        val utils = InsetsUtils(helper.ivHeadBack, this)
+        utils.applyInsets = { insets ->
+            if (helper.topBar?.isVisible ?: helper.ivHeadBack.isVisible) {
+                setVerticalInsets(insets)
+                if (utils.isSideNavBar)
+                    setSideInsets(insets)
+                true
+            } else false
+        }
+        utils.init(window)
+    }
+
+    @RequiresApi(Build.VERSION_CODES.S)
+    private fun setVerticalInsets(insets: Insets) {
+        if (helper.topBar != null) {
+            helper.tvPromTimeHead.updateLayoutParams<CollapsingToolbarLayout.LayoutParams> {
+                gravity = Gravity.BOTTOM
+            }
+            tvGodWords.updateLayoutParams<CollapsingToolbarLayout.LayoutParams> {
+                gravity = Gravity.BOTTOM + Gravity.END
+            }
+            val collapsingBar: CollapsingToolbarLayout = findViewById(R.id.collapsingBar)
+            collapsingBar.scrimVisibleHeightTrigger = insets.top + 10
+            collapsingBar.minimumHeight = insets.top
+        }
+        helper.vsbScrollBar.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+            topMargin += insets.top
+        }
+        helper.svMain?.let {
+            it.updatePadding(left = insets.left, right = insets.right)
+            it.post { curFragment?.updateRoot(it.height) }
+        }
+
         helper.bottomBar?.let { bar ->
-            lifecycleScope.launch {
-                while (bar.measuredHeight == 0) delay(100)
-                checkFullScreen()
-                App.CONTENT_BOTTOM_INDENT = bar.measuredHeight + baseContext.convertToDpi(30)
-                helper.tvTitle?.let {
-                    App.CONTENT_BOTTOM_INDENT = bar.measuredHeight + it.measuredHeight
-                    it.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                        bottomMargin = bar.measuredHeight
+            App.CONTENT_BOTTOM_INDENT = bar.measuredHeight
+            if (insets.bottom > 0) {
+                bar.updatePadding(bottom = insets.bottom - baseContext.defIndent)
+                App.CONTENT_BOTTOM_INDENT += insets.bottom - baseContext.defIndent
+                bar.children.first()
+                    .addOnLayoutChangeListener { v, _, top, _, _, _, _, _, _ ->
+                        if (top > 0) v.top = 0
                     }
+                bar.addOnLayoutChangeListener { v, _, _, _, _, _, _, _, _ ->
+                    if (v.minimumHeight < v.measuredHeight)
+                        v.minimumHeight = v.measuredHeight
                 }
-                helper.tvToast.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+            }
+            helper.tvTitle?.let {
+                it.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                    leftMargin += insets.left
                     bottomMargin = App.CONTENT_BOTTOM_INDENT
                 }
-                helper.vsbScrollBar.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                    bottomMargin = App.CONTENT_BOTTOM_INDENT
-                }
-                helper.tvPromTimeFloat.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                    bottomMargin = App.CONTENT_BOTTOM_INDENT
-                }
+                App.CONTENT_BOTTOM_INDENT += it.measuredHeight
+            }
+            curFragment?.onChangedInsets(insets)
+            bar.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                leftMargin = insets.left
+                rightMargin = insets.right
+            }
+            helper.tvToast.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                bottomMargin = App.CONTENT_BOTTOM_INDENT
+                leftMargin = insets.left
+                rightMargin = insets.right
+            }
+            helper.vsbScrollBar.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                bottomMargin = App.CONTENT_BOTTOM_INDENT
+            }
+            helper.tvPromTimeFloat.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                bottomMargin = App.CONTENT_BOTTOM_INDENT
             }
         }
     }
 
-    private fun checkFullScreen() {
-        val location = IntArray(2)
-        helper.topBar?.getLocationOnScreen(location)
-        if (location[1] == 0) //fullScreen
-            tvGodWords.updateLayoutParams<CollapsingToolbarLayout.LayoutParams> {
-                gravity = Gravity.BOTTOM
+    @RequiresApi(Build.VERSION_CODES.S)
+    private fun setSideInsets(insets: Insets) {
+        helper.tvToast.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+            leftMargin = insets.left
+            rightMargin = insets.right
+        }
+        if (insets.right > 0) {
+            helper.vsbScrollBar.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                rightMargin = insets.right + baseContext.defIndent
             }
+            tvGodWords.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                rightMargin = insets.right
+            }
+            helper.pStatus.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                rightMargin = insets.right + baseContext.defIndent
+            }
+        }
+        if (insets.left > 0) {
+            helper.tvPromTimeHead.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                leftMargin = insets.left
+            }
+            helper.tvPromTimeFloat.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                leftMargin = insets.left
+            }
+            val ivHeadFront: ImageView = findViewById(R.id.ivHeadFront)
+            ivHeadFront.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                leftMargin = insets.left
+            }
+        }
+        helper.ivHeadBack.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+            leftMargin = insets.left
+            rightMargin = insets.right
+        }
     }
 
     private fun showHead() {
         if (helper.topBar == null) {
-            findViewById<View>(R.id.ivHeadBack).isVisible = true
+            helper.ivHeadBack.isVisible = true
             findViewById<View>(R.id.ivHeadFront).isVisible = true
             findViewById<View>(R.id.tvGodWords).isVisible = true
-            findViewById<View>(R.id.tvPromTimeHead).isVisible = true
+            helper.tvPromTimeHead.isVisible = true
         } else helper.topBar!!.isVisible = true
     }
 
@@ -386,7 +481,6 @@ class MainActivity : AppCompatActivity(), ItemClicker {
 
     override fun onResume() {
         super.onResume()
-        updateIndent()
         if (curFragment == null && jobFinishStar?.isCancelled == true) finishFlashStar()
         prom?.resume()
     }
@@ -470,7 +564,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
                 }
                 val id = intent.getIntExtra(DataBase.ID, NotificationUtils.NOTIF_SUMMARY)
                 intent.removeExtra(DataBase.ID)
-                utils.clearSummaryNotif(id)
+                launchUtils.clearSummaryNotif(id)
             }
 
             Section.SITE -> curFragment = SiteFragment.newInstance(tab).also {
@@ -645,7 +739,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
     private fun onChangedState(state: NeoState) {
         when (state) {
             is MainState.Ads -> {
-                utils.updateTime()
+                launchUtils.updateTime()
                 if (state.timediff.absoluteValue > LIMIT_DIFF_SEC || state.hasNew) frWelcome =
                     WelcomeFragment.newInstance(state.hasNew, state.timediff)
                 if (state.warnIndex > -1) showWarnAds(state.warnIndex)
@@ -764,11 +858,13 @@ class MainActivity : AppCompatActivity(), ItemClicker {
     fun setFloatProm(isFloat: Boolean) {
         prom?.hide()
         prom = if (isFloat) PromUtils(helper.tvPromTimeFloat)
-        else PromUtils(findViewById(R.id.tvPromTimeHead))
+        else PromUtils(helper.tvPromTimeHead)
         prom?.show()
     }
 
     fun lockHead() {
+        val collapsingBar: CollapsingToolbarLayout = findViewById(R.id.collapsingBar)
+        if (collapsingBar.minimumHeight > 0) return
         helper.topBar?.let {
             it.setExpanded(false)
             it.isVisible = false
