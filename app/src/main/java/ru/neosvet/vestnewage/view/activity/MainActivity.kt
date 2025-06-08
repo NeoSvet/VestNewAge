@@ -582,8 +582,6 @@ class MainActivity : AppCompatActivity(), ItemClicker {
                 fragmentTransaction.replace(R.id.my_fragment, it)
             }
 
-            Section.CABINET -> {}
-
             Section.SETTINGS -> curFragment = SettingsFragment().also {
                 fragmentTransaction.replace(R.id.my_fragment, it)
             }

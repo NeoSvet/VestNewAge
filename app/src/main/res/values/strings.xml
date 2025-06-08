@@ -13,7 +13,6 @@
     <string name="error">Ошибка</string>
     <string name="site_code">Ошибка на сайте: %d, попробуйте позже</string>
     <string name="site_no_response">Проблемы с сетью, попробуйте позже</string>
-    <string name="site_unavailable">Сайт недоступен</string>
     <string name="about_no_response">Возможно, вам надо включить или выключить использование зеркала в домене .COM. Или изменился адрес, с которого загружается информация – попробуйте позже. Подробнее написано в «Справке».</string>
     <!--Download-->
     <string name="download_">Скачать…</string>
@@ -122,7 +121,6 @@
     <string name="tip_browser">Чтобы вернуть панели, нажмите «Назад» или включите их возврат при прокрутке наверх в опциях («Автовозврат панелей»).\n\n
     Нижняя панель, слева направо: меню опций, поделиться, добавить в закладки, поиск на странице, обновить (перезагрузить).</string>
     <string name="tip_browser2">Кнопка «На весь экран» позволяет моментом скрыть весь интерфейс, и он вернётся лишь при нажатии на «Назад». Эта кнопка может быть на месте кнопки «вверх/вниз», если та отключена.</string>
-    <string name="tip_calendar">Нажмите на месяц, чтобы выбрать месяц и год.</string>
     <string name="tip_search">После поиска здесь появится стрелочка, которая открывает и скрывает панель результатов.\nТам отображается информация о поиске, имеются возможности произвести поиск в результатах (там где «Новый поиск») и экспортировать их.</string>
     <!--BrowserActivity-->
     <string name="refresh">Обновить</string>
@@ -178,7 +176,6 @@
     <string name="par_numbers">Абзацы №№&#160;</string>
     <!--SiteFragment-->
     <string name="site">Сайт</string>
-    <string name="to_load">Скачать</string>
     <string name="today_s">Сегодняшнее!</string>
     <string name="image">[изображение]</string>
     <string name="mail">[почта]</string>
@@ -194,7 +191,6 @@
     <string name="to_prev_month">К предыдущему месяцу</string>
     <string name="to_next_month">К следующему месяцу</string>
     <!--Страница-->
-    <string name="default_title">Страница без заголовка</string>
     <string name="video_on_site">Ссылка на видео с другого сайта</string>
     <string name="copyright">Copyright © Leonid Maslov 2004-</string>
     <string name="downloaded">Загружено:&#160;</string>
@@ -281,7 +277,6 @@
     <string name="load_already_run">Загрузка уже запущена (см. уведомления)</string>
     <string name="stop">Остановить</string>
     <string name="load_suc_finish">Загрузка успешно завершена</string>
-    <string name="cab_fail">Отсутствует доступ к интернету или требуется VPN</string>
     <!--StatusButton-->
     <string name="crash">Сбой</string>
     <string name="done">Готово</string>

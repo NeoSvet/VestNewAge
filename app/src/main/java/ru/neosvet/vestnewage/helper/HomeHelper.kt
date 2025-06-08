@@ -56,11 +56,6 @@ class HomeHelper(private val context: Context) {
                     t = R.string.journal
                 }
 
-                Section.CABINET -> {
-                    i = R.drawable.star
-                    t = R.string.app_name
-                }
-
                 Section.HOME -> if (isMain) {
                     i = R.drawable.ic_home
                     t = R.string.home_screen
@@ -95,8 +90,8 @@ class HomeHelper(private val context: Context) {
                 }
 
                 else -> { //Section.NEW, Section.MENU
-                    i = -1
-                    t = -1
+                    i = R.drawable.star
+                    t = R.string.app_name
                 }
             }
             return Point(i, t)
@@ -153,7 +148,6 @@ class HomeHelper(private val context: Context) {
                     Section.SITE.value -> Section.SITE
                     Section.MARKERS.value -> Section.MARKERS
                     Section.JOURNAL.value -> Section.JOURNAL
-                    Section.CABINET.value -> Section.CABINET
                     Section.HELP.value -> Section.HELP
                     Section.SETTINGS.value -> Section.SETTINGS
                     Section.HOME.value -> Section.HOME
@@ -170,9 +164,16 @@ class HomeHelper(private val context: Context) {
 
         if (menu.isEmpty()) {
             if (isMain)
-                menu.addAll(listOf(Section.CALENDAR, Section.HOME, Section.SEARCH, Section.CABINET))
+                menu.addAll(
+                    listOf(
+                        Section.CALENDAR,
+                        Section.HOME,
+                        Section.SEARCH,
+                        Section.SETTINGS
+                    )
+                )
             else
-                menu.addAll(listOf(Section.BOOK, Section.MARKERS, Section.HOME, Section.SETTINGS))
+                menu.addAll(listOf(Section.BOOK, Section.MARKERS, Section.HOME, Section.HELP))
         }
 
         return menu

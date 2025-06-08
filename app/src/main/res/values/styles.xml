@@ -33,17 +33,6 @@
         <item name="buttonStyle">@style/Button</item>
     </style>
 
-    <style name="TabLayoutTheme">
-        <item name="android:background">@color/colorPrimaryDark</item>
-        <item name="tabIndicatorColor">@color/colorAccentLight</item>
-        <item name="tabIndicatorHeight">2dp</item>
-        <item name="tabMaxWidth">1000dp</item>
-        <item name="tabMode">fixed</item>
-        <item name="tabSelectedTextColor">@color/main_color</item>
-        <item name="tabTextColor">@color/darker_gray</item>
-        <item name="tabGravity">fill</item>
-    </style>
-
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />

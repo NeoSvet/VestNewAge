@@ -110,7 +110,7 @@ object Urls {
 
     //-------- from official site ---------------------------------------------------------------
     @JvmStatic
-    val MainSite: String //for cabinet, for pages <2016
+    val MainSite: String //for pages <2016 year
         get() = URL[3]
 
     val Site: String

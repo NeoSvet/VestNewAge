@@ -24,7 +24,7 @@ class MenuFragment : Fragment() {
         private val mMenu = listOf(
             Section.NEW, Section.HOME, Section.SUMMARY, Section.SITE, Section.CALENDAR,
             Section.BOOK, Section.SEARCH, Section.MARKERS, Section.JOURNAL,
-            Section.CABINET, Section.SETTINGS, Section.HELP
+            Section.SETTINGS, Section.HELP
         )
         private var iSelect = -1
     }
