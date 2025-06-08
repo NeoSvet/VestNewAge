@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="ic_launcher_background">#000000</color>
+    <color name="navigationBarColor">#113366</color>
     <color name="colorPrimary">#9AC1FD</color>
     <color name="colorPrimaryDark">#B5D1FB</color>
     <color name="colorAccent">#5C9AFA</color>
@@ -9,8 +10,8 @@
     <color name="colorAccentLight">#2266BB</color>
     <color name="main_color">#000000</color>
     <color name="bg_color">#FFFFFF</color>
-    <color name="bar_start">#CC2266BB</color>
-    <color name="bar_end">#DD9AC1FD</color>
+    <color name="bar_start">#DD9AC1FD</color>
+    <color name="bar_end">#CC2266BB</color>
     <color name="item_color">#222266BB</color>
     <color name="red">#FD5858</color>
     <color name="green">#ACE23F</color>
