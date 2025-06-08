@@ -202,7 +202,7 @@ class MainHelper(private val act: MainActivity) {
         curSection = if (section.value > Section.HELP.value) Section.BOOK else section
         when (section) {
             Section.NEW -> setActionIcon(R.drawable.ic_clear)
-            Section.SUMMARY, Section.SITE -> setActionIcon(R.drawable.ic_refresh)
+            Section.SUMMARY, Section.SITE, Section.CALENDAR -> setActionIcon(R.drawable.ic_refresh)
             Section.SEARCH -> setActionIcon(R.drawable.ic_settings)
             else -> setActionIcon(R.drawable.star)
         }
