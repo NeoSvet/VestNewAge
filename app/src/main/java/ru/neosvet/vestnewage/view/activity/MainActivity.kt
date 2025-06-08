@@ -524,7 +524,6 @@ class MainActivity : AppCompatActivity(), ItemClicker {
         helper.fabAction.isVisible = true
         when (section) {
             Section.MENU -> {
-                unblocked()
                 helper.frMenu = MenuFragment().also {
                     fragmentTransaction.replace(R.id.my_fragment, it)
                 }
@@ -532,7 +531,6 @@ class MainActivity : AppCompatActivity(), ItemClicker {
             }
 
             Section.HOME -> {
-                unblocked()
                 fragmentTransaction.replace(R.id.my_fragment, HomeFragment())
                 helper.frMenu?.setSelect(Section.HOME)
             }
@@ -587,7 +585,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
             }
 
             Section.HELP -> {
-                if (tab == -1) { //first isRun
+                if (tab == -1) { //first run
                     val frHelp = HelpFragment.newInstance(0)
                     fragmentTransaction.replace(R.id.my_fragment, frHelp)
                 } else fragmentTransaction.replace(R.id.my_fragment, HelpFragment())
@@ -733,11 +731,15 @@ class MainActivity : AppCompatActivity(), ItemClicker {
             }
 
             is BasicState.Loading -> {
+                blocked()
                 status.loadText()
                 status.setLoad(true)
             }
 
-            is BasicState.Success -> status.setLoad(false)
+            is BasicState.Success -> {
+                status.setLoad(false)
+                unblocked()
+            }
 
             is BasicState.Error -> setError(state)
         }
