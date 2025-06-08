@@ -38,10 +38,10 @@ object Urls {
         "print/", "", //PAGE 14 15
         "_content/BV/style-print.min.css", //STYLE 16
         "", //17 TODO style.com load from html main page (print version)?
-        "rss.xml", "rss/", //RSS 18 19
+        "rss.xml", "", //RSS 18 19
         "AjaxData/Calendar", "", //QUOTE 20 21
         // $Y - year, %M - month, %P - year-2004
-        "AjaxData/Calendar/%Y-%M.json", "ajax.php?m=%M&y=%P", //CALENDAR 22 23
+        "AjaxData/Calendar/%Y-%M.json", "", //CALENDAR 22 23
         "print/poems/%Y.html", "", //POEMS 24 25
         "print/tolkovaniya.html", "", //EPISTLES 26 27
         "intforum.html", "", //NEWS 28 29
@@ -128,9 +128,8 @@ object Urls {
 
     val RSS: String
         get() {
-            return (if (isSiteCom) URL[3] +
-                    URL[19].ifEmpty { URL[18] }
-            else URL[2] + URL[18]) + "?" + System.currentTimeMillis()
+            return (if (isSiteCom) URL[3].ifEmpty { URL[2] } else URL[2]) +
+                    URL[18] + "?" + System.currentTimeMillis()
         }
 
     val News: String
@@ -151,14 +150,9 @@ object Urls {
     val QuoteCom: String = URL[3] + URL[21]
 
     fun getCalendar(month: Int, year: Int): String {
-        var url = if (isSiteCom) URL[3] +
-                URL[23].ifEmpty { URL[22] }
-        else URL[2] + URL[22]
+        var url = (if (isSiteCom) URL[3].ifEmpty { URL[2] } else URL[2]) + URL[22]
         url = url.replace("%M", month.toString())
-        return if (url.contains("%P"))
-            url.replace("%P", (year - 2004).toString())
-        else
-            url.replace("%Y", year.toString())
+        return url.replace("%Y", year.toString())
     }
 
     fun getPoems(year: Int): String {

@@ -1,13 +1,8 @@
 package ru.neosvet.vestnewage.utils
 
 import android.app.Activity
-import okhttp3.Request
-import okhttp3.internal.http.promisesBody
-import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
-import ru.neosvet.vestnewage.data.NeoException
 import ru.neosvet.vestnewage.network.NeoClient
-import ru.neosvet.vestnewage.network.NetConst
 import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.view.dialog.MessageDialog
 import java.io.BufferedReader
@@ -20,6 +15,7 @@ class WordsUtils {
     companion object {
         private const val GOD_WORDS = "/god_words"
     }
+
     private var godWords: String = ""
 
     private fun saveGodWords(words: String) {
@@ -61,31 +57,6 @@ class WordsUtils {
     }
 
     fun update() {
-        if (Urls.isSiteCom) loadQuoteCom()
-        else loadQuote()
-    }
-
-    private fun loadQuoteCom() {
-        val request = Request.Builder()
-            .url(Urls.QuoteCom)
-            .addHeader(NetConst.USER_AGENT, App.context.packageName)
-            .build()
-        val client = NeoClient.createHttpClient()
-        val response = client.newCall(request).execute()
-        if (response.isSuccessful.not()) throw NeoException.SiteCode(response.code)
-        if (response.promisesBody().not()) throw NeoException.SiteNoResponse()
-        val inStream = response.body.byteStream()
-        val br = BufferedReader(InputStreamReader(inStream, Const.ENCODING))
-        var s = br.readLine()
-        while (!s.contains("quote"))
-            s = br.readLine()
-        br.close()
-        val i = s.indexOf("quote") + 7
-        s = s.substring(i, s.indexOf("</div>", i)).replace(Const.BR, Const.N)
-        saveGodWords(s)
-    }
-
-    private fun loadQuote() {
         val client = NeoClient()
         val br = BufferedReader(InputStreamReader(client.getStream(Urls.Quote)))
         var s = br.readLine()

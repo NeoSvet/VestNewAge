@@ -9,9 +9,8 @@ import ru.neosvet.vestnewage.loader.basic.Loader
 import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.storage.PageStorage
-import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.storage.UnreadStorage
-import ru.neosvet.vestnewage.utils.fromHTML
+import ru.neosvet.vestnewage.utils.Const
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.util.LinkedList
@@ -51,46 +50,8 @@ class CalendarLoader(private val client: NeoClient) : LinksProvider, Loader {
         br.close()
         stream.close()
         if (s.length < 20) return
-        if (Urls.isSiteCom) parseHtml(s)
-        else parseJson(s)
+        parseJson(s)
         if (isRun) listToStorage(updateUnread)
-    }
-
-    private fun parseHtml(content: String) {
-        val a = "href=\""
-        var i = content.indexOf(a)
-        while (i > -1) {
-            i += a.length + 1
-            val link = content.substring(i, content.indexOf("\"", i))
-            i = content.indexOf(">", i) + 1
-            val d = content.substring(i, content.indexOf("</a", i))
-            if (d.contains("<")) list.add(BasicItem(d.fromHTML))
-            else list.add(BasicItem(d))
-            addLink(link)
-            if (link.contains('_'))
-                checkLink(link, '_')
-            else if (link.contains('#'))
-                checkLink(link, '#')
-            if (date.year == 2016 && link.contains("2016")) {
-                val add = when (date.month) {
-                    1 -> false
-                    2 -> !link.contains("05") && !link.contains("12")
-                    4 -> !link.contains("06")
-                    else -> true
-                }
-                if (add)
-                    addLink(link.replace("2016", Const.POEMS))
-            }
-            i = content.indexOf(a, i)
-        }
-    }
-
-    private fun checkLink(link: String, c: Char) {
-        var n = link.indexOf(c) + 1
-        n = link.substring(n, n + 1).toInt()
-        if (n == 3)
-            addLink(link.replace("$c$n", "${c}2"))
-        addLink(link.replace("$c$n", ""))
     }
 
     private fun parseJson(content: String) {
@@ -140,8 +101,7 @@ class CalendarLoader(private val client: NeoClient) : LinksProvider, Loader {
         storage.updateTime()
         val unread = if (updateUnread) UnreadStorage() else null
         while (list.isNotEmpty()) {
-            val item = if (Urls.isSiteCom)
-                list.removeFirst() else list.removeLast()
+            val item = list.removeLast()
             if (updateUnread)
                 date.day = item.title.toInt()
             if (item.hasFewLinks()) {

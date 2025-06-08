@@ -25,10 +25,6 @@ class SummaryLoader(private val client: NeoClient) : Loader {
         val host = Urls.Host
         val br = BufferedReader(InputStreamReader(stream), 1000)
         var s = br.readLine()
-        if (Urls.isSiteCom) {
-            while (!s.contains("pubDate"))
-                s = br.readLine()
-        }
         var a = s.indexOf("Date>") + 5
         val secList = DateUnit.parse(s.substring(a, s.indexOf("<", a))).timeInSeconds
         val file = Files.file(Files.RSS)
@@ -36,18 +32,19 @@ class SummaryLoader(private val client: NeoClient) : Loader {
             DateUnit.putMills(file.lastModified()).timeInSeconds
         else 0L
         val needUpdate = secFile < secList
-
         val bw = BufferedWriter(FileWriter(file))
         val now = DateUnit.initNow()
         val unread = UnreadStorage()
-        val m = (if (Urls.isSiteCom) br.readText() else s).split("<item>")
+        val m = s.split("<item>")
         br.close()
         stream.close()
         var b: Int
+        val com = Urls.isSiteCom
         for (i in 1 until m.size) {
             a = m[i].indexOf("<link") + 6
             b = m[i].indexOf("</", a)
-            s = m[i].substring(a, b)
+            if (com)
+                s = m[i].substring(a, b).replace(".eu/", ".com/")
             if (s.contains(host))
                 s = s.substring(s.indexOf(host) + host.length + 1)
             if (s.contains("#0")) s = s.replace("#0", "#2")

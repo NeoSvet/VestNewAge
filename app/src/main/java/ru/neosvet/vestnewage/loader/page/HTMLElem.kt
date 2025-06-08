@@ -12,7 +12,7 @@ class HTMLElem {
             field = if (value.contains("&")) //"&#x"
                 value.fromHTML
             else if (tag == Const.LINK)
-                value.trim { it <= ' ' } else value
+                value.trim() else value
         }
 
     constructor()

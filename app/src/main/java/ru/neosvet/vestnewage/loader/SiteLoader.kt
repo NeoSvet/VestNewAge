@@ -112,19 +112,12 @@ class SiteLoader(
     private fun loadList(link: String): List<BasicItem> {
         val page = PageParser(client)
         val isSite = link == Urls.Site
-        val isCom = Urls.isSiteCom
-        val end: String
-        if (isSite) {
-            page.load(link, "")
-            end = if (isCom) "bgimage" else "<button"
-        } else {
-            end = if (isCom) "print2" else "<button"
+        val end = "<button"
+        if (isSite) page.load(link, "")
+        else {
             val i = link.lastIndexOf("/") + 1
             val url = link.substring(0, i) + Const.PRINT + link.substring(i)
-            if (isCom) {
-                page.load(url, "")
-                page.nextItem
-            } else page.load(url, "razdel")
+            page.load(url, "razdel")
         }
         var s: String? = page.currentElem
         var t: String
@@ -196,14 +189,6 @@ class SiteLoader(
         if (setDes(item, t).not())
             list.add(BasicItem(t))
         page.clear()
-        if (isSite && isCom) {
-            var i = list.size - 1
-            while (i > 1) {
-                if (i in 17..24 || i in 11..13 || (i in 2..6 && i != 4))
-                    list.removeAt(i)
-                i--
-            }
-        }
         return list
     }
 

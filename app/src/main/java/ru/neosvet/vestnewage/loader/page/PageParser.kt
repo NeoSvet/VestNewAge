@@ -25,24 +25,10 @@ class PageParser(private val client: NeoClient) {
         get() = content.current().let { it.tag == Const.TEXT || (it.start.not() && it.end) }
 
     fun load(url: String, startString: String) {
-        var start = startString
-        var end = "<!--/row-->"
+        var start = if (startString.isEmpty()) "page-title" else startString
+        val end = "<!--/row-->"
         val stream = client.getStream(url)
-        val br = when {
-            url.contains(Urls.ACADEMY) ->
-                BufferedReader(InputStreamReader(stream), 1000)
-
-            Urls.isSiteCom -> {
-                if (start.isEmpty()) start = "class=\"title"
-                end = "id=\"print2"
-                BufferedReader(InputStreamReader(stream, "cp1251"), 1000)
-            }
-
-            else -> {
-                if (start.isEmpty()) start = "page-title"
-                BufferedReader(InputStreamReader(stream), 1000)
-            }
-        }
+        val br = BufferedReader(InputStreamReader(stream), 1000)
         if (url.contains("#") && !url.contains("#1"))
             start = "a name=\"" + url.substring(url.indexOf("#") + 1)
         var line: String? = br.readLine()
@@ -90,7 +76,7 @@ class PageParser(private val client: NeoClient) {
         var wasNoind = false
         var startPar = false
         while (i < m.size) {
-            var s = m[i].trim { it <= ' ' }
+            var s = m[i].trim()
             if (s.isEmpty()) {
                 i++
                 continue

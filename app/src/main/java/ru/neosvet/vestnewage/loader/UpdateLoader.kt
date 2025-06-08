@@ -105,11 +105,7 @@ class UpdateLoader(private val client: NeoClient) : Loader {
         load()
         val stream = client.getStream(Urls.RSS)
         val br = BufferedReader(InputStreamReader(stream), 1000)
-        var s = br.readLine()
-        if (Urls.isSiteCom) {
-            while (!s.contains("pubDate"))
-                s = br.readLine()
-        }
+        val s = br.readLine()
         var a = s.indexOf("Date>") + 5
         val timeList = DateUnit.parse(s.substring(a, s.indexOf("<", a))).timeInMills
         val file = Files.file(Files.RSS)
@@ -120,7 +116,7 @@ class UpdateLoader(private val client: NeoClient) : Loader {
             file.setLastModified(System.currentTimeMillis())
             return list
         }
-        val m = (if (Urls.isSiteCom) br.readText() else s).split("<item>")
+        val m = s.split("<item>")
         br.close()
         val bw = BufferedWriter(FileWriter(file))
         val host = Urls.Host
