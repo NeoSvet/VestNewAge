@@ -65,7 +65,6 @@
     <string name="markers">Закладки</string>
     <string name="journal">Журнал</string>
     <string name="search">Поиск</string>
-    <string name="cabinet">Кабинет</string>
     <string name="settings">Настройки</string>
     <string name="help">Справка</string>
     <!--Formats-->
@@ -187,19 +186,6 @@
     <string name="links">Ссылки:</string>
     <string name="timekeeping">Хронометраж акции</string>
     <string name="the_path">Путь Импульса Духовной Волны</string>
-    <!--CabmainFragment-->
-    <string name="profile_failed">Анкета загружена неверно</string>
-    <string name="auth_failed">Авторизация не удалась</string>
-    <string name="send_status">Передать ощущение</string>
-    <string name="selected_status">Выбранное состояние</string>
-    <string name="select_status">Выберите состояние</string>
-    <string name="send_unlivable">Сейчас передать невозможно</string>
-    <string name="email">Email</string>
-    <string name="password">Пароль</string>
-    <string name="remember_email">запомнить email</string>
-    <string name="remember_password">запомнить пароль</string>
-    <string name="alter_path">альтернативный путь</string>
-    <string name="cabinet_title">Личный кабинет участника Движения</string>
     <!--Tabs-->
     <string name="to_prev_tab">К предыдущей вкладке</string>
     <string name="to_next_tab">К следующей вкладке</string>

@@ -67,7 +67,6 @@ import ru.neosvet.vestnewage.view.basic.StatusButton
 import ru.neosvet.vestnewage.view.basic.defIndent
 import ru.neosvet.vestnewage.view.dialog.SetNotifDialog
 import ru.neosvet.vestnewage.view.fragment.BookFragment
-import ru.neosvet.vestnewage.view.fragment.CabinetFragment
 import ru.neosvet.vestnewage.view.fragment.CalendarFragment
 import ru.neosvet.vestnewage.view.fragment.HelpFragment
 import ru.neosvet.vestnewage.view.fragment.HomeFragment
@@ -583,9 +582,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
                 fragmentTransaction.replace(R.id.my_fragment, it)
             }
 
-            Section.CABINET -> curFragment = CabinetFragment().also {
-                fragmentTransaction.replace(R.id.my_fragment, it)
-            }
+            Section.CABINET -> {}
 
             Section.SETTINGS -> curFragment = SettingsFragment().also {
                 fragmentTransaction.replace(R.id.my_fragment, it)

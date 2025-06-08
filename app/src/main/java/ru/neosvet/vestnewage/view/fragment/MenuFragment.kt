@@ -88,12 +88,12 @@ class MenuFragment : Fragment() {
         val mImage = intArrayOf(
             R.drawable.ic_0, R.drawable.ic_home, R.drawable.ic_summary, R.drawable.ic_site,
             R.drawable.ic_calendar, R.drawable.ic_book, R.drawable.ic_search, R.drawable.ic_marker,
-            R.drawable.ic_journal, R.drawable.ic_cabinet, R.drawable.ic_settings, R.drawable.ic_help
+            R.drawable.ic_journal, R.drawable.ic_settings, R.drawable.ic_help
         )
         val mTitle = intArrayOf(
             R.string.new_section, R.string.home_screen, R.string.summary, R.string.news,
             R.string.calendar, R.string.book, R.string.search, R.string.markers,
-            R.string.journal, R.string.cabinet, R.string.settings, R.string.help
+            R.string.journal, R.string.settings, R.string.help
         )
         var i = 0
         while (i < mImage.size) {

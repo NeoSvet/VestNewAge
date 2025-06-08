@@ -57,8 +57,8 @@ class HomeHelper(private val context: Context) {
                 }
 
                 Section.CABINET -> {
-                    i = R.drawable.ic_cabinet
-                    t = R.string.cabinet
+                    i = R.drawable.star
+                    t = R.string.app_name
                 }
 
                 Section.HOME -> if (isMain) {
@@ -108,7 +108,7 @@ class HomeHelper(private val context: Context) {
         context.getString(R.string.news), context.getString(R.string.calendar),
         context.getString(R.string.poems), context.getString(R.string.search),
         context.getString(R.string.markers), context.getString(R.string.journal),
-        context.getString(R.string.cabinet), context.getString(R.string.settings),
+        context.getString(R.string.settings),
         context.getString(R.string.epistles), context.getString(R.string.doctrine_creator),
         context.getString(R.string.holy_rus), context.getString(R.string.help)
     )
@@ -116,7 +116,7 @@ class HomeHelper(private val context: Context) {
         listOf(
             Section.HOME, Section.SUMMARY, Section.SITE, Section.CALENDAR,
             Section.BOOK, Section.SEARCH, Section.MARKERS, Section.JOURNAL,
-            Section.CABINET, Section.SETTINGS, Section.EPISTLES,
+            Section.SETTINGS, Section.EPISTLES,
             Section.DOCTRINE, Section.HOLY_RUS, Section.HELP
         )
     }
@@ -124,7 +124,7 @@ class HomeHelper(private val context: Context) {
         listOf(
             R.drawable.ic_edit, R.drawable.ic_summary, R.drawable.ic_site, R.drawable.ic_calendar,
             R.drawable.ic_book_k, R.drawable.ic_search, R.drawable.ic_marker, R.drawable.ic_journal,
-            R.drawable.ic_cabinet, R.drawable.ic_settings, R.drawable.ic_book_p,
+            R.drawable.ic_settings, R.drawable.ic_book_p,
             R.drawable.ic_book_dc, R.drawable.ic_book_sr, R.drawable.ic_help
         )
     }
