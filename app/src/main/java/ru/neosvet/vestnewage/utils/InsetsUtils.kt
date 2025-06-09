@@ -29,6 +29,8 @@ class InsetsUtils(
     var navBar: ImageView? = null
         private set
     private var isDone = false
+    private var needBar = false
+    private var prevInsets = Insets.NONE
 
     private fun run(insets: Insets) {
         view.post {
@@ -56,15 +58,27 @@ class InsetsUtils(
                     }
                 }
             }
-        } else if (activity.findViewById<View>(R.id.bottomBar) == null) {
-            navBar = ImageView(activity).apply {
-                setBackgroundColor(ContextCompat.getColor(activity, R.color.navigationBarColor))
-                val p = LayoutParams(LayoutParams.MATCH_PARENT, insets.bottom)
-                setLayoutParams(p)
-                root.addView(this)
+        } else if (needBar || activity.findViewById<View>(R.id.bottomBar) == null) {
+            createBottomBar(root)
+        }
+    }
+
+    fun createBottomBar(root: ViewGroup) {
+        if (navBar != null) return
+        if (prevInsets == Insets.NONE) {
+            needBar = true
+            return
+        }
+        navBar = ImageView(activity).apply {
+            setBackgroundColor(ContextCompat.getColor(activity, R.color.navigationBarColor))
+            val p = LayoutParams(LayoutParams.MATCH_PARENT, prevInsets.bottom)
+            setLayoutParams(p)
+            root.addView(this)
+            if (root is CoordinatorLayout)
                 updateLayoutParams<CoordinatorLayout.LayoutParams> {
                     gravity = Gravity.BOTTOM
-                }
+                } else updateLayoutParams<ConstraintLayout.LayoutParams> {
+                bottomToBottom = ConstraintLayout.LayoutParams.PARENT_ID
             }
         }
     }
@@ -77,9 +91,14 @@ class InsetsUtils(
         window.decorView.setOnApplyWindowInsetsListener { view, insets ->
             val systemInsets = insets.getInsets(WindowInsets.Type.systemBars())
             //println("---- WindowInsets top=${systemInsets.top} bottom=${systemInsets.bottom} left=${systemInsets.left} right=${systemInsets.right}")
+            prevInsets = systemInsets
             if (!isDone) run(systemInsets)
             insets
         }
+    }
+
+    fun retryInsets() {
+        applyInsets?.invoke(prevInsets)
     }
 
 }

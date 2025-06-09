@@ -35,7 +35,8 @@ class HeadBar(
     var isBlocked = false
         private set
 
-    var switchGone: (() -> Unit)? = null
+    var funcGone: (() -> Unit)? = null
+    var funcShow: (() -> Unit)? = null
     val isHided: Boolean
         get() = state == State.GONE
     val isExpanded: Boolean
@@ -93,13 +94,13 @@ class HeadBar(
     private fun changeEnd() {
         state = when (mainView.height) {
             goneH -> {
-                if (switchGone == null) mainView.isVisible = false
+                if (funcGone == null) mainView.isVisible = false
                 State.GONE
             }
 
             expandedH -> State.EXPANDED
             else -> {
-                if (isHided) switchGone?.invoke()
+                if (isHided) funcShow?.invoke()
                 State.COLLAPSED
             }
         }
@@ -123,8 +124,8 @@ class HeadBar(
                     v.startAnimation(anHide)
             }
         }
-        if (h == goneH && switchGone != null) {
-            switchGone?.invoke()
+        if (h == goneH && funcGone != null) {
+            funcGone?.invoke()
             state = State.GONE
             unblocked()
             return
@@ -186,6 +187,7 @@ class HeadBar(
     fun show() {
         mainView.isVisible = true
         changeHeight(collapsedH)
+        funcShow?.invoke()
     }
 
     fun blocked() {

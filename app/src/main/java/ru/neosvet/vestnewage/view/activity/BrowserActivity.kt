@@ -42,6 +42,7 @@ import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.InsetsUtils
 import ru.neosvet.vestnewage.utils.PromUtils
 import ru.neosvet.vestnewage.utils.ScreenUtils
+import ru.neosvet.vestnewage.utils.ScreenUtils.Type
 import ru.neosvet.vestnewage.utils.TipUtils
 import ru.neosvet.vestnewage.utils.WordsUtils
 import ru.neosvet.vestnewage.utils.isDoctrineBook
@@ -92,6 +93,9 @@ class BrowserActivity : AppCompatActivity(), ReaderClient.Parent, NeoInterface.P
     private lateinit var headBar: HeadBar
     private lateinit var prom: PromUtils
     private lateinit var menu: NeoMenu
+    private var insetsUtils: InsetsUtils? = null
+    private val needNavBg: Boolean
+        get() = ScreenUtils.type == Type.PHONE_PORT && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
     private var navIsTop = false
     private var isSearch = false
     private var twoPointers = false
@@ -168,16 +172,17 @@ class BrowserActivity : AppCompatActivity(), ReaderClient.Parent, NeoInterface.P
 
     @RequiresApi(Build.VERSION_CODES.S)
     private fun initInsetsUtils() {
-        val utils = InsetsUtils(binding.ivHeadBack, this)
-        utils.applyInsets = { insets ->
-            if (binding.ivHeadBack.isVisible) {
-                setVerticalInsets(insets)
-                if (utils.isSideNavBar)
-                    setSideInsets(insets)
-                true
-            } else false
+        insetsUtils = InsetsUtils(binding.ivHeadBack, this).apply {
+            applyInsets = { insets ->
+                if (binding.ivHeadBack.isVisible) {
+                    setVerticalInsets(insets)
+                    if (isSideNavBar)
+                        setSideInsets(insets)
+                    true
+                } else false
+            }
+            init(window)
         }
-        utils.init(window)
     }
 
     @RequiresApi(Build.VERSION_CODES.S)
@@ -202,6 +207,8 @@ class BrowserActivity : AppCompatActivity(), ReaderClient.Parent, NeoInterface.P
 
     @RequiresApi(Build.VERSION_CODES.S)
     private fun setVerticalInsets(insets: Insets) {
+        val vis = binding.bottomBar.isVisible
+        if (!vis) binding.bottomBar.isVisible = true
         PromBottom(false)
         setSwitchHead(insets.top)
         binding.tvGodWords.updateLayoutParams<ConstraintLayout.LayoutParams> {
@@ -227,25 +234,25 @@ class BrowserActivity : AppCompatActivity(), ReaderClient.Parent, NeoInterface.P
             rightMargin = insets.right
             bottomMargin = insets.bottom
         }
+        if (!vis) binding.bottomBar.post { binding.bottomBar.isVisible = false }
     }
 
     private fun setSwitchHead(statusHeight: Int) {
         val h = statusHeight + statusHeight / 2
         if (h > headBar.collapsedH)
             headBar.collapsedH = h
-        headBar.switchGone = {
-            if (headBar.isHided) {
-                binding.ivHeadFront.isVisible = true
-                binding.btnBack.isVisible = true
-                binding.ivHeadBack.setImageResource(headResId)
-            } else {
-                binding.ivHeadFront.isVisible = false
-                binding.btnBack.isVisible = false
-                binding.ivHeadBack.setImageResource(R.drawable.topbar_bg)
-                binding.ivHeadBack.updateLayoutParams<ViewGroup.LayoutParams> {
-                    height = statusHeight
-                }
+        headBar.funcGone = {
+            binding.ivHeadFront.isVisible = false
+            binding.btnBack.isVisible = false
+            binding.ivHeadBack.setImageResource(R.drawable.topbar_bg)
+            binding.ivHeadBack.updateLayoutParams<ViewGroup.LayoutParams> {
+                height = statusHeight
             }
+        }
+        headBar.funcShow = {
+            binding.ivHeadFront.isVisible = true
+            binding.btnBack.isVisible = true
+            binding.ivHeadBack.setImageResource(headResId)
         }
         if (headBar.isBlocked) {
             headBar.hide()
@@ -372,6 +379,13 @@ class BrowserActivity : AppCompatActivity(), ReaderClient.Parent, NeoInterface.P
                 )
             }
             pSearch.isVisible = false
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                binding.root.post {
+                    insetsUtils?.retryInsets()
+                    if (ScreenUtils.type == Type.PHONE_PORT)
+                        insetsUtils?.navBar?.isVisible = false
+                }
+            }
             wvBrowser.clearMatches()
         }
         isSearch = false
@@ -586,6 +600,16 @@ class BrowserActivity : AppCompatActivity(), ReaderClient.Parent, NeoInterface.P
         binding.fabNav.hide()
         binding.bottomBar.performHide()
         PromBottom(true)
+        if (needNavBg) showNavBg()
+    }
+
+    @RequiresApi(Build.VERSION_CODES.S)
+    private fun showNavBg() {
+        insetsUtils?.let {
+            if (it.navBar == null)
+                it.createBottomBar(binding.root)
+            else it.navBar?.isVisible = true
+        }
     }
 
     private fun bottomShow() {
@@ -596,6 +620,8 @@ class BrowserActivity : AppCompatActivity(), ReaderClient.Parent, NeoInterface.P
         }
         binding.bottomBar.performShow()
         PromBottom(false)
+        if (needNavBg)
+            insetsUtils?.navBar?.isVisible = false
     }
 
     private fun setNavButton(scrollY: Int) {
@@ -1006,6 +1032,7 @@ class BrowserActivity : AppCompatActivity(), ReaderClient.Parent, NeoInterface.P
         binding.fabNav.isVisible = false
         binding.bottomBar.isVisible = false
         PromBottom(true)
+        if (needNavBg) showNavBg()
     }
 
     private fun bottomUnblocked() {
@@ -1013,6 +1040,8 @@ class BrowserActivity : AppCompatActivity(), ReaderClient.Parent, NeoInterface.P
         binding.fabNav.isVisible = true
         binding.bottomBar.isVisible = true
         PromBottom(false)
+        if (needNavBg)
+            insetsUtils?.navBar?.isVisible = false
     }
 
     override fun changePage(next: Boolean) {
