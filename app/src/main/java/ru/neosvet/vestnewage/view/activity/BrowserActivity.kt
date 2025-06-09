@@ -15,6 +15,7 @@ import android.view.inputmethod.EditorInfo
 import androidx.activity.OnBackPressedCallback
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.ActionMenuView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
@@ -390,6 +391,8 @@ class BrowserActivity : AppCompatActivity(), ReaderClient.Parent, NeoInterface.P
     private fun initViews() {
         status = StatusButton(this, binding.pStatus)
         val pref = getSharedPreferences(MainHelper.TAG, MODE_PRIVATE)
+        if (pref.getBoolean(Const.ALWAYS_DARK, false))
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
         prom = if (pref.getBoolean(Const.PROM_FLOAT, false))
             PromUtils(binding.tvPromTimeFloat)
         else PromUtils(binding.tvPromTimeHead)

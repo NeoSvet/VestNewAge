@@ -208,6 +208,7 @@
     <string name="base">Основное</string>
     <string name="notif_new">Проверка обновлений</string>
     <string name="notif_prom">Напоминание о Посыле</string>
+    <string name="always_dark_theme">Всегда тёмная тема</string>
     <string name="float_prom_time">Переместить отсчёт времени до Посыла в нижний левый угол экрана</string>
     <string name="start_with_new">При запуске открыть Новое, если имеется</string>
     <string name="use_site_com">Использовать зеркало в домене .COM</string>

@@ -83,6 +83,8 @@ class MainHelper(private val act: MainActivity) {
     private val pref = act.getSharedPreferences(TAG, AppCompatActivity.MODE_PRIVATE)
     val isFloatPromTime: Boolean
         get() = pref.getBoolean(Const.PROM_FLOAT, false)
+    val isAlwaysDark: Boolean
+        get() = pref.getBoolean(Const.ALWAYS_DARK, false)
     var isSideMenu: Boolean = false
         private set
 

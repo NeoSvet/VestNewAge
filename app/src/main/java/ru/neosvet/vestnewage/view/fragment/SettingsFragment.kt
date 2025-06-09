@@ -191,6 +191,12 @@ class SettingsFragment : NeoFragment() {
         val list = mutableListOf<CheckItem>()
         list.add(
             CheckItem(
+                title = getString(R.string.always_dark_theme),
+                isChecked = prefMain.getBoolean(Const.ALWAYS_DARK, false)
+            )
+        )
+        list.add(
+            CheckItem(
                 title = getString(R.string.float_prom_time),
                 isChecked = prefMain.getBoolean(Const.PROM_FLOAT, false)
             )
@@ -213,15 +219,24 @@ class SettingsFragment : NeoFragment() {
                 isSingleSelect = false,
                 list = list,
                 onChecked = { index, checked ->
-                    if (index == 2) {
+                    if (index == 3) {
                         Urls.setCom(checked)
                         return@CheckList
                     }
-                    val name = if (index == 0) {
-                        act?.setFloatProm(checked)
-                        Const.PROM_FLOAT
-                    } else
-                        Const.START_NEW
+                    val name = when (index) {
+                        0 -> {
+                            act?.setDarkTheme(checked)
+                            Const.ALWAYS_DARK
+                        }
+
+                        1 -> {
+                            act?.setFloatProm(checked)
+                            Const.PROM_FLOAT
+                        }
+
+                        else ->
+                            Const.START_NEW
+                    }
                     prefMain.edit {
                         putBoolean(name, checked)
                     }
@@ -240,13 +255,22 @@ class SettingsFragment : NeoFragment() {
             )
         }
         list.add(
-            CheckItem(title = getString(R.string.home_screen), isChecked = screen == list.size)
+            CheckItem(
+                title = getString(R.string.home_screen),
+                isChecked = screen == list.size
+            )
         )
         list.add(
-            CheckItem(title = getString(R.string.calendar), isChecked = screen == list.size)
+            CheckItem(
+                title = getString(R.string.calendar),
+                isChecked = screen == list.size
+            )
         )
         list.add(
-            CheckItem(title = getString(R.string.summary), isChecked = screen == list.size)
+            CheckItem(
+                title = getString(R.string.summary),
+                isChecked = screen == list.size
+            )
         )
         adapter.addItem(
             SettingsItem.CheckList(
@@ -283,7 +307,12 @@ class SettingsFragment : NeoFragment() {
                 SettingsToiler.CLEAR_NOW_BOOK
             )
         )
-        list.add(CheckItem(getString(R.string.other_books), SettingsToiler.CLEAR_OTHER_BOOKS))
+        list.add(
+            CheckItem(
+                getString(R.string.other_books),
+                SettingsToiler.CLEAR_OTHER_BOOKS
+            )
+        )
         list.add(
             CheckItem(
                 getString(R.string.articles_and_summary),
@@ -345,16 +374,23 @@ class SettingsFragment : NeoFragment() {
                         dialog = SetNotifDialog(requireActivity(), SummaryHelper.TAG)
                         dialog?.show()
                     } else {
-                        val intent = Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS)
-                            .putExtra(Settings.EXTRA_APP_PACKAGE, act!!.packageName)
-                            .putExtra(Settings.EXTRA_CHANNEL_ID, NotificationUtils.CHANNEL_SUMMARY)
+                        val intent =
+                            Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS)
+                                .putExtra(Settings.EXTRA_APP_PACKAGE, act!!.packageName)
+                                .putExtra(
+                                    Settings.EXTRA_CHANNEL_ID,
+                                    NotificationUtils.CHANNEL_SUMMARY
+                                )
                         startActivity(intent)
                     }
                 }
             ))
     }
 
-    private fun initCheckList(label: List<String>, value: List<Boolean>): List<CheckItem> {
+    private fun initCheckList(
+        label: List<String>,
+        value: List<Boolean>
+    ): List<CheckItem> {
         val list = mutableListOf<CheckItem>()
         for (i in label.indices) {
             val item = CheckItem(label[i], i)
@@ -393,7 +429,9 @@ class SettingsFragment : NeoFragment() {
 
         val list = initCheckList(
             listOf(
-                getString(R.string.alarm), getString(R.string.set), getString(R.string.look)
+                getString(R.string.alarm),
+                getString(R.string.set),
+                getString(R.string.look)
             ), listOf()
         )
         adapterProm = CheckAdapter(
@@ -416,9 +454,13 @@ class SettingsFragment : NeoFragment() {
                         dialog = SetNotifDialog(requireActivity(), PromUtils.TAG)
                         dialog?.show()
                     } else {
-                        val intent = Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS)
-                            .putExtra(Settings.EXTRA_APP_PACKAGE, act!!.packageName)
-                            .putExtra(Settings.EXTRA_CHANNEL_ID, NotificationUtils.CHANNEL_PROM)
+                        val intent =
+                            Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS)
+                                .putExtra(Settings.EXTRA_APP_PACKAGE, act!!.packageName)
+                                .putExtra(
+                                    Settings.EXTRA_CHANNEL_ID,
+                                    NotificationUtils.CHANNEL_PROM
+                                )
                         startActivity(intent)
                     }
                 }
@@ -454,7 +496,8 @@ class SettingsFragment : NeoFragment() {
                             + getString(R.string.info_default_a),
                     buttonLabel = getString(R.string.set_),
                     onClick = {
-                        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, pack)
+                        val intent =
+                            Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, pack)
                         startActivity(intent)
                     }
                 ))
@@ -468,7 +511,8 @@ class SettingsFragment : NeoFragment() {
                         + getString(R.string.info_default_b),
                 buttonLabel = getString(R.string.set_),
                 onClick = {
-                    val intent = Intent(Settings.ACTION_APP_OPEN_BY_DEFAULT_SETTINGS, pack)
+                    val intent =
+                        Intent(Settings.ACTION_APP_OPEN_BY_DEFAULT_SETTINGS, pack)
                     startActivity(intent)
                 }
             ))
@@ -493,7 +537,8 @@ class SettingsFragment : NeoFragment() {
                         + getString(R.string.info_battery),
                 buttonLabel = getString(R.string.set_battery),
                 onClick = {
-                    val intent = Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)
+                    val intent =
+                        Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)
                     startActivity(intent)
                 }
             ))
@@ -538,7 +583,8 @@ class SettingsFragment : NeoFragment() {
 
     @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
     private fun setAlarmNew(value: Int) {
-        val manager = ContextCompat.getSystemService(requireContext(), AlarmManager::class.java)
+        val manager =
+            ContextCompat.getSystemService(requireContext(), AlarmManager::class.java)
         if (manager?.canScheduleExactAlarms() == false) {
             val alert = MessageDialog(requireActivity()).apply {
                 setTitle(getString(R.string.notif_prom))
@@ -617,9 +663,10 @@ class SettingsFragment : NeoFragment() {
     }
 
     fun putRingtone(data: Intent?) {
-        data?.getParcelableExtra<Uri>(RingtoneManager.EXTRA_RINGTONE_PICKED_URI)?.let { uri ->
-            val ringTone = RingtoneManager.getRingtone(act, uri)
-            dialog?.putRingtone(ringTone.getTitle(act), uri.toString())
-        }
+        data?.getParcelableExtra<Uri>(RingtoneManager.EXTRA_RINGTONE_PICKED_URI)
+            ?.let { uri ->
+                val ringTone = RingtoneManager.getRingtone(act, uri)
+                dialog?.putRingtone(ringTone.getTitle(act), uri.toString())
+            }
     }
 }

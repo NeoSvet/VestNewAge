@@ -19,6 +19,7 @@ import androidx.activity.OnBackPressedCallback
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.ActionMenuView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -150,6 +151,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
             initInsetsUtils()
         else setIndent()
         setFloatProm(helper.isFloatPromTime)
+        if (helper.isAlwaysDark) setDarkTheme(true)
         runObserve()
         onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
     }
@@ -896,6 +898,15 @@ class MainActivity : AppCompatActivity(), ItemClicker {
             item.title = m.title
             item.icon = ContextCompat.getDrawable(this, m.image)
             i++
+        }
+    }
+
+    fun setDarkTheme(dark: Boolean) {
+        if (dark) {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+            //saveThemePreference(AppCompatDelegate.MODE_NIGHT_YES)
+        } else {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
         }
     }
 }
