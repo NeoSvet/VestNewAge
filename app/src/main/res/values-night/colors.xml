@@ -11,7 +11,8 @@
     <color name="bg_color">#000000</color>
     <color name="bar_start">#CC99CCFF</color>
     <color name="bar_end">#DD113366</color>
-    <color name="item_color">#2299CCFF</color>
+    <color name="card_color">#33406092</color>
+    <color name="item_color">#3399CCFF</color>
     <color name="red">#CC0000</color>
     <color name="green">#669900</color>
 </resources>
