@@ -22,7 +22,7 @@ class MenuAdapter(
         data.add(MenuItem(image, title))
     }
 
-    fun changeIcon(image: Int, index: Int) {
+    fun changeIcon(index: Int, image: Int) {
         data[index].image = image
         notifyItemChanged(index)
     }

@@ -117,7 +117,7 @@ class MenuFragment : Fragment() {
     fun setNew(newId: Int) {
         if (adapter.itemCount > 0 && newId != lastNewId) {
             lastNewId = newId
-            adapter.changeIcon(newId, 0)
+            adapter.changeIcon(0, newId)
         }
     }
 

@@ -874,7 +874,7 @@ class BrowserActivity : AppCompatActivity(), ReaderClient.Parent, NeoInterface.P
 
     private fun setCheckItem(index: Int, check: Boolean) {
         val icon = if (check) R.drawable.checkbox_simple else R.drawable.uncheckbox_simple
-        adMenu.changeIcon(icon, index)
+        adMenu.changeIcon(index, icon)
     }
 
     private fun initSearch() {
