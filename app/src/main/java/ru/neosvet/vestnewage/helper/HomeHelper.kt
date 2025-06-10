@@ -84,14 +84,9 @@ class HomeHelper(private val context: Context) {
                     t = R.string.holy_rus
                 }
 
-                Section.HELP -> {
+                else -> { //Section.HELP, Section.NEW, Section.MENU, Section.CABINET
                     i = R.drawable.ic_help
                     t = R.string.help
-                }
-
-                else -> { //Section.NEW, Section.MENU
-                    i = R.drawable.star
-                    t = R.string.app_name
                 }
             }
             return Point(i, t)
@@ -148,13 +143,12 @@ class HomeHelper(private val context: Context) {
                     Section.SITE.value -> Section.SITE
                     Section.MARKERS.value -> Section.MARKERS
                     Section.JOURNAL.value -> Section.JOURNAL
-                    Section.HELP.value -> Section.HELP
                     Section.SETTINGS.value -> Section.SETTINGS
                     Section.HOME.value -> Section.HOME
                     Section.EPISTLES.value -> Section.EPISTLES
                     Section.DOCTRINE.value -> Section.DOCTRINE
                     Section.HOLY_RUS.value -> Section.HOLY_RUS
-                    else -> Section.MENU
+                    else -> Section.HELP
                 }
                 menu.add(item)
             }

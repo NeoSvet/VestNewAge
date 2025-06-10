@@ -57,10 +57,6 @@ class HomeFragment : NeoFragment(), HomeAdapter.Events {
     override fun initViewModel(): NeoToiler =
         ViewModelProvider(this)[HomeToiler::class.java]
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
