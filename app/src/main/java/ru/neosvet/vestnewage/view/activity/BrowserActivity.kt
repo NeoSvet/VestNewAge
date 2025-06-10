@@ -7,7 +7,6 @@ import android.graphics.Insets
 import android.os.Build
 import android.os.Bundle
 import android.view.KeyEvent
-import android.view.MenuItem
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
@@ -27,11 +26,13 @@ import androidx.core.view.updatePadding
 import androidx.core.widget.doAfterTextChanged
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.GridLayoutManager
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
+import ru.neosvet.vestnewage.data.MenuItem
 import ru.neosvet.vestnewage.databinding.BrowserActivityBinding
 import ru.neosvet.vestnewage.helper.BrowserHelper
 import ru.neosvet.vestnewage.helper.MainHelper
@@ -59,6 +60,7 @@ import ru.neosvet.vestnewage.view.browser.HeadBar
 import ru.neosvet.vestnewage.view.browser.NeoInterface
 import ru.neosvet.vestnewage.view.browser.ReaderClient
 import ru.neosvet.vestnewage.view.dialog.ShareDialog
+import ru.neosvet.vestnewage.view.list.MenuAdapter
 import ru.neosvet.vestnewage.viewmodel.BrowserToiler
 import ru.neosvet.vestnewage.viewmodel.state.BasicState
 import ru.neosvet.vestnewage.viewmodel.state.BrowserState
@@ -75,16 +77,13 @@ class BrowserActivity : AppCompatActivity(), ReaderClient.Parent, NeoInterface.P
             if (!search.isNullOrEmpty()) intent.putExtra(Const.SEARCH, search)
             App.context.startActivity(intent)
         }
-    }
 
-    data class NeoMenu(
-        val theme: MenuItem,
-        val numpar: MenuItem,
-        val buttons: MenuItem,
-        val top: MenuItem,
-        val autoreturn: MenuItem,
-        val refresh: MenuItem
-    )
+        private const val MENU_NAVBUTTONS = 0
+        private const val MENU_MINITOP = 1
+        private const val MENU_AUTORETURN = 2
+        private const val MENU_NUMPAR = 3
+        private const val MENU_THEME = 4
+    }
 
     private val softKeyboard: SoftKeyboard by lazy {
         SoftKeyboard(binding.content.etSearch)
@@ -92,7 +91,7 @@ class BrowserActivity : AppCompatActivity(), ReaderClient.Parent, NeoInterface.P
     private lateinit var status: StatusButton
     private lateinit var headBar: HeadBar
     private lateinit var prom: PromUtils
-    private lateinit var menu: NeoMenu
+    private lateinit var refreshItem: android.view.MenuItem
     private var insetsUtils: InsetsUtils? = null
     private val needNavBg: Boolean
         get() = ScreenUtils.type == Type.PHONE_PORT && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
@@ -112,6 +111,7 @@ class BrowserActivity : AppCompatActivity(), ReaderClient.Parent, NeoInterface.P
     private val unread = UnreadStorage()
     private var connectWatcher: Job? = null
     private lateinit var binding: BrowserActivityBinding
+    private lateinit var adMenu: MenuAdapter
     private var helper = BrowserHelper()
     private var link = ""
     private var searchIndex = -1
@@ -199,6 +199,9 @@ class BrowserActivity : AppCompatActivity(), ReaderClient.Parent, NeoInterface.P
         binding.btnFullScreen.updateLayoutParams<ViewGroup.MarginLayoutParams> {
             leftMargin = insets.left + defIndent
         }
+        binding.rvMenu.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+            leftMargin = insets.left
+        }
         binding.bottomBar.updateLayoutParams<ViewGroup.MarginLayoutParams> {
             leftMargin = insets.left
             rightMargin = insets.right
@@ -219,15 +222,21 @@ class BrowserActivity : AppCompatActivity(), ReaderClient.Parent, NeoInterface.P
             topMargin = insets.top / 2
         }
 
-        if (insets.bottom > 0)
+        if (insets.bottom > 0) {
             binding.bottomBar.updatePadding(bottom = insets.bottom - baseContext.defIndent)
-        binding.bottomBar.children.first()
-            .addOnLayoutChangeListener { v, _, top, _, _, _, _, _, _ ->
-                if (top > 0) v.top = 0
+            binding.bottomBar.children.first()
+                .addOnLayoutChangeListener { v, _, top, _, _, _, _, _, _ ->
+                    if (top > 0) v.top = 0
+                }
+            binding.bottomBar.addOnLayoutChangeListener { v, _, _, _, _, _, _, _, _ ->
+                if (v.minimumHeight < v.measuredHeight)
+                    v.minimumHeight = v.measuredHeight
             }
-        binding.bottomBar.addOnLayoutChangeListener { v, _, _, _, _, _, _, _, _ ->
-            if (v.minimumHeight < v.measuredHeight)
-                v.minimumHeight = v.measuredHeight
+        }
+        binding.bottomBar.post {
+            binding.rvMenu.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                bottomMargin = binding.bottomBar.measuredHeight
+            }
         }
         binding.content.wvBrowser.updateLayoutParams<ViewGroup.MarginLayoutParams> {
             leftMargin = insets.left
@@ -410,11 +419,82 @@ class BrowserActivity : AppCompatActivity(), ReaderClient.Parent, NeoInterface.P
         prom = if (pref.getBoolean(Const.PROM_FLOAT, false))
             PromUtils(binding.tvPromTimeFloat)
         else PromUtils(binding.tvPromTimeHead)
+
+        adMenu = MenuAdapter(this::onOptionClick)
+        adMenu.setItems(
+            listOf(
+                MenuItem(R.drawable.uncheckbox_simple, getString(R.string.nav_button)),
+                MenuItem(R.drawable.uncheckbox_simple, getString(R.string.collapsing_top)),
+                MenuItem(R.drawable.uncheckbox_simple, getString(R.string.auto_return_panels)),
+                MenuItem(R.drawable.uncheckbox_simple, getString(R.string.num_par)),
+                MenuItem(R.drawable.ic_theme, getString(R.string.dark_theme)),
+                MenuItem(R.drawable.ic_opt_scale, getString(R.string.opt_scale)),
+                MenuItem(R.drawable.ic_src_scale, getString(R.string.src_scale)),
+            )
+        )
+        binding.rvMenu.let {
+            it.layoutManager = GridLayoutManager(this, ScreenUtils.span)
+            if (ScreenUtils.span > 1) {
+                it.updateLayoutParams<ConstraintLayout.LayoutParams> {
+                    height = it.height / ScreenUtils.span
+                }
+            }
+            it.adapter = adMenu
+        }
+    }
+
+    private fun onOptionClick(index: Int, item: MenuItem) {
+        when (index) {
+            MENU_NAVBUTTONS -> {
+                helper.isNavButton = helper.isNavButton.not()
+                setCheckItem(index, helper.isNavButton)
+                switchNavButton()
+            }
+
+            MENU_MINITOP -> {
+                helper.isMiniTop = helper.isMiniTop.not()
+                setCheckItem(index, helper.isMiniTop)
+                headBar.setExpandable(helper.isMiniTop)
+            }
+
+            MENU_AUTORETURN -> {
+                helper.isAutoReturn = helper.isAutoReturn.not()
+                setCheckItem(index, helper.isAutoReturn)
+            }
+
+            MENU_NUMPAR -> {
+                if (item.isSelect) return
+                position = positionOnPage
+                helper.isNumPar = helper.isNumPar.not()
+                setCheckItem(index, helper.isNumPar)
+                changeArguments()
+                toiler.openPage(true)
+            }
+
+            MENU_THEME -> {
+                position = positionOnPage
+                helper.isLightTheme = helper.isLightTheme.not()
+                initTheme()
+                binding.content.wvBrowser.clearCache(true)
+                changeArguments()
+                toiler.openPage(false)
+            }
+
+            else -> { // R.drawable.ic_opt_scale, R.drawable.ic_src_scale
+                helper.zoom = if (item.image == R.drawable.ic_opt_scale)
+                    convertToDpi(100) else 100
+                helper.save(this@BrowserActivity)
+                helper.zoom = 0
+                openReader(link, null)
+                finish()
+            }
+        }
     }
 
     private val onBackPressedCallback = object : OnBackPressedCallback(true) {
         override fun handleOnBackPressed() {
             when {
+                binding.rvMenu.isVisible -> binding.rvMenu.isVisible = false
                 snackbar.isShown -> snackbar.hide()
                 isSearch -> closeSearch()
                 status.isVisible -> {
@@ -480,14 +560,14 @@ class BrowserActivity : AppCompatActivity(), ReaderClient.Parent, NeoInterface.P
     private fun initOptions() {
         binding.content.wvBrowser.setInitialScale(helper.zoom)
         if (helper.isNavButton)
-            setCheckItem(menu.buttons, true)
+            setCheckItem(MENU_NAVBUTTONS, true)
         switchNavButton()
         if (helper.isMiniTop)
-            setCheckItem(menu.top, true)
+            setCheckItem(MENU_MINITOP, true)
         if (helper.isAutoReturn)
-            setCheckItem(menu.autoreturn, true)
+            setCheckItem(MENU_AUTORETURN, true)
         if (helper.isNumPar)
-            setCheckItem(menu.numpar, true)
+            setCheckItem(MENU_NUMPAR, true)
         initTheme()
     }
 
@@ -639,11 +719,11 @@ class BrowserActivity : AppCompatActivity(), ReaderClient.Parent, NeoInterface.P
         if (helper.isLightTheme) {
             etSearch.setTextColor(ContextCompat.getColor(context, android.R.color.black))
             root.setBackgroundColor(ContextCompat.getColor(context, android.R.color.white))
-            menu.theme.title = getString(R.string.dark_theme)
+            adMenu.changeTitle(MENU_THEME, getString(R.string.dark_theme))
         } else {
             etSearch.setTextColor(ContextCompat.getColor(context, android.R.color.white))
             root.setBackgroundColor(ContextCompat.getColor(context, android.R.color.black))
-            menu.theme.title = getString(R.string.light_theme)
+            adMenu.changeTitle(MENU_THEME, getString(R.string.light_theme))
         }
     }
 
@@ -656,7 +736,7 @@ class BrowserActivity : AppCompatActivity(), ReaderClient.Parent, NeoInterface.P
             when {
                 link.contains(Const.DOCTRINE) -> Urls.openInBrowser(Urls.DoctrineSite)
                 link.contains(Const.HOLY_RUS) -> Urls.openInBrowser(Urls.HolyRusSite)
-                menu.refresh.isVisible -> Urls.openInBrowser(Urls.Site + link)
+                refreshItem.isVisible -> Urls.openInBrowser(Urls.Site + link)
                 else -> Urls.openInBrowser(Urls.Site)
             }
         }
@@ -717,18 +797,7 @@ class BrowserActivity : AppCompatActivity(), ReaderClient.Parent, NeoInterface.P
 
     @SuppressLint("ClickableViewAccessibility")
     private fun setBottomBar() = binding.run {
-        bottomBar.menu.let { main ->
-            main[0].subMenu?.let {
-                menu = NeoMenu(
-                    refresh = main[4],
-                    buttons = it[0],
-                    top = it[1],
-                    autoreturn = it[2],
-                    numpar = it[3],
-                    theme = it[4]
-                )
-            }
-        }
+        refreshItem = bottomBar.menu[4]
         bottomBar.setBackgroundResource(R.drawable.bottombar_bg)
         bottomBar.setOnMenuItemClickListener {
             when (it.itemId) {
@@ -740,30 +809,8 @@ class BrowserActivity : AppCompatActivity(), ReaderClient.Parent, NeoInterface.P
                 R.id.nav_share ->
                     ShareDialog.newInstance(link).show(supportFragmentManager, null)
 
-                R.id.nav_buttons -> {
-                    helper.isNavButton = helper.isNavButton.not()
-                    setCheckItem(it, helper.isNavButton)
-                    switchNavButton()
-                }
-
-                R.id.nav_minitop -> {
-                    helper.isMiniTop = helper.isMiniTop.not()
-                    setCheckItem(it, helper.isMiniTop)
-                    headBar.setExpandable(helper.isMiniTop)
-                }
-
-                R.id.nav_autoreturn -> {
-                    helper.isAutoReturn = helper.isAutoReturn.not()
-                    setCheckItem(it, helper.isAutoReturn)
-                }
-
-                R.id.nav_numpar -> {
-                    position = positionOnPage
-                    helper.isNumPar = helper.isNumPar.not()
-                    setCheckItem(it, helper.isNumPar)
-                    changeArguments()
-                    toiler.openPage(true)
-                }
+                R.id.nav_menu ->
+                    rvMenu.isVisible = !rvMenu.isVisible
 
                 R.id.nav_search ->
                     goSearch(true)
@@ -777,24 +824,6 @@ class BrowserActivity : AppCompatActivity(), ReaderClient.Parent, NeoInterface.P
                             getString(R.string.search_for) + " “" + helper.request + "”"
                         else ""
                     )
-                }
-
-                R.id.nav_opt_scale, R.id.nav_src_scale -> {
-                    helper.zoom = if (it.itemId == R.id.nav_opt_scale)
-                        convertToDpi(100) else 100
-                    helper.save(this@BrowserActivity)
-                    helper.zoom = 0
-                    openReader(link, null)
-                    finish()
-                }
-
-                R.id.nav_theme -> {
-                    position = positionOnPage
-                    helper.isLightTheme = helper.isLightTheme.not()
-                    initTheme()
-                    content.wvBrowser.clearCache(true)
-                    changeArguments()
-                    toiler.openPage(false)
                 }
             }
             return@setOnMenuItemClickListener true
@@ -843,8 +872,9 @@ class BrowserActivity : AppCompatActivity(), ReaderClient.Parent, NeoInterface.P
         }
     }
 
-    private fun setCheckItem(item: MenuItem, check: Boolean) {
-        item.setIcon(if (check) R.drawable.checkbox_simple else R.drawable.uncheckbox_simple)
+    private fun setCheckItem(index: Int, check: Boolean) {
+        val icon = if (check) R.drawable.checkbox_simple else R.drawable.uncheckbox_simple
+        adMenu.changeIcon(icon, index)
     }
 
     private fun initSearch() {
@@ -914,7 +944,7 @@ class BrowserActivity : AppCompatActivity(), ReaderClient.Parent, NeoInterface.P
             BasicState.Ready -> {
                 finishLoading()
                 binding.tvNotFound.isVisible = true
-                menu.refresh.isVisible = false
+                refreshItem.isVisible = false
                 toiler.clearStates()
             }
 
@@ -949,18 +979,18 @@ class BrowserActivity : AppCompatActivity(), ReaderClient.Parent, NeoInterface.P
         setHeadBar(state.type)
         when (state.type) {
             BrowserState.Type.DOCTRINE -> {
-                menu.numpar.isVisible = false
-                menu.refresh.isVisible = link.isDoctrineBook
+                adMenu.select(MENU_NUMPAR)
+                refreshItem.isVisible = link.isDoctrineBook
             }
 
             BrowserState.Type.HOLY_RUS -> {
-                menu.numpar.isVisible = false
-                menu.refresh.isVisible = true
+                adMenu.select(MENU_NUMPAR)
+                refreshItem.isVisible = true
             }
 
             else -> {
-                menu.numpar.isVisible = link.isPoem
-                menu.refresh.isVisible = state.type != BrowserState.Type.OLD_BOOK
+                if (!link.isPoem) adMenu.select(MENU_NUMPAR)
+                refreshItem.isVisible = state.type != BrowserState.Type.OLD_BOOK
             }
         }
         if (positionForRestore > 0f) snackbar.show(

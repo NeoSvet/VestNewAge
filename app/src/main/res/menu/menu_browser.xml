@@ -5,38 +5,7 @@
         android:id="@+id/nav_menu"
         android:icon="@drawable/ic_menu"
         android:title="@string/menu"
-        app:showAsAction="always">
-        <menu>
-            <item
-                android:id="@+id/nav_buttons"
-                android:icon="@drawable/uncheckbox_simple"
-                android:title="@string/nav_button" />
-            <item
-                android:id="@+id/nav_minitop"
-                android:icon="@drawable/uncheckbox_simple"
-                android:title="@string/collapsing_top" />
-            <item
-                android:id="@+id/nav_autoreturn"
-                android:icon="@drawable/uncheckbox_simple"
-                android:title="@string/auto_return_panels" />
-            <item
-                android:id="@+id/nav_numpar"
-                android:icon="@drawable/uncheckbox_simple"
-                android:title="@string/num_par" />
-            <item
-                android:id="@+id/nav_theme"
-                android:icon="@drawable/ic_theme"
-                android:title="@string/dark_theme" />
-            <item
-                android:id="@+id/nav_opt_scale"
-                android:icon="@drawable/ic_opt_scale"
-                android:title="@string/opt_scale" />
-            <item
-                android:id="@+id/nav_src_scale"
-                android:icon="@drawable/ic_src_scale"
-                android:title="@string/src_scale" />
-        </menu>
-    </item>
+        app:showAsAction="always" />
     <item
         android:id="@+id/nav_share"
         android:icon="@drawable/ic_share"

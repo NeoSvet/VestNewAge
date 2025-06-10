@@ -27,6 +27,11 @@ class MenuAdapter(
         notifyItemChanged(index)
     }
 
+    fun changeTitle(index: Int, title: String) {
+        data[index].title = title
+        notifyItemChanged(index)
+    }
+
     fun select(index: Int) {
         for (i in data.indices) {
             if (data[i].isSelect) {
