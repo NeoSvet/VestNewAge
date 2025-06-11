@@ -188,7 +188,7 @@ class BrowserActivity : AppCompatActivity(), ReaderClient.Parent, NeoInterface.P
     @RequiresApi(Build.VERSION_CODES.S)
     private fun setSideInsets(insets: Insets) {
         binding.tvPromTimeFloat.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-            leftMargin = insets.left
+            leftMargin = insets.left + defIndent
         }
         binding.tvGodWords.updateLayoutParams<ViewGroup.MarginLayoutParams> {
             rightMargin = insets.right
@@ -212,7 +212,6 @@ class BrowserActivity : AppCompatActivity(), ReaderClient.Parent, NeoInterface.P
     private fun setVerticalInsets(insets: Insets) {
         val vis = binding.bottomBar.isVisible
         if (!vis) binding.bottomBar.isVisible = true
-        PromBottom(false)
         setSwitchHead(insets.top)
         binding.tvGodWords.updateLayoutParams<ConstraintLayout.LayoutParams> {
             topToTop = -1
@@ -223,7 +222,7 @@ class BrowserActivity : AppCompatActivity(), ReaderClient.Parent, NeoInterface.P
         }
 
         if (insets.bottom > 0) {
-            binding.bottomBar.updatePadding(bottom = insets.bottom - baseContext.defIndent)
+            binding.bottomBar.updatePadding(bottom = insets.bottom - defIndent)
             binding.bottomBar.children.first()
                 .addOnLayoutChangeListener { v, _, top, _, _, _, _, _, _ ->
                     if (top > 0) v.top = 0
@@ -234,6 +233,7 @@ class BrowserActivity : AppCompatActivity(), ReaderClient.Parent, NeoInterface.P
             }
         }
         binding.bottomBar.post {
+            PromBottom(false)
             binding.rvMenu.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                 bottomMargin = binding.bottomBar.measuredHeight
             }
@@ -272,8 +272,10 @@ class BrowserActivity : AppCompatActivity(), ReaderClient.Parent, NeoInterface.P
     private fun PromBottom(withoutBar: Boolean) {
         if (!binding.tvPromTimeFloat.isVisible) return
         binding.tvPromTimeFloat.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-            bottomMargin = if (withoutBar) baseContext.defIndent
-            else binding.bottomBar.measuredHeight + baseContext.convertToDpi(5)
+            bottomMargin = if (withoutBar) defIndent
+            else binding.bottomBar.measuredHeight + defIndent
+            if (withoutBar && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
+                bottomMargin += insetsUtils?.navBar?.measuredHeight ?: 0
         }
     }
 
