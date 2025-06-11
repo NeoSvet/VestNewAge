@@ -374,8 +374,8 @@ class MainActivity : AppCompatActivity(), ItemClicker {
         helper.bottomBar?.let { bar ->
             App.CONTENT_BOTTOM_INDENT = bar.measuredHeight
             if (insets.bottom > 0) {
-                bar.updatePadding(bottom = insets.bottom - baseContext.defIndent)
-                App.CONTENT_BOTTOM_INDENT += insets.bottom - baseContext.defIndent
+                bar.updatePadding(bottom = insets.bottom - defIndent)
+                App.CONTENT_BOTTOM_INDENT += insets.bottom - defIndent
                 bar.children.first()
                     .addOnLayoutChangeListener { v, _, top, _, _, _, _, _, _ ->
                         if (top > 0) v.top = 0
@@ -419,13 +419,13 @@ class MainActivity : AppCompatActivity(), ItemClicker {
         }
         if (insets.right > 0) {
             helper.vsbScrollBar.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                rightMargin = insets.right + baseContext.defIndent
+                rightMargin = insets.right + defIndent
             }
             tvGodWords.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                 rightMargin = insets.right
             }
             helper.pStatus.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                rightMargin = insets.right + baseContext.defIndent
+                rightMargin = insets.right + defIndent
             }
         }
         if (insets.left > 0) {

@@ -330,7 +330,7 @@ class MarkerActivity : AppCompatActivity() {
     private fun initInsetsUtils() {
         val utils = InsetsUtils(binding.toolbar, this)
         utils.applyInsets = { insets ->
-            val m = insets.top - baseContext.defIndent
+            val m = insets.top - defIndent
             binding.toolbar.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                 topMargin = m
             }

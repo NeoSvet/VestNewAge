@@ -7,12 +7,11 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.graphics.Color
 import android.media.RingtoneManager
-import android.net.Uri
 import android.os.Build
-import android.view.View
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.TextView
+import androidx.core.net.toUri
 import androidx.core.view.isVisible
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -29,7 +28,9 @@ import ru.neosvet.vestnewage.view.dialog.SetNotifDialog
 import java.util.Timer
 import kotlin.concurrent.timer
 
-class PromUtils(textView: View?) {
+class PromUtils(
+    private val tvPromTime: TextView?
+) {
     companion object {
         const val TAG = "Prom"
         private const val TWO_SEC = (2 * DateUnit.SEC_IN_MILLS).toLong()
@@ -38,7 +39,6 @@ class PromUtils(textView: View?) {
         private const val DEF_PERIOD = 400000L
     }
 
-    private var tvPromTime: TextView? = null
     private val isPromField: Boolean
         get() = tvPromTime != null
     private val pref: SharedPreferences =
@@ -46,15 +46,11 @@ class PromUtils(textView: View?) {
     private var period = DEF_PERIOD
     private var isStart = false
     private val scope = CoroutineScope(Dispatchers.Default)
-    private val main: CoroutineScope by lazy {
-        CoroutineScope(Dispatchers.Main)
-    }
     private var timer: Timer? = null
 
     init {
-        if (textView != null) {
-            tvPromTime = textView as TextView?
-            tvPromTime?.isVisible = true
+        if (tvPromTime != null) {
+            tvPromTime.isVisible = true
             setViews()
         }
     }
@@ -85,17 +81,17 @@ class PromUtils(textView: View?) {
     }
 
     private fun setViews() {
-        if (tvPromTime!!.id == R.id.tvPromTimeFloat) {
-            val anim = BottomAnim(tvPromTime!!)
-            tvPromTime!!.setOnClickListener {
+        if (tvPromTime?.id == R.id.tvPromTimeFloat) {
+            val anim = BottomAnim(tvPromTime)
+            tvPromTime.setOnClickListener {
                 anim.hide()
                 scope.launch {
                     delay(TWO_SEC)
-                    tvPromTime?.post { anim.show() }
+                    tvPromTime.post { anim.show() }
                 }
             }
         } else { //R.id.tvPromTimeInMenu
-            tvPromTime!!.setOnClickListener {
+            tvPromTime?.setOnClickListener {
                 openReader(Urls.PROM_LINK, null)
             }
         }
@@ -109,8 +105,7 @@ class PromUtils(textView: View?) {
         prom.changeSeconds(-timeDiff)
         while (now.timeInSeconds > prom.timeInSeconds)
             prom.changeHours(8)
-        if (next)
-            prom.changeHours(8)
+        if (next) prom.changeHours(8)
         return prom
     }
 
@@ -157,21 +152,18 @@ class PromUtils(textView: View?) {
             an.setAnimationListener(object : Animation.AnimationListener {
                 override fun onAnimationStart(animation: Animation) {}
                 override fun onAnimationEnd(animation: Animation) {
-                    tvPromTime?.isVisible = false
+                    tvPromTime.isVisible = false
                 }
 
                 override fun onAnimationRepeat(animation: Animation) {}
             })
             an.duration = TWO_SEC
-            tvPromTime?.startAnimation(an)
+            tvPromTime.startAnimation(an)
         }
     }
 
     private fun setTimeText(t: String) {
-        if (Build.VERSION.SDK_INT == Build.VERSION_CODES.M)
-            main.launch { tvPromTime?.text = t }
-        else
-            tvPromTime?.post { tvPromTime?.text = t }
+        tvPromTime?.post { tvPromTime.text = t }
     }
 
     private fun getPromText(): String? {
@@ -186,8 +178,7 @@ class PromUtils(textView: View?) {
             App.context.getString(R.string.minute)
         )
         t = App.context.getString(R.string.to_prom) + " " + t
-        if (isPromField)
-            startTimer(n, t)
+        if (isPromField) startTimer(n, t)
         return t
     }
 
@@ -213,7 +204,7 @@ class PromUtils(textView: View?) {
         val sound = pref.getBoolean(SetNotifDialog.SOUND, false)
         val vibration = pref.getBoolean(SetNotifDialog.VIBR, true)
         val intent = Intent(App.context, MainActivity::class.java)
-        intent.data = Uri.parse(Urls.Site + Urls.PROM_LINK)
+        intent.data = (Urls.Site + Urls.PROM_LINK).toUri()
         val piEmpty = PendingIntent.getActivity(App.context, 0, Intent(), NotificationUtils.FLAGS)
         val piProm = PendingIntent.getActivity(App.context, 0, intent, NotificationUtils.FLAGS)
         val notifUtils = NotificationUtils()
@@ -230,15 +221,13 @@ class PromUtils(textView: View?) {
             .addAction(0, App.context.getString(R.string.accept), piCancel)
             .setLights(Color.GREEN, DateUnit.SEC_IN_MILLS, DateUnit.SEC_IN_MILLS)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            if (p == 0) notifBuilder.setTimeoutAfter((30 * DateUnit.SEC_IN_MILLS).toLong()) else notifBuilder.setTimeoutAfter(
-                p.toLong() * 60 * DateUnit.SEC_IN_MILLS
-            )
+            if (p == 0) notifBuilder.setTimeoutAfter((30 * DateUnit.SEC_IN_MILLS).toLong())
+            else notifBuilder.setTimeoutAfter(p.toLong() * 60 * DateUnit.SEC_IN_MILLS)
         } else {
             if (sound) {
                 val uri = pref.getString(SetNotifDialog.URI, null)
-                if (uri == null) notifBuilder.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)) else notifBuilder.setSound(
-                    Uri.parse(uri)
-                )
+                if (uri == null) notifBuilder.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
+                else notifBuilder.setSound(uri.toUri())
             }
             if (vibration) notifBuilder.setVibrate(longArrayOf(500, 1500))
         }
