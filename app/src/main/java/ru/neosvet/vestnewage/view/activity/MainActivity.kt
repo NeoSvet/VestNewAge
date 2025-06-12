@@ -147,10 +147,10 @@ class MainActivity : AppCompatActivity(), ItemClicker {
         setBottomPanel()
         initStatusButton()
         initWords()
+        setFloatProm(helper.isFloatPromTime)
         if (!ScreenUtils.isTabletLand && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
             initInsetsUtils()
         else setIndent()
-        setFloatProm(helper.isFloatPromTime)
         if (helper.isAlwaysDark) setDarkTheme(true)
         runObserve()
         onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
@@ -166,6 +166,12 @@ class MainActivity : AppCompatActivity(), ItemClicker {
                         bottomMargin = App.CONTENT_BOTTOM_INDENT
                     }
                     App.CONTENT_BOTTOM_INDENT += it.measuredHeight
+                }
+                helper.tvPromTimeFloat.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                    bottomMargin = App.CONTENT_BOTTOM_INDENT
+                }
+                helper.tvToast.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                    bottomMargin = App.CONTENT_BOTTOM_INDENT
                 }
             }
         }
