@@ -94,7 +94,7 @@ class BrowserActivity : AppCompatActivity(), ReaderClient.Parent, NeoInterface.P
     private lateinit var refreshItem: android.view.MenuItem
     private var insetsUtils: InsetsUtils? = null
     private val needNavBg: Boolean
-        get() = ScreenUtils.type == Type.PHONE_PORT && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+        get() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
     private var navIsTop = false
     private var isSearch = false
     private var twoPointers = false
@@ -147,10 +147,10 @@ class BrowserActivity : AppCompatActivity(), ReaderClient.Parent, NeoInterface.P
         setViews()
         setContent()
         initWords()
-        if (!ScreenUtils.isTabletLand && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
             initInsetsUtils()
         else binding.bottomBar.post {
-            PromBottom(false)
+            switchPromBottom()
             binding.rvMenu.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                 bottomMargin = binding.bottomBar.measuredHeight
             }
@@ -238,8 +238,11 @@ class BrowserActivity : AppCompatActivity(), ReaderClient.Parent, NeoInterface.P
                     v.minimumHeight = v.measuredHeight
             }
         }
+        binding.tvPromTimeFloat.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+            bottomMargin += insets.bottom
+        }
         binding.bottomBar.post {
-            PromBottom(false)
+            switchPromBottom()
             binding.rvMenu.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                 bottomMargin = binding.bottomBar.measuredHeight
             }
@@ -275,13 +278,19 @@ class BrowserActivity : AppCompatActivity(), ReaderClient.Parent, NeoInterface.P
         }
     }
 
-    private fun PromBottom(withoutBar: Boolean) {
+    private fun switchPromBottom() {
         if (!binding.tvPromTimeFloat.isVisible) return
-        binding.tvPromTimeFloat.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-            bottomMargin = if (withoutBar) defIndent
-            else binding.bottomBar.measuredHeight + defIndent
-            if (withoutBar && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
-                bottomMargin += insetsUtils?.navBar?.measuredHeight ?: 0
+        binding.bottomBar.post {
+            val withBar = binding.bottomBar.isVisible
+            binding.tvPromTimeFloat.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                var m = defIndent
+                if (withBar) m += binding.bottomBar.measuredHeight
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) insetsUtils?.let {
+                    if (!it.isSideNavBar && it.navBar?.isVisible == true)
+                        m += it.navBar?.measuredHeight ?: 0
+                }
+                if (bottomMargin != m) bottomMargin = m
+            }
         }
     }
 
@@ -688,8 +697,11 @@ class BrowserActivity : AppCompatActivity(), ReaderClient.Parent, NeoInterface.P
     private fun bottomHide() {
         binding.fabNav.hide()
         binding.bottomBar.performHide()
-        PromBottom(true)
+        binding.bottomBar.post {
+            binding.bottomBar.isVisible = false
+        }
         if (needNavBg) showNavBg()
+        switchPromBottom()
     }
 
     @RequiresApi(Build.VERSION_CODES.S)
@@ -707,8 +719,9 @@ class BrowserActivity : AppCompatActivity(), ReaderClient.Parent, NeoInterface.P
         binding.fabNav.post {
             binding.fabNav.alpha = 0.5f
         }
+        binding.bottomBar.isVisible = true
         binding.bottomBar.performShow()
-        PromBottom(false)
+        switchPromBottom()
         if (needNavBg)
             insetsUtils?.navBar?.isVisible = false
     }
@@ -1027,13 +1040,15 @@ class BrowserActivity : AppCompatActivity(), ReaderClient.Parent, NeoInterface.P
         restoreSearch()
         if (isFullScreen) binding.bottomBar.post {
             switchFullScreen(true)
-        } else bottomUnblocked()
-        if (!state.bottom) bottomHide()
-        when (state.head) {
-            0.toByte() -> headBar.hide()
-            1.toByte() -> binding.ivHeadBack.post {
-                headBar.setExpandable(true)
-                headBar.setExpandable(false)
+        } else {
+            bottomUnblocked()
+            if (!state.bottom) bottomHide()
+            when (state.head) {
+                0.toByte() -> headBar.hide()
+                1.toByte() -> binding.ivHeadBack.post {
+                    headBar.setExpandable(true)
+                    headBar.setExpandable(false)
+                }
             }
         }
     }
@@ -1070,15 +1085,15 @@ class BrowserActivity : AppCompatActivity(), ReaderClient.Parent, NeoInterface.P
     private fun bottomBlocked() {
         binding.fabNav.isVisible = false
         binding.bottomBar.isVisible = false
-        PromBottom(true)
         if (needNavBg) showNavBg()
+        switchPromBottom()
     }
 
     private fun bottomUnblocked() {
         if (isSearch) return
         binding.fabNav.isVisible = true
         binding.bottomBar.isVisible = true
-        PromBottom(false)
+        switchPromBottom()
         if (needNavBg)
             insetsUtils?.navBar?.isVisible = false
     }

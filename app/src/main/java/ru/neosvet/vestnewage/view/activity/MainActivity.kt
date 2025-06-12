@@ -148,7 +148,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
         initStatusButton()
         initWords()
         setFloatProm(helper.isFloatPromTime)
-        if (!ScreenUtils.isTabletLand && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
             initInsetsUtils()
         else setIndent()
         if (helper.isAlwaysDark) setDarkTheme(true)
@@ -350,6 +350,10 @@ class MainActivity : AppCompatActivity(), ItemClicker {
                 setVerticalInsets(insets)
                 if (utils.isSideNavBar)
                     setSideInsets(insets)
+                if (ScreenUtils.isTabletLand) {
+                    val root = findViewById<ViewGroup>(R.id.main)
+                    utils.createBottomBar(root)
+                }
                 true
             } else false
         }
@@ -368,6 +372,11 @@ class MainActivity : AppCompatActivity(), ItemClicker {
             val collapsingBar: CollapsingToolbarLayout = findViewById(R.id.collapsingBar)
             collapsingBar.scrimVisibleHeightTrigger = insets.top + 10
             collapsingBar.minimumHeight = insets.top
+        } else {
+            val top = findViewById<ImageView>(R.id.ivTop)
+            top.isVisible = true
+            top.maxHeight = insets.top
+            top.minimumHeight = insets.top
         }
         helper.vsbScrollBar.updateLayoutParams<ViewGroup.MarginLayoutParams> {
             topMargin += insets.top
@@ -377,11 +386,15 @@ class MainActivity : AppCompatActivity(), ItemClicker {
             it.post { curFragment?.updateRoot(it.height) }
         }
 
+        App.CONTENT_BOTTOM_INDENT = insets.bottom
         helper.bottomBar?.let { bar ->
-            App.CONTENT_BOTTOM_INDENT = bar.measuredHeight
+            App.CONTENT_BOTTOM_INDENT += bar.measuredHeight
             if (insets.bottom > 0) {
+                App.CONTENT_BOTTOM_INDENT -= defIndent
                 bar.updatePadding(bottom = insets.bottom - defIndent)
-                App.CONTENT_BOTTOM_INDENT += insets.bottom - defIndent
+                helper.rvAction.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                    bottomMargin += insets.bottom
+                }
                 bar.children.first()
                     .addOnLayoutChangeListener { v, _, top, _, _, _, _, _, _ ->
                         if (top > 0) v.top = 0
@@ -403,17 +416,28 @@ class MainActivity : AppCompatActivity(), ItemClicker {
                 leftMargin = insets.left
                 rightMargin = insets.right
             }
-            helper.tvToast.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                bottomMargin = App.CONTENT_BOTTOM_INDENT
-                leftMargin = insets.left
-                rightMargin = insets.right
+        }
+        if (helper.bottomBar == null) {
+            helper.fabAction.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                bottomMargin = App.CONTENT_BOTTOM_INDENT + defIndent
             }
-            helper.vsbScrollBar.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                bottomMargin = App.CONTENT_BOTTOM_INDENT
+            helper.rvAction.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                bottomMargin += insets.bottom
             }
-            helper.tvPromTimeFloat.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                bottomMargin = App.CONTENT_BOTTOM_INDENT
-            }
+        }
+        helper.tvToast.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+            bottomMargin = App.CONTENT_BOTTOM_INDENT + defIndent
+            leftMargin = insets.left
+            rightMargin = insets.right
+        }
+        helper.vsbScrollBar.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+            bottomMargin = App.CONTENT_BOTTOM_INDENT + defIndent
+        }
+        helper.tvPromTimeFloat.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+            bottomMargin = App.CONTENT_BOTTOM_INDENT + defIndent
+        }
+        helper.pStatus.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+            bottomMargin += insets.bottom
         }
     }
 
@@ -433,13 +457,16 @@ class MainActivity : AppCompatActivity(), ItemClicker {
             helper.pStatus.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                 rightMargin = insets.right + defIndent
             }
+            helper.rvAction.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                rightMargin += insets.right
+            }
         }
         if (insets.left > 0) {
             helper.tvPromTimeHead.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                 leftMargin = insets.left
             }
             helper.tvPromTimeFloat.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                leftMargin = insets.left
+                leftMargin += insets.left
             }
             val ivHeadFront: ImageView = findViewById(R.id.ivHeadFront)
             ivHeadFront.updateLayoutParams<ViewGroup.MarginLayoutParams> {

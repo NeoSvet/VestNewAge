@@ -72,6 +72,8 @@ class MainHelper(private val act: MainActivity) {
         private set
     var tvPromTimeHead: TextView
         private set
+    var rvAction: RecyclerView
+        private set
 
     val unread = UnreadStorage()
     var countNew: Int = 0
@@ -96,7 +98,7 @@ class MainHelper(private val act: MainActivity) {
         fabAction = act.findViewById(R.id.fabAction)
         vsbScrollBar = act.findViewById(R.id.vsbScrollBar)
         tvPromTimeHead = act.findViewById(R.id.tvPromTimeHead)
-        val rvAction = act.findViewById<RecyclerView>(R.id.rvAction)
+        rvAction = act.findViewById(R.id.rvAction)
         tipAction = NeoTip(act, rvAction)
         tipAction.autoHide = false
         rvAction.layoutManager = GridLayoutManager(act, 1)
@@ -107,7 +109,7 @@ class MainHelper(private val act: MainActivity) {
             else act.onAction(TAG)
         }
 
-        ivHeadBack = act.findViewById<ImageView>(R.id.ivHeadBack)
+        ivHeadBack = act.findViewById(R.id.ivHeadBack)
         ivHeadBack.setOnClickListener {
             Urls.openInBrowser(Urls.Site)
         }

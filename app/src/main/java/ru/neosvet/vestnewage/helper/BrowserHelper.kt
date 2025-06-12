@@ -38,9 +38,9 @@ class BrowserHelper {
         val pref = context.getSharedPreferences(TAG, Context.MODE_PRIVATE)
         isLightTheme = pref.getInt(THEME, 0) == 0
         zoom = pref.getInt(SCALE, 0)
-        isNavButton = pref.getBoolean(NAVBUTTONS, true)
+        isNavButton = pref.getBoolean(NAVBUTTONS, false)
         isMiniTop = pref.getBoolean(MITITOP, false)
-        isAutoReturn = pref.getBoolean(AUTORETURN, false)
+        isAutoReturn = pref.getBoolean(AUTORETURN, true)
         isNumPar = pref.getBoolean(NUMPAR, false)
         showReaction = pref.getBoolean(SHOW_REACTION, false)
         if (zoom < 10) zoom = context.convertToDpi(100)

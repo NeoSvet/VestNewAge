@@ -2,9 +2,18 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
+    android:id="@+id/main"
     android:layout_height="match_parent"
-    android:background="@drawable/starsky_bg"
-    android:fitsSystemWindows="true">
+    android:background="@drawable/starsky_bg">
+
+    <ImageView
+        android:id="@+id/ivTop"
+        android:layout_width="match_parent"
+        android:layout_height="25dp"
+        android:background="@color/navigationBarColor"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <com.google.android.material.imageview.ShapeableImageView
         android:id="@+id/ivHeadBack"
@@ -14,7 +23,7 @@
         android:src="@drawable/head_back"
         android:visibility="gone"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@id/ivTop" />
 
     <com.google.android.material.imageview.ShapeableImageView
         android:id="@+id/ivHeadFront"
@@ -69,9 +78,11 @@
     <FrameLayout
         android:id="@+id/my_fragment"
         android:layout_width="0dp"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/menu_fragment" />
+        app:layout_constraintStart_toEndOf="@id/menu_fragment"
+        app:layout_constraintTop_toBottomOf="@id/ivTop"
+        app:layout_constraintBottom_toBottomOf="parent" />
 
     <ru.neosvet.vestnewage.view.basic.NeoScrollBar
         android:id="@+id/vsbScrollBar"
@@ -84,7 +95,7 @@
         android:focusable="true"
         android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/ivTop"
         app:vsb_bar_background="@color/colorAccent"
         app:vsb_bar_corner_radius="15dp"
         app:vsb_bar_progress_gradient_end="@color/colorPrimaryDark"
@@ -156,7 +167,7 @@
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@id/ivTop" />
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/tvToast"

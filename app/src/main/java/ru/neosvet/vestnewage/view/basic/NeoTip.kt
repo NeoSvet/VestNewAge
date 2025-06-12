@@ -4,21 +4,23 @@ import android.content.Context
 import android.view.View
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.R
 
 class NeoTip(context: Context, private val view: View) {
     var isShow = false
         private set
     var autoHide = true
-    private val anShow: Animation
-    private val anHide: Animation
+    private val anShow: Animation = AnimationUtils.loadAnimation(context, R.anim.show)
+    private val anHide: Animation = AnimationUtils.loadAnimation(context, R.anim.hide)
     private var job: Job? = null
     private val scope = CoroutineScope(Dispatchers.Default)
 
     init {
-        anShow = AnimationUtils.loadAnimation(context, R.anim.show)
-        anHide = AnimationUtils.loadAnimation(context, R.anim.hide)
         anHide.setAnimationListener(object : Animation.AnimationListener {
             override fun onAnimationStart(animation: Animation) {}
             override fun onAnimationEnd(animation: Animation) {
