@@ -149,6 +149,12 @@ class BrowserActivity : AppCompatActivity(), ReaderClient.Parent, NeoInterface.P
         initWords()
         if (!ScreenUtils.isTabletLand && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
             initInsetsUtils()
+        else binding.bottomBar.post {
+            PromBottom(false)
+            binding.rvMenu.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                bottomMargin = binding.bottomBar.measuredHeight
+            }
+        }
         if (savedInstanceState == null) {
             initArguments()
             TipUtils.showTipIfNeed(TipUtils.Type.BROWSER)
@@ -604,6 +610,7 @@ class BrowserActivity : AppCompatActivity(), ReaderClient.Parent, NeoInterface.P
         wvBrowser.webViewClient = ReaderClient(act, act.packageName)
         wvBrowser.setOnTouchListener { _, event ->
             if (snackbar.isShown) snackbar.hide()
+            if (binding.rvMenu.isVisible) binding.rvMenu.isVisible = false
             if (event.pointerCount == 2) {
                 if (twoPointers)
                     wvBrowser.setInitialScale((currentScale * 100f).toInt())
