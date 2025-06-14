@@ -25,8 +25,11 @@ class StatusButton(
     private val progBar: ProgressBar? = panel.findViewById(R.id.progStatus)
     private var error: BasicState.Error? = null
     private var stop = true
-    var isVisible = false
-        private set
+    var isVisible
+        get() = panel.isVisible
+        private set(value) {
+            panel.isVisible = value
+        }
     private var prog = false
 
     init {
@@ -41,7 +44,7 @@ class StatusButton(
         anHide.setAnimationListener(object : Animation.AnimationListener {
             override fun onAnimationStart(animation: Animation) {}
             override fun onAnimationEnd(animation: Animation) {
-                panel.visibility = View.GONE
+                isVisible = false
             }
 
             override fun onAnimationRepeat(animation: Animation) {}
@@ -62,7 +65,6 @@ class StatusButton(
             isVisible = true
             iv.startAnimation(anRotate)
         } else {
-            isVisible = false
             tv.text = context.getString(R.string.done)
             panel.startAnimation(anHide)
         }
@@ -80,7 +82,6 @@ class StatusButton(
             isVisible = true
         } else {
             this.error = null
-            panel.isVisible = false
             isVisible = false
             panel.setBackgroundResource(R.drawable.shape_norm)
             iv.setImageResource(R.drawable.ic_refresh)
@@ -92,6 +93,11 @@ class StatusButton(
 
     fun loadText() {
         tv.text = context.getString(R.string.load)
+    }
+
+    fun setText(text: String) {
+        anHide.cancel()
+        tv.text = text
     }
 
     fun setClick(event: View.OnClickListener?) {
@@ -129,6 +135,6 @@ class StatusButton(
         iv.clearAnimation()
         anHide.cancel()
         anRotate.cancel()
-        panel.isVisible = true
+        isVisible = true
     }
 }

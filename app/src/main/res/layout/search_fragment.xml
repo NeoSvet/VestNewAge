@@ -91,43 +91,6 @@
         android:id="@+id/content"
         layout="@layout/search_content" />
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/pStatus"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@drawable/starsky_bg"
-        android:orientation="horizontal"
-        android:padding="@dimen/half_indent"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent">
-
-        <com.google.android.material.textview.MaterialTextView
-            android:id="@+id/tvStatus"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:layout_marginEnd="@dimen/half_indent"
-            android:background="@drawable/card_bg"
-            android:gravity="center_vertical"
-            android:paddingStart="@dimen/half_indent"
-            android:text="@string/search"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/bStop"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <ImageButton
-            android:id="@+id/bStop"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_gravity="center_vertical"
-            android:background="@drawable/button"
-            android:padding="@dimen/half_indent"
-            android:scaleType="fitXY"
-            android:src="@drawable/ic_close"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvRequests"
         android:layout_width="0dp"

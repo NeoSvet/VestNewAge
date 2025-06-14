@@ -10,6 +10,5 @@
     <dimen name="string_size">36dp</dimen>
     <dimen name="margin_top">65dp</dimen>
     <dimen name="top_minus">100dp</dimen>
-    <dimen name="bottom_bar_height">64dp</dimen>
     <dimen name="head_margin">20dp</dimen>
 </resources>

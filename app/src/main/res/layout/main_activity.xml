@@ -86,7 +86,7 @@
         android:layout_width="40dp"
         android:layout_height="match_parent"
         android:layout_gravity="end"
-        android:layout_marginTop="50dp"
+        android:layout_marginTop="75dp"
         android:layout_marginEnd="@dimen/def_indent"
         android:clickable="true"
         android:focusable="true"
@@ -187,7 +187,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
         android:layout_marginStart="15dp"
-        android:layout_marginBottom="50dp"
+        android:layout_marginBottom="@dimen/bottom_bar_height"
         android:background="@drawable/area"
         android:visibility="gone" />
 

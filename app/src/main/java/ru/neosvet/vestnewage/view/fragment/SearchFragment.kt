@@ -74,6 +74,7 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent,
         get() = neotoiler as SearchToiler
     private var binding: SearchFragmentBinding? = null
     private lateinit var helper: SearchHelper
+    private var isReady = false
     private lateinit var adRequest: RequestAdapter
     private val adDefault: BasicAdapter by lazy {
         BasicAdapter(this::defaultClick)
@@ -208,24 +209,23 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent,
                 return false
             }
         }
+        if (toiler.isBusy) {
+            toiler.cancel()
+            return false
+        }
         return super.onBackPressed()
     }
 
     override fun setStatus(load: Boolean) {
-        super.setStatus(false)
+        super.setStatus(load)
         binding?.run {
             if (load) {
-                act?.let {
-                    moveExportButton(true)
-                    it.initScrollBar(0, null)
-                    it.blocked()
-                }
-                pStatus.isVisible = true
+                act?.initScrollBar(0, null)
+                moveExportButton(true)
                 etSearch.isEnabled = false
             } else {
-                act?.unblocked()
-                pStatus.isVisible = false
                 etSearch.isEnabled = true
+                act?.unblocked()
             }
         }
     }
@@ -276,7 +276,6 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent,
 
     @SuppressLint("ClickableViewAccessibility")
     private fun setViews() = binding?.run {
-        bStop.setOnClickListener { toiler.cancel() }
         resultAdapter = ArrayAdapter(
             requireContext(), R.layout.spinner_button,
             resources.getStringArray(R.array.search_mode_results)
@@ -308,8 +307,8 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent,
 
     private fun parseFileResult(data: Intent) {
         data.dataString?.let { file ->
-            binding?.tvStatus?.text = getString(R.string.export)
             setStatus(true)
+            act?.status?.setText(getString(R.string.export))
             toiler.startExport(file)
         }
     }
@@ -336,7 +335,7 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent,
         setStatus(true)
         val i = content.sSearchInResults.selectedItemPosition
         val mode = if (i > 0) {
-            tvStatus.text = getString(R.string.search)
+            act?.status?.setText(getString(R.string.search))
             if (i == 1) SearchEngine.MODE_RESULT_TEXT
             else SearchEngine.MODE_RESULT_PAR
         } else helper.mode
@@ -360,14 +359,23 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent,
     }
 
     override fun onChangedInsets(insets: android.graphics.Insets) {
-        binding?.run { content.rvSearch.updatePadding(bottom = App.CONTENT_BOTTOM_INDENT) }
+        binding?.run {
+            content.rvSearch.updatePadding(bottom = App.CONTENT_BOTTOM_INDENT)
+            pSearch.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                bottomMargin = App.CONTENT_BOTTOM_INDENT
+            }
+        }
     }
 
     override fun onChangedOtherState(state: NeoState) {
+        if (!isReady && state !is SearchState.Primary) return
         when (state) {
-            is BasicState.Message -> binding?.run {
-                if (pStatus.isVisible) tvStatus.text = state.message
-                else act?.showScrollTip(state.message)
+            is BasicState.Message -> act?.let {
+                if (state.message[0] == '%') it.showScrollTip(state.message.substring(1))
+                else if (toiler.isBusy) {
+                    if (!it.status.isVisible) setStatus(true)
+                    it.status.setText(state.message)
+                }
             }
 
             is ListState.Update<*> ->  //finish load page
@@ -376,11 +384,16 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent,
             is SearchState.Results -> {
                 if (state.max == 0) noResults()
                 else showResult(state.max)
-                if (state.finish) setStatus(false)
+                if (state.finish) {
+                    binding?.run { etSearch.setText(helper.request) }
+                    setStatus(false)
+                }
             }
 
-            is SearchState.Primary ->
+            is SearchState.Primary -> {
                 helper = state.helper
+                isReady = true
+            }
 
             BasicState.Success ->
                 setStatus(false)

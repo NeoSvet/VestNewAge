@@ -274,6 +274,7 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent, SearchEngine.Parent, LoadHan
         val count = getResultCount()
         setLabel(count)
         helper.saveLastResult()
+        isRun = false
         postState(SearchState.Results(count, true))
     }
 
@@ -495,7 +496,7 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent, SearchEngine.Parent, LoadHan
         jobTitle?.cancel()
         jobTitle = scope.launch {
             val title = storage.getTitle(position)
-            postState(BasicState.Message(title))
+            postState(BasicState.Message("%$title"))
         }
     }
 }

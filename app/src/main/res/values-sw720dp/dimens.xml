@@ -1,5 +1,4 @@
 <resources> 
     <dimen name="tab_size">47dp</dimen>
     <dimen name="fixed_font">24dp</dimen>
-    <dimen name="bottom_bar_height">64dp</dimen>
 </resources>

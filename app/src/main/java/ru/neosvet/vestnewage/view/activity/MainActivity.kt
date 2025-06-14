@@ -127,7 +127,9 @@ class MainActivity : AppCompatActivity(), ItemClicker {
             timeHide = 1000L
         }
     }
-
+    private var insetsUtils: InsetsUtils? = null
+    private val isNewAndroid: Boolean
+        get() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
     val newId: Int
         get() = helper.newId
 
@@ -148,8 +150,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
         initStatusButton()
         initWords()
         setFloatProm(helper.isFloatPromTime)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
-            initInsetsUtils()
+        if (isNewAndroid) initInsetsUtils()
         else setIndent()
         if (helper.isAlwaysDark) setDarkTheme(true)
         runObserve()
@@ -344,20 +345,21 @@ class MainActivity : AppCompatActivity(), ItemClicker {
 
     @RequiresApi(Build.VERSION_CODES.S)
     private fun initInsetsUtils() {
-        val utils = InsetsUtils(helper.ivHeadBack, this)
-        utils.applyInsets = { insets ->
-            if (helper.topBar?.isVisible ?: helper.ivHeadBack.isVisible) {
-                setVerticalInsets(insets)
-                if (utils.isSideNavBar)
-                    setSideInsets(insets)
-                if (ScreenUtils.isTabletLand) {
-                    val root = findViewById<ViewGroup>(R.id.main)
-                    utils.createBottomBar(root)
-                }
-                true
-            } else false
+        insetsUtils = InsetsUtils(helper.ivHeadBack, this).apply {
+            applyInsets = { insets ->
+                if (helper.topBar?.isVisible ?: helper.ivHeadBack.isVisible) {
+                    setVerticalInsets(insets)
+                    if (isSideNavBar)
+                        setSideInsets(insets)
+                    if (ScreenUtils.isTabletLand) {
+                        val root = findViewById<ViewGroup>(R.id.main)
+                        createBottomBar(root)
+                    }
+                    true
+                } else false
+            }
+            init(window)
         }
-        utils.init(window)
     }
 
     @RequiresApi(Build.VERSION_CODES.S)
@@ -377,9 +379,13 @@ class MainActivity : AppCompatActivity(), ItemClicker {
             top.isVisible = true
             top.maxHeight = insets.top
             top.minimumHeight = insets.top
-        }
-        helper.vsbScrollBar.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-            topMargin += insets.top
+            helper.vsbScrollBar.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                topMargin += insets.top
+                bottomMargin += insets.bottom
+            }
+            helper.tvPromTimeFloat.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                bottomMargin += insets.bottom
+            }
         }
         helper.svMain?.let {
             it.updatePadding(left = insets.left, right = insets.right)
@@ -424,17 +430,18 @@ class MainActivity : AppCompatActivity(), ItemClicker {
             helper.rvAction.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                 bottomMargin += insets.bottom
             }
+        } else {
+            helper.vsbScrollBar.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                bottomMargin = App.CONTENT_BOTTOM_INDENT + defIndent
+            }
+            helper.tvPromTimeFloat.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                bottomMargin = App.CONTENT_BOTTOM_INDENT
+            }
         }
         helper.tvToast.updateLayoutParams<ViewGroup.MarginLayoutParams> {
             bottomMargin = App.CONTENT_BOTTOM_INDENT + defIndent
             leftMargin = insets.left
             rightMargin = insets.right
-        }
-        helper.vsbScrollBar.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-            bottomMargin = App.CONTENT_BOTTOM_INDENT + defIndent
-        }
-        helper.tvPromTimeFloat.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-            bottomMargin = App.CONTENT_BOTTOM_INDENT + defIndent
         }
         helper.pStatus.updateLayoutParams<ViewGroup.MarginLayoutParams> {
             bottomMargin += insets.bottom
@@ -820,16 +827,26 @@ class MainActivity : AppCompatActivity(), ItemClicker {
         curFragment?.onAction(title)
     }
 
+    @RequiresApi(Build.VERSION_CODES.S)
+    private fun showNavBg() {
+        val root = findViewById<ViewGroup>(R.id.root) ?: return
+        insetsUtils?.let {
+            if (it.navBar == null)
+                it.createBottomBar(root)
+            else it.navBar?.isVisible = true
+        }
+    }
+
     fun blocked() = helper.run {
         isBlocked = true
         tipAction.hide()
         tvTitle?.isVisible = false
         fabAction.isVisible = false
         bottomBar?.isVisible = false
+        if (isNewAndroid) showNavBg()
     }
 
     fun unblocked() = helper.run {
-        if (status.isVisible) return@run
         isBlocked = false
         tvTitle?.isVisible = true
         fabAction.isVisible = true
@@ -837,6 +854,8 @@ class MainActivity : AppCompatActivity(), ItemClicker {
             isVisible = true
             performShow()
         }
+        if (isNewAndroid && !ScreenUtils.isTabletLand)
+            insetsUtils?.navBar?.isVisible = false
     }
 
     fun setAction(icon: Int) {

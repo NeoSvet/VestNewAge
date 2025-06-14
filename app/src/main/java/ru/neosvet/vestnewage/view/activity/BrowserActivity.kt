@@ -93,7 +93,7 @@ class BrowserActivity : AppCompatActivity(), ReaderClient.Parent, NeoInterface.P
     private lateinit var prom: PromUtils
     private lateinit var refreshItem: android.view.MenuItem
     private var insetsUtils: InsetsUtils? = null
-    private val needNavBg: Boolean
+    private val isNewAndroid: Boolean
         get() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
     private var navIsTop = false
     private var isSearch = false
@@ -147,8 +147,7 @@ class BrowserActivity : AppCompatActivity(), ReaderClient.Parent, NeoInterface.P
         setViews()
         setContent()
         initWords()
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
-            initInsetsUtils()
+        if (isNewAndroid) initInsetsUtils()
         else binding.bottomBar.post {
             switchPromBottom()
             binding.rvMenu.updateLayoutParams<ViewGroup.MarginLayoutParams> {
@@ -285,7 +284,7 @@ class BrowserActivity : AppCompatActivity(), ReaderClient.Parent, NeoInterface.P
             binding.tvPromTimeFloat.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                 var m = defIndent
                 if (withBar) m += binding.bottomBar.measuredHeight
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) insetsUtils?.let {
+                if (isNewAndroid) insetsUtils?.let {
                     if (!it.isSideNavBar && it.navBar?.isVisible == true)
                         m += it.navBar?.measuredHeight ?: 0
                 }
@@ -405,7 +404,7 @@ class BrowserActivity : AppCompatActivity(), ReaderClient.Parent, NeoInterface.P
                 )
             }
             pSearch.isVisible = false
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            if (isNewAndroid) {
                 binding.root.post {
                     insetsUtils?.retryInsets()
                     if (ScreenUtils.type == Type.PHONE_PORT)
@@ -700,7 +699,7 @@ class BrowserActivity : AppCompatActivity(), ReaderClient.Parent, NeoInterface.P
         binding.bottomBar.post {
             binding.bottomBar.isVisible = false
         }
-        if (needNavBg) showNavBg()
+        if (isNewAndroid) showNavBg()
         switchPromBottom()
     }
 
@@ -722,7 +721,7 @@ class BrowserActivity : AppCompatActivity(), ReaderClient.Parent, NeoInterface.P
         binding.bottomBar.isVisible = true
         binding.bottomBar.performShow()
         switchPromBottom()
-        if (needNavBg)
+        if (isNewAndroid)
             insetsUtils?.navBar?.isVisible = false
     }
 
@@ -1085,7 +1084,7 @@ class BrowserActivity : AppCompatActivity(), ReaderClient.Parent, NeoInterface.P
     private fun bottomBlocked() {
         binding.fabNav.isVisible = false
         binding.bottomBar.isVisible = false
-        if (needNavBg) showNavBg()
+        if (isNewAndroid) showNavBg()
         switchPromBottom()
     }
 
@@ -1094,7 +1093,7 @@ class BrowserActivity : AppCompatActivity(), ReaderClient.Parent, NeoInterface.P
         binding.fabNav.isVisible = true
         binding.bottomBar.isVisible = true
         switchPromBottom()
-        if (needNavBg)
+        if (isNewAndroid)
             insetsUtils?.navBar?.isVisible = false
     }
 
