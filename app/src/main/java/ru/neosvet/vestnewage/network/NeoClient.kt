@@ -37,9 +37,11 @@ class NeoClient(
             }
 
         fun deleteTempFiles() {
-            val d = Files.parent("/cache")
-            d.listFiles()?.forEach { f ->
-                if (f.isFile) f.delete()
+            synchronized(Unit) {
+                val d = Files.parent("/cache")
+                d.listFiles()?.forEach { f ->
+                    if (f.isFile) f.delete()
+                }
             }
         }
     }
@@ -98,16 +100,18 @@ class NeoClient(
     }
 
     private fun createFile(): File {
-        var i = 1
-        var file: File
-        while (true) {
-            file = Files.parent(PATH + i.toString())
-            if (!file.exists()) return file
-            if (file.exists() && isLongAgo(file.lastModified())) {
-                file.delete()
-                return file
+        synchronized(Unit) {
+            var i = 1
+            var file: File
+            while (true) {
+                file = Files.parent(PATH + i.toString())
+                if (!file.exists()) return file
+                if (file.exists() && isLongAgo(file.lastModified())) {
+                    file.delete()
+                    return file
+                }
+                i++
             }
-            i++
         }
     }
 }
