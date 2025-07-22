@@ -54,37 +54,55 @@ class ErrorUtils(private val throwable: Throwable) {
 
     private fun getInformation(data: Data): String {
         val des = StringBuilder()
+        des.append(App.context.getString(R.string.error_type))
+        des.append(" " + throwable.javaClass.name)
+        des.append(Const.CRLF)
         des.append(App.context.getString(R.string.error_des))
-        des.append(Const.N)
-        des.append(throwable.message)
-        des.append(Const.N)
-        try {
+        des.append(Const.CRLF)
+        if (throwable.message.isNullOrBlank())
+            des.append(App.context.getString(R.string.unknown_error))
+        else des.append(throwable.message)
+        des.append(Const.CRLF)
+        if (throwable.stackTrace.isNotEmpty()) try {
+            var empty = true
             for (item in throwable.stackTrace) {
                 val s = item.toString()
                 if (s.contains("ru.neosvet")) {
+                    empty = false
                     des.append(s)
-                    des.append(Const.N)
+                    des.append(Const.CRLF)
+                }
+            }
+            if (empty) {
+                for (item in throwable.stackTrace) {
+                    des.append(item.toString())
+                    des.append(Const.CRLF)
                 }
             }
         } catch (e: Exception) {
             des.append("Error in stack: ${e.message}")
-            des.append(Const.N)
+            des.append(Const.CRLF)
+        } else {
+            des.append("Stack is empty")
+            des.append(Const.CRLF)
         }
-        des.append(Const.N)
+        des.append(Const.CRLF)
         des.append(App.context.getString(R.string.input_data))
-        des.append(Const.N)
+        des.append(Const.CRLF)
         des.append("COM: ")
         des.append(Urls.isSiteCom)
-        des.append(Const.N)
+        des.append(Const.CRLF)
         val map = data.keyValueMap
         for (key in map.keys) {
             des.append(key)
             des.append(": ")
             des.append(map[key])
-            des.append(Const.N)
+            des.append(Const.CRLF)
         }
         try {
+            des.append(Const.CRLF)
             des.append(App.context.getString(R.string.srv_info))
+            des.append(Const.CRLF)
             des.append(
                 String.format(
                     App.context.getString(R.string.format_info),

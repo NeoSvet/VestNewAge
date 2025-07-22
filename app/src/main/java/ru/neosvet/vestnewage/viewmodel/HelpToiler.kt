@@ -9,6 +9,7 @@ import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.HelpItem
 import ru.neosvet.vestnewage.helper.DateHelper
+import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.TipUtils
 import ru.neosvet.vestnewage.view.activity.TipActivity
 import ru.neosvet.vestnewage.viewmodel.basic.HelpStrings
@@ -166,8 +167,8 @@ class HelpToiler : ViewModel() {
     private fun clickFeedback(index: Int) {
         when (index) {
             WRITE_TO_DEV -> {
-                val msg = strings.srvInfo + list[FEEDBACK + CHANGELOG].content
-                stateChannel.trySend(BasicState.Message(msg))
+                val msg = strings.srvInfo + Const.CRLF + list[FEEDBACK + CHANGELOG].content
+                stateChannel.trySend(BasicState.Message(Const.CRLF + Const.CRLF + msg))
             }
 
             TG_CHANNEL ->

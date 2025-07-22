@@ -33,6 +33,7 @@
     <string name="open_link">Открыть ссылку</string>
     <string name="send">Отправить</string>
     <string name="error_des">Описание ошибки:</string>
+    <string name="error_type">Тип ошибки:</string>
     <string name="input_data">Входные данные:</string>
     <string name="warning">Внимание:</string>
     <string name="select_all">Выбрать всё</string>
@@ -308,7 +309,7 @@
     <string name="title_app">Приложение «Весть Века»</string>
     <string name="url_on_google">https://play.google.com/store/apps/details?id=ru.neosvet.vestnewage</string>
     <string name="url_on_huawei">https://appgallery.cloud.huawei.com/ag/n/app/C106820457?locale=ru_RU</string>
-    <string name="srv_info">\nСлужебная информация:\n</string>
+    <string name="srv_info">Служебная информация:</string>
     <string name="copy">Скопировать</string>
     <string name="link_on_app">Ссылка на приложение</string>
     <!--SearchFragment-->

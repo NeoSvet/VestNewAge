@@ -4,7 +4,7 @@ public interface Const {
     int TURN_OFF = -1;
     String mailto = "mailto:neosvet333@gmail.com?subject=Приложение «Весть Века»&body=";
     String ENCODING = "cp1251";
-    String COMMA = ",", N = "\n", NN = "\n\n", AND = "&", SEARCH = "search";
+    String COMMA = ",", N = "\n", NN = "\n\n", CRLF = "\r\n", AND = "&", SEARCH = "search";
     String BR = "<br>", KV_OPEN = "“", KV_CLOSE = "”";
     String HTML = ".html", PRINT = "print/", FROM_OTKR = "from_otkr";
     String TASK = "task", DIALOG = "dialog", POEMS = "poems";
