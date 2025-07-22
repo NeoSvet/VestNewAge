@@ -31,4 +31,4 @@ val String.fromHTML: String
     get() = HtmlCompat.fromHtml(this, HtmlCompat.FROM_HTML_MODE_COMPACT).toString().trim()
 
 val String.isDoctrineBook: Boolean
-    get() = this[9].isDigit()
+    get() = this.indexOf('-') < 13 && this[9].isDigit()
