@@ -24,6 +24,7 @@ import androidx.appcompat.widget.ActionMenuView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.core.splashscreen.SplashScreenViewProvider
 import androidx.core.view.children
 import androidx.core.view.get
 import androidx.core.view.isVisible
@@ -34,7 +35,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.work.Data
 import com.google.android.material.appbar.CollapsingToolbarLayout
 import com.google.android.material.bottomappbar.BottomAppBar
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.App
@@ -111,7 +111,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
     private var statusBack = StatusBack.EXIT
 
     private lateinit var launchUtils: LaunchUtils
-    private var jobFinishStar: Job? = null
+    private var star: SplashScreenViewProvider? = null
     private lateinit var tvGodWords: TextView
     private val snackbar = NeoSnackbar()
     private val toiler: MainToiler by lazy {
@@ -272,6 +272,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
     private fun launchSplashScreen() {
         val splashScreen = installSplashScreen()
         splashScreen.setOnExitAnimationListener { provider ->
+            star = provider
             provider.view.setBackgroundColor(
                 ContextCompat.getColor(this, android.R.color.transparent)
             )
@@ -279,18 +280,12 @@ class MainActivity : AppCompatActivity(), ItemClicker {
             anStar.setAnimationListener(object : Animation.AnimationListener {
                 override fun onAnimationStart(animation: Animation) {}
                 override fun onAnimationEnd(animation: Animation) {
-                    provider.remove()
+                    finishFlashStar()
                 }
 
                 override fun onAnimationRepeat(animation: Animation) {}
             })
             provider.view.startAnimation(anStar)
-        }
-        jobFinishStar = lifecycleScope.launch {
-            delay(1600)
-            helper.fabAction.post {
-                finishFlashStar()
-            }
         }
     }
 
@@ -328,6 +323,8 @@ class MainActivity : AppCompatActivity(), ItemClicker {
     }
 
     private fun finishFlashStar() {
+        star?.remove()
+        star = null
         showHead()
         unblocked()
         helper.setNewValue()
@@ -507,7 +504,6 @@ class MainActivity : AppCompatActivity(), ItemClicker {
 
     override fun onResume() {
         super.onResume()
-        if (curFragment == null && jobFinishStar?.isCancelled == true) finishFlashStar()
         prom?.resume()
     }
 
@@ -517,7 +513,6 @@ class MainActivity : AppCompatActivity(), ItemClicker {
 
     override fun onSaveInstanceState(outState: Bundle) {
         outState.putString(Const.MODE, helper.curSection.toString())
-        jobFinishStar?.cancel()
         toiler.setStatus(
             MainState.Status(
                 curSection = helper.curSection.toString(),
@@ -684,6 +679,8 @@ class MainActivity : AppCompatActivity(), ItemClicker {
                     firstSection = helper.getFirstSection()
                     setSection(firstSection, false)
                 }
+
+                curFragment == null -> finishFlashStar()
 
                 else -> exit()
             }
