@@ -61,18 +61,19 @@ class AdditionLoader(private val client: NeoClient) : Loader {
                 des.clear()
                 if (!storage.update(id, row))
                     storage.insert(row)
-                handler?.postPercent(100 - id.percent(maxPost))
+                handler?.postPercent(id.percent(maxPost))
                 s = br.readLine()
             }
             br.close()
-            if(!isRun) break
+            if (!isRun) break
         }
-        var p = maxPost
-        while (p > id && isRun) {
-            if (storage.hasPost(p).not())
-                loadPost(p)?.let { storage.insert(it) }
-            p--
-            handler?.postPercent(100 - p.percent(maxPost))
+        id++
+        while (id <= maxPost && isRun) {
+            if (storage.hasPost(id).not())
+                loadPost(id)?.let { storage.insert(it) }
+            id++
+            handler?.postPercent(id.percent(maxPost))
+            if (!isRun) break
         }
         storage.close()
         isRun = false
@@ -98,7 +99,7 @@ class AdditionLoader(private val client: NeoClient) : Loader {
             for (p in start downTo end) {
                 if (storage.hasPost(p).not())
                     loadPost(p)?.let { storage.insert(it) }
-                if(!isRun) break
+                if (!isRun) break
             }
         } catch (_: NeoException.SiteNoResponse) {
         }
