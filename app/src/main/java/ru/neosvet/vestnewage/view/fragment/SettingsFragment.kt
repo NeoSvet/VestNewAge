@@ -213,6 +213,12 @@ class SettingsFragment : NeoFragment() {
                 isChecked = Urls.isSiteCom
             )
         )
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) list.add(
+            CheckItem(
+                title = getString(R.string.certificate_ignore),
+                isChecked = App.unsafeClient
+            )
+        )
         adapter.addItem(
             SettingsItem.CheckList(
                 title = getString(R.string.base),
@@ -221,6 +227,11 @@ class SettingsFragment : NeoFragment() {
                 onChecked = { index, checked ->
                     if (index == 3) {
                         Urls.setCom(checked)
+                        return@CheckList
+                    }
+                    if (index == 4) {
+                        if (checked) App.needUnsafeClient()
+                        else App.offUnsafeClient()
                         return@CheckList
                     }
                     val name = when (index) {

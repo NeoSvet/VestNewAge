@@ -21,6 +21,12 @@ class App : Application() {
             val file = Files.slash(UNSAFE_FILE)
             if (!file.exists()) file.createNewFile()
         }
+
+        fun offUnsafeClient() {
+            unsafeClient = false
+            val file = Files.slash(UNSAFE_FILE)
+            if (file.exists()) file.delete()
+        }
     }
 
     override fun onCreate() {

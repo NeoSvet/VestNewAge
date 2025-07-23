@@ -213,7 +213,7 @@
     <string name="float_prom_time">Переместить отсчёт времени до Посыла в нижний левый угол экрана</string>
     <string name="start_with_new">При запуске открыть Новое, если имеется</string>
     <string name="use_site_com">Использовать зеркало в домене .COM</string>
-    <string name="certificate_igonre">Игнорировать сертификаты (потенциально небезопасно)</string>
+    <string name="certificate_ignore">Игнорировать сертификаты (потенциально небезопасно)</string>
     <string name="start_screen">Начальный экран</string>
     <string name="menu">Меню</string>
     <string name="free_storage">Освободить память</string>
