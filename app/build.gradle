@@ -1,16 +1,18 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
     id 'com.android.application'
     id 'kotlin-android'
 }
 
 android {
-    compileSdk 35
+    compileSdk 36
     defaultConfig {
         applicationId 'ru.neosvet.vestnewage'
         minSdk 24
-        targetSdk 35
-        versionCode 76
-        versionName '5.5'
+        targetSdk 36
+        versionCode 77
+        versionName '5.6'
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
     }
     buildTypes {
@@ -23,8 +25,10 @@ android {
         sourceCompatibility JavaVersion.VERSION_11
         targetCompatibility JavaVersion.VERSION_11
     }
-    kotlinOptions {
-        jvmTarget = '11'
+    kotlin {
+        compilerOptions {
+            jvmTarget = JvmTarget.JVM_11
+        }
     }
     buildFeatures {
         viewBinding true
@@ -37,11 +41,11 @@ dependencies {
     implementation 'androidx.core:core-ktx:1.16.0'
     implementation 'com.google.android.material:material:1.12.0'
     implementation 'androidx.appcompat:appcompat:1.7.1'
-    implementation 'com.squareup.okhttp3:okhttp:5.0.0-alpha.11'
+    implementation 'com.squareup.okhttp3:okhttp:5.1.0'
     implementation 'me.leolin:ShortcutBadger:1.1.22@aar'
-    implementation 'com.jakewharton.threetenabp:threetenabp:1.4.0' //for DateUnit
-    implementation 'androidx.work:work-runtime:2.10.1'
-    implementation 'androidx.work:work-runtime-ktx:2.10.1'
+    implementation 'com.jakewharton.threetenabp:threetenabp:1.4.9' //for DateUnit
+    implementation 'androidx.work:work-runtime:2.10.2'
+    implementation 'androidx.work:work-runtime-ktx:2.10.2'
     implementation 'androidx.constraintlayout:constraintlayout:2.2.1'
     implementation 'androidx.core:core-splashscreen:1.0.1'
     implementation 'androidx.paging:paging-runtime-ktx:3.3.6'
