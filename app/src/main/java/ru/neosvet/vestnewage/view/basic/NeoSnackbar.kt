@@ -20,7 +20,7 @@ class NeoSnackbar {
             .setTextColor(context.getColor(R.color.main_color))
             .setActionTextColor(context.getColor(R.color.colorAccentLight))
             .setAction(android.R.string.ok) {
-                if (msg == context.getString(R.string.site_no_response))
+                if (msg == context.getString(R.string.network_issues))
                     showAboutNoResponse(context)
                 else event?.invoke()
                 hide()

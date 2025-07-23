@@ -12,7 +12,7 @@
     <string name="touch_to_send">[нажмите чтобы отправить]</string>
     <string name="error">Ошибка</string>
     <string name="site_code">Ошибка на сайте: %d, попробуйте позже</string>
-    <string name="site_no_response">Проблемы с сетью, попробуйте позже</string>
+    <string name="network_issues">Проблемы с сетью, попробуйте позже</string>
     <string name="about_no_response">Возможно, вам надо включить или выключить использование зеркала в домене .COM. Или изменился адрес, с которого загружается информация – попробуйте позже. Подробнее написано в «Справке».</string>
     <!--Download-->
     <string name="download_">Скачать…</string>
@@ -213,6 +213,7 @@
     <string name="float_prom_time">Переместить отсчёт времени до Посыла в нижний левый угол экрана</string>
     <string name="start_with_new">При запуске открыть Новое, если имеется</string>
     <string name="use_site_com">Использовать зеркало в домене .COM</string>
+    <string name="certificate_igonre">Игнорировать сертификаты (потенциально небезопасно)</string>
     <string name="start_screen">Начальный экран</string>
     <string name="menu">Меню</string>
     <string name="free_storage">Освободить память</string>

@@ -5,8 +5,7 @@ import okhttp3.Protocol
 import okhttp3.Request
 import okhttp3.internal.http.promisesBody
 import ru.neosvet.vestnewage.App
-import ru.neosvet.vestnewage.data.NeoException.SiteCode
-import ru.neosvet.vestnewage.data.NeoException.SiteNoResponse
+import ru.neosvet.vestnewage.data.NeoException
 import ru.neosvet.vestnewage.loader.basic.LoadHandlerLite
 import ru.neosvet.vestnewage.utils.Files
 import ru.neosvet.vestnewage.utils.percent
@@ -65,15 +64,15 @@ class NeoClient(
         } catch (e: Exception) {
             //e.printStackTrace()
             urlsUpdate(url)
-            throw SiteNoResponse()
+            throw NeoException.SiteUnavailable()
         }
         if (response.isSuccessful.not()) {
             urlsUpdate(url)
-            throw SiteCode(response.code)
+            throw NeoException.SiteCode(response.code)
         }
         if (response.promisesBody().not()) {
             urlsUpdate(url)
-            throw SiteNoResponse()
+            throw NeoException.SiteNoResponse()
         }
         val inStream = response.body.byteStream()
         val max = response.body.contentLength().toInt()
