@@ -15,6 +15,7 @@
             android:id="@+id/text_item"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/def_indent"
             android:paddingHorizontal="@dimen/def_indent"
             android:textColor="@color/colorAccentLight"
             app:layout_constraintTop_toTopOf="parent" />
