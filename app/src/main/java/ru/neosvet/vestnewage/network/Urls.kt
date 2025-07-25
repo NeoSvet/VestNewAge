@@ -18,7 +18,7 @@ import java.io.FileWriter
 import java.io.InputStreamReader
 
 object Urls {
-    private var TIME = 1742276438000L
+    private var TIME = 1749891972000L
     private const val FILE = "/urls.txt"
     const val PRED_LINK = "/2004/predislovie.html"
     const val DOCTRINE = "https://doktrina.info/"
@@ -48,8 +48,7 @@ object Urls {
         "novosti.html", "", //ADS 30 31
         "databases_vna", "vna/databases", //DATABASES 32 33
         "vna/svyataya-rus/", "", //HOLY_RUS_BASE 34 35
-        "https://doktrina.info/svyataya-rus/",  //HOLY_RUS_SITE 36
-        "https://neosvet.somee.com/api/otkr?page=" //ALTER_URL 37
+        "https://doktrina.info/svyataya-rus/"  //HOLY_RUS_SITE 36
     )
 
     @JvmStatic
@@ -105,9 +104,6 @@ object Urls {
     val WebPage: String
         get() = if (isSiteCom) URL[13].ifEmpty { URL[12] } else URL[12]
 
-    val AlterUrl: String
-        get() = URL[37]
-
     //-------- from official site ---------------------------------------------------------------
     @JvmStatic
     val MainSite: String //for pages <2016 year
@@ -146,8 +142,6 @@ object Urls {
     val Style: String = URL[2] + URL[16]
 
     val Quote: String = URL[2] + URL[20]
-
-    val QuoteCom: String = URL[3] + URL[21]
 
     fun getCalendar(month: Int, year: Int): String {
         var url = (if (isSiteCom) URL[3].ifEmpty { URL[2] } else URL[2]) + URL[22]
@@ -231,7 +225,7 @@ object Urls {
             intent.data = url.toUri()
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             App.context.startActivity(intent)
-        } catch (e: java.lang.Exception) {
+        } catch (_: java.lang.Exception) {
             var s = url.substring(url.indexOf(":") + 1)
             if (s.startsWith("/")) s = s.substring(2)
             copyAddress(s)
