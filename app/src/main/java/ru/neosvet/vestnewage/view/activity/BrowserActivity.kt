@@ -757,6 +757,7 @@ class BrowserActivity : AppCompatActivity(), ReaderClient.Parent, NeoInterface.P
             when {
                 link.contains(Const.DOCTRINE) -> Urls.openInBrowser(Urls.DoctrineSite)
                 link.contains(Const.HOLY_RUS) -> Urls.openInBrowser(Urls.HolyRusSite)
+                link.contains(Const.WORLD_AFTER_WAR) -> Urls.openInBrowser(Urls.WorldAfterWarSite)
                 refreshItem.isVisible -> Urls.openInBrowser(Urls.Site + link)
                 else -> Urls.openInBrowser(Urls.Site)
             }
@@ -790,6 +791,15 @@ class BrowserActivity : AppCompatActivity(), ReaderClient.Parent, NeoInterface.P
             type == BrowserState.Type.HOLY_RUS -> {
                 setDoctrineBack()
                 ivHeadFront.setImageResource(R.drawable.head_front_r)
+            }
+
+            type == BrowserState.Type.WORLD_AFTER_WAR -> {
+                if (ScreenUtils.isWide && isBigHead)
+                    setHeadResource(R.drawable.head_back_tablet_m)
+                else if (ScreenUtils.isLand)
+                    setHeadResource(R.drawable.head_back_land_m)
+                else setHeadResource(R.drawable.head_back_m)
+                ivHeadFront.setImageResource(R.drawable.head_front_m)
             }
 
             ScreenUtils.isWide && isBigHead -> setHeadResource(R.drawable.head_back_tablet)

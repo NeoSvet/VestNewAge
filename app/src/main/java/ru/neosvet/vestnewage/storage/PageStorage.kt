@@ -53,8 +53,10 @@ class PageStorage : DataBase.Parent, StorageSearchable {
         get() = name == DataBase.DOCTRINE
     val isHolyRus: Boolean
         get() = name == DataBase.HOLY_RUS
+    val isWorldAfterWar: Boolean
+        get() = name == DataBase.WORLD_AFTER_WAR
     val isOtherBook: Boolean
-        get() = isDoctrine || isHolyRus
+        get() = isDoctrine || isHolyRus || isWorldAfterWar
     val isBook: Boolean
         get() = !isArticle && patternBook.matcher(name).matches()
 
@@ -63,6 +65,7 @@ class PageStorage : DataBase.Parent, StorageSearchable {
             name.contains(Const.HTML) -> getDatePage(name)
             name.contains(Const.DOCTRINE) -> DataBase.DOCTRINE
             name.contains(Const.HOLY_RUS) -> DataBase.HOLY_RUS
+            name.contains(Const.WORLD_AFTER_WAR) -> DataBase.WORLD_AFTER_WAR
             else -> name
         }
         if (isClosed.not()) {

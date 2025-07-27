@@ -2,6 +2,7 @@ package ru.neosvet.vestnewage.loader.page
 
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
+import ru.neosvet.vestnewage.data.Books
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.loader.BookLoader
 import ru.neosvet.vestnewage.loader.basic.Loader
@@ -114,18 +115,16 @@ class PageLoader(private val client: NeoClient) : Loader {
     }
 
     private fun downloadOtherPage(link: String) {
-        val isRus = link.contains(Const.HOLY_RUS)
+        val book = Books.linkToBook(link)
         var id = storage.getPageId(link)
         if (id == -1) {
             val loader = BookLoader(client)
-            loader.loadBookList(isRus)
+            loader.loadBookList(book)
             id = storage.getPageId(link)
         } else storage.deleteParagraphs(id)
 
-        val m = if (isRus) arrayOf(Urls.HolyRusBase, Const.HOLY_RUS)
-        else arrayOf(Urls.DoctrineBase, Const.DOCTRINE)
-        var s: String? = link.substring(m[1].length) //pages
-        val stream = client.getStream("${m[0]}$s.txt")
+        var s: String? = link.substring(Books.Prefix(book).length) //pages
+        val stream = client.getStream("${Books.baseUrl(book)}$s.txt")
         val br = BufferedReader(InputStreamReader(stream, Const.ENCODING), 1000)
         storage.updateTime(link, br.readLine().toLong())
         s = br.readLine()

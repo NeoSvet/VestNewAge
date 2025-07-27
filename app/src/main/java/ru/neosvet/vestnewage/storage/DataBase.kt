@@ -33,6 +33,7 @@ class DataBase(
         const val ARTICLES = "00.00"
         const val DOCTRINE = "00.01"
         const val HOLY_RUS = "00.02"
+        const val WORLD_AFTER_WAR = "00.03"
         const val EMPTY_BASE_SIZE = 24576L
         const val CREATE_TABLE = "create table if not exists "
         private val names: MutableSet<String> = LinkedHashSet()

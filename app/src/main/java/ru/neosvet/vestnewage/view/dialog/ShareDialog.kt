@@ -144,6 +144,12 @@ class ShareDialog : BottomSheetDialogFragment() {
                 sb.append(Urls.HolyRusSite)
             }
 
+            storage.isWorldAfterWar -> {
+                sb.append(getString(R.string.world_after_war_pages))
+                sb.appendLine(link.substring(Const.WORLD_AFTER_WAR.length))
+                sb.append(Urls.WorldAfterWarSite)
+            }
+
             !storage.isOldBook -> sb.append(Urls.Site + link)
         }
 

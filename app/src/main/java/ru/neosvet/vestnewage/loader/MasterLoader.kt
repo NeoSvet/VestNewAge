@@ -2,6 +2,7 @@ package ru.neosvet.vestnewage.loader
 
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
+import ru.neosvet.vestnewage.data.BookTab
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.helper.SiteHelper
 import ru.neosvet.vestnewage.helper.SummaryHelper
@@ -57,8 +58,9 @@ class MasterLoader : Loader, LoadHandlerLite {
         loadStyle()
         loadSummary()
         loadSite()
-        loadDoctrine()
-        loadHolyRus()
+        loadBook(BookTab.DOCTRINE)
+        loadBook(BookTab.HOLY_RUS)
+        loadBook(BookTab.WORLD_AFTER_WAR)
         val date = DateUnit.initToday()
         loadMonth(date.month, date.year)
     }
@@ -93,24 +95,20 @@ class MasterLoader : Loader, LoadHandlerLite {
         isRun = false
     }
 
-    fun loadDoctrine() {
+    fun loadBook(book: BookTab) {
+        //DOCTRINE(2), HOLY_RUS(3), WORLD_AFTER_WAR(4)
         isRun = true
-        msg = App.context.getString(R.string.doctrine_creator)
+        msg = App.context.getString(
+            when (book) {
+                BookTab.HOLY_RUS -> R.string.holy_rus
+                BookTab.WORLD_AFTER_WAR -> R.string.world_after_war
+                else -> R.string.doctrine_creator
+            }
+        )
         handler?.postMessage(msg)
         getBookLoader().let {
-            it.loadBookList(false)
-            it.loadBook(false, null)
-        }
-        isRun = false
-    }
-
-    fun loadHolyRus() {
-        isRun = true
-        msg = App.context.getString(R.string.holy_rus)
-        handler?.postMessage(msg)
-        getBookLoader().let {
-            it.loadBookList(true)
-            it.loadBook(true, null)
+            it.loadBookList(book)
+            it.loadBook(book, null)
         }
         isRun = false
     }

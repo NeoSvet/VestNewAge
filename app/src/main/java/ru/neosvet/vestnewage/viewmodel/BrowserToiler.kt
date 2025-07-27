@@ -57,6 +57,7 @@ class BrowserToiler : NeoToiler() {
     private var isRefresh = false
     private var isDoctrine = false
     private var isHolyRus = false
+    private var isWorldAfterWar = false
     private var isNumPar = false
     private var isPaging = false
     private var withOutPosition = false
@@ -84,6 +85,7 @@ class BrowserToiler : NeoToiler() {
             downloaded = context.getString(R.string.downloaded),
             doctrinePages = context.getString(R.string.doctrine_pages),
             holyRusPages = context.getString(R.string.holy_rus_pages),
+            worldAfterWarPages = context.getString(R.string.world_after_war_pages),
             doctrineFuture = context.getString(R.string.doctrine_future),
             editionOf = context.getString(R.string.edition_of),
             publicationOf = context.getString(R.string.publication_of),
@@ -121,7 +123,9 @@ class BrowserToiler : NeoToiler() {
 
     fun openLink(url: String, addHistory: Boolean) {
         if (url.isEmpty()) return
-        if (!isDoctrine && !isHolyRus && !url.contains(Const.HTML) && !url.contains("http:")) {
+        if (!isDoctrine && !isHolyRus && !isWorldAfterWar &&
+            !url.contains(Const.HTML) && !url.contains("http:")
+        ) {
             Urls.openInApps(url)
             return
         }
@@ -158,6 +162,12 @@ class BrowserToiler : NeoToiler() {
                 storage.isHolyRus -> {
                     type = BrowserState.Type.HOLY_RUS
                     isHolyRus = true
+                    isPaging = true
+                }
+
+                storage.isWorldAfterWar -> {
+                    type = BrowserState.Type.WORLD_AFTER_WAR
+                    isWorldAfterWar = true
                     isPaging = true
                 }
 
@@ -332,6 +342,13 @@ class BrowserToiler : NeoToiler() {
                     bw.write(strings.editionOf + d.toString())
                 }
 
+                isWorldAfterWar -> {
+                    bw.write(strings.worldAfterWarPages + link.substring(Const.WORLD_AFTER_WAR.length))
+                    bw.write(strings.copyright)
+                    bw.write(DateUnit.initToday().year.toString() + Const.BR)
+                    bw.write(strings.editionOf + d.toString())
+                }
+
                 else -> {
                     if (!storage.isOldBook || Urls.isSiteCom) {
                         val url = Urls.Site + link
@@ -446,7 +463,7 @@ class BrowserToiler : NeoToiler() {
                 return
             }
         }
-        if (isDoctrine || isHolyRus) {
+        if (isDoctrine || isHolyRus || isWorldAfterWar) {
             setState(BasicState.Success)
             return
         }

@@ -4,7 +4,7 @@ import ru.neosvet.vestnewage.helper.BrowserHelper
 
 sealed class BrowserState : NeoState {
     enum class Type {
-        NEW_BOOK, OLD_BOOK, DOCTRINE, HOLY_RUS
+        NEW_BOOK, OLD_BOOK, DOCTRINE, HOLY_RUS, WORLD_AFTER_WAR
     }
 
     data class Primary(

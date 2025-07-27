@@ -12,6 +12,7 @@ import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.BasicItem
 import ru.neosvet.vestnewage.data.BookRnd
 import ru.neosvet.vestnewage.data.BookTab
+import ru.neosvet.vestnewage.data.Books
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.helper.BookHelper
 import ru.neosvet.vestnewage.helper.DateHelper
@@ -117,18 +118,10 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
                 masterLoader.loadMonth(dEpistles.month, dEpistles.year)
             } else loader.loadEpistlesList()
 
-            BookTab.DOCTRINE -> {
-                loader.loadBookList(false)
+            else -> {
+                loader.loadBookList(selectedTab)
                 openOtherBook()
-                if (isRun) loader.loadBook(false, this)
-                postState(BasicState.Success)
-                return
-            }
-
-            BookTab.HOLY_RUS -> {
-                loader.loadBookList(true)
-                openOtherBook()
-                if (isRun) loader.loadBook(true, this)
+                if (isRun) loader.loadBook(selectedTab, this)
                 postState(BasicState.Success)
                 return
             }
@@ -255,12 +248,11 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
         if (isPoemsTab) yearsP else yearsE
 
     private suspend fun openOtherBook() {
-        val isRus = selectedTab == BookTab.HOLY_RUS
         val storage = PageStorage()
-        storage.open(if (isRus) DataBase.HOLY_RUS else DataBase.DOCTRINE)
+        storage.open(Books.baseName(selectedTab))
         val cursor = storage.getListAll()
         cursor.moveToFirst()
-        val site = if (isRus) Urls.HolyRusSite else Urls.DoctrineSite
+        val site = Books.siteUrl(selectedTab)
         if (cursor.count == 1) {
             cursor.close()
             storage.close()
@@ -273,7 +265,7 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
         val list = mutableListOf<BasicItem>()
         while (cursor.moveToNext()) {
             val link = cursor.getString(iLink)
-            if (isRus || link.isDoctrineBook) {
+            if (selectedTab != BookTab.DOCTRINE || link.isDoctrineBook) {
                 val title = cursor.getString(iTitle)
                 list.add(BasicItem(title, link))
             }
@@ -433,6 +425,7 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
         BookTab.EPISTLES.value -> BookTab.EPISTLES
         BookTab.DOCTRINE.value -> BookTab.DOCTRINE
         BookTab.HOLY_RUS.value -> BookTab.HOLY_RUS
+        BookTab.WORLD_AFTER_WAR.value -> BookTab.WORLD_AFTER_WAR
         else -> BookTab.POEMS
     }
 

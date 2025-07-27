@@ -114,7 +114,8 @@ class BookFragment : NeoFragment() {
             getString(R.string.poems),
             getString(R.string.epistles),
             getString(R.string.doctrine_creator),
-            getString(R.string.holy_rus)
+            getString(R.string.holy_rus),
+            getString(R.string.world_after_war)
         )
         pTab.setOnChangeListener {
             toiler.openList(tab = it)

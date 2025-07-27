@@ -17,6 +17,7 @@ data class BrowserStrings(
     val downloaded: String,
     val doctrinePages: String,
     val holyRusPages: String,
+    val worldAfterWarPages: String,
     val doctrineFuture: String,
     val editionOf: String,
     val publicationOf: String,
@@ -107,15 +108,6 @@ data class MarkerStrings(
     val titleAlreadyUsed: String,
     val noCollections: String,
     val needSetCheck: String
-)
-
-data class CabinetStrings(
-    val selectedStatus: String,
-    val authFailed: String,
-    val profileFailed: String,
-    val sendStatus: String,
-    val selectStatus: String,
-    val sendUnlivable: String
 )
 
 data class HelpStrings(

@@ -21,7 +21,9 @@ class DownloadDialog(
         private const val BASIC_SIZE = 165000
         private const val ADDITION_DAY_SIZE = 450
         private const val ADDITION_IN_DAYS = 19078
-        private const val OTHER_BOOKS_SIZE = 565649 //DOCTRINE: 215984 HOLY_RUS: 349665
+        private const val OTHER_BOOKS_SIZE = 1449575
+
+        //DOCTRINE:217436 HOLY_RUS:351200 WORLD_AFTER_WAR:880939
         private val BOOK_SIZE = arrayOf(
             1133299, 1056687, 1057064, 1010414, 972633, 484820
         )

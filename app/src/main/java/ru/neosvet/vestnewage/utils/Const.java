@@ -10,8 +10,8 @@ public interface Const {
     String TASK = "task", DIALOG = "dialog", POEMS = "poems";
     String ALWAYS_DARK = "always_dark", PROM_FLOAT = "prom_float", START_NEW = "start_new", START_SCEEN = "start_screen", CUR_ID = "cur_id";
     String TAB = "tab", MONTH = "Month", YEAR = "Year", UNREAD = "Unread", LIST = "list", PAGE = "page";
-    String START = "start", END = "end", MODE = "mode", STRING = "string";
-    String TIME = "time", TIMEDIFF = "timediff", DOCTRINE = "doctrine:", HOLY_RUS = "rus:";
+    String START = "start", END = "end", MODE = "mode", STRING = "string", TIME = "time", TIMEDIFF = "timediff";
+    String DOCTRINE = "doctrine:", HOLY_RUS = "rus:", WORLD_AFTER_WAR = "mir:";
     String EPISTLES = "epistles", OTKR = "otkr", ADS = "ads", FILE = "file";
     String TITLE = "title", LINK = "link", PLACE = "place", DESCRIPTION = "des";
 }

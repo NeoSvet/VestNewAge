@@ -43,8 +43,9 @@ class SearchEngine(
         const val MODE_TELEGRAM = 6
         const val MODE_DOCTRINE = 7
         const val MODE_HOLY_RUS = 8
-        const val MODE_RESULT_TEXT = 9
-        const val MODE_RESULT_PAR = 10
+        const val MODE_WORLD_AFTER_WAR = 9
+        const val MODE_RESULT_TEXT = 10
+        const val MODE_RESULT_PAR = 11
         private const val OR = " OR "
         private const val endSelect = "</b></font>"
         private const val lenSelect = 36
@@ -137,6 +138,10 @@ class SearchEngine(
         }
         if (mode == MODE_HOLY_RUS) {
             searchList(DataBase.HOLY_RUS)
+            return@run
+        }
+        if (mode == MODE_WORLD_AFTER_WAR) {
+            searchList(DataBase.WORLD_AFTER_WAR)
             return@run
         }
         if (mode == MODE_SITE)

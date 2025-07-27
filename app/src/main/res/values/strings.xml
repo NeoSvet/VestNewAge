@@ -107,6 +107,7 @@
     <string name="poems">Катрены</string>
     <string name="doctrine_creator">Доктрина Создателя</string>
     <string name="holy_rus">Святая Русь</string>
+    <string name="world_after_war">Мир после войны</string>
     <string name="link_to_src">Ссылка на источник</string>
     <string name="rnd_verse">«Случайный» стих</string>
     <string name="rnd_epistle">«Случайное» Послание</string>
@@ -197,6 +198,7 @@
     <string name="downloaded">Загружено:&#160;</string>
     <string name="doctrine_pages">Книга «Доктрина Создателя», страницы&#160;</string>
     <string name="holy_rus_pages">Книга «Святая Русь», страницы&#160;</string>
+    <string name="world_after_war_pages">Книга «Мир после войны», страницы&#160;</string>
     <string name="doctrine_future">Сайт «Доктрина Будущего»&#160;</string>
     <string name="edition_of">Редакция от&#160;</string>
     <string name="publication_of">Публикация от&#160;</string>

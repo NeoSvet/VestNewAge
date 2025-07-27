@@ -8,9 +8,9 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ServiceInfo
-import android.net.Uri
 import android.os.Build
 import androidx.core.app.NotificationCompat
+import androidx.core.net.toUri
 import androidx.work.Constraints
 import androidx.work.CoroutineWorker
 import androidx.work.Data
@@ -25,6 +25,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
+import ru.neosvet.vestnewage.data.BookTab
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.loader.AdditionLoader
 import ru.neosvet.vestnewage.loader.MasterLoader
@@ -76,7 +77,7 @@ class LoaderWorker(
     }
 
     private enum class Task {
-        STARTING, LOAD_BASIC, LOAD_DOCTRINE, LOAD_HOLY_RUS, LOAD_MONTH
+        STARTING, LOAD_BASIC, LOAD_DOCTRINE, LOAD_HOLY_RUS, LOAD_WORLD_AFTER_WAR, LOAD_MONTH
     }
 
     private lateinit var notif: NotificationCompat.Builder
@@ -184,7 +185,7 @@ class LoaderWorker(
                 title = applicationContext.getString(R.string.error_load),
                 msg = error.message + Const.N + applicationContext.getString(R.string.touch_to_send),
                 intent = Intent(Intent.ACTION_VIEW).apply {
-                    data = Uri.parse(Const.mailto + error.information)
+                    data = (Const.mailto + error.information).toUri()
                 }
             )
         } else {
@@ -245,10 +246,12 @@ class LoaderWorker(
     private fun loadOtherBooks() {
         task = Task.LOAD_DOCTRINE
         currentLoader = loader
-        loader.loadDoctrine()
-        upProg()
+        loader.loadBook(BookTab.DOCTRINE)
         task = Task.LOAD_HOLY_RUS
-        loader.loadHolyRus()
+        loader.loadBook(BookTab.HOLY_RUS)
+        upProg()
+        task = Task.LOAD_WORLD_AFTER_WAR
+        loader.loadBook(BookTab.WORLD_AFTER_WAR)
         upProg()
     }
 

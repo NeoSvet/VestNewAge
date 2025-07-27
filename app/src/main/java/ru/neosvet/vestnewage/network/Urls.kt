@@ -18,7 +18,7 @@ import java.io.FileWriter
 import java.io.InputStreamReader
 
 object Urls {
-    private var TIME = 1749891972000L
+    private var TIME = 1753423874000L
     private const val FILE = "/urls.txt"
     const val PRED_LINK = "/2004/predislovie.html"
     const val DOCTRINE = "https://doktrina.info/"
@@ -48,7 +48,9 @@ object Urls {
         "novosti.html", "", //ADS 30 31
         "databases_vna", "vna/databases", //DATABASES 32 33
         "vna/svyataya-rus/", "", //HOLY_RUS_BASE 34 35
-        "https://doktrina.info/svyataya-rus/"  //HOLY_RUS_SITE 36
+        "https://doktrina.info/svyataya-rus/",  //HOLY_RUS_SITE 36
+        "vna/world-after-war/", "", //WORLD_AFTER_WAR_BASE 37 38
+        "https://doktrina8.ru/mir.html"  //WORLD_AFTER_WAR_SITE 39
     )
 
     @JvmStatic
@@ -73,6 +75,9 @@ object Urls {
     val HolyRusSite: String
         get() = URL[36]
 
+    val WorldAfterWarSite: String
+        get() = URL[39]
+
     val TelegramUrl: String
         get() = URL[5]
 
@@ -88,6 +93,10 @@ object Urls {
     val HolyRusBase: String
         get() = if (isSiteCom) URL[1] + URL[35].ifEmpty { URL[34] }
         else URL[0] + URL[34]
+
+    val WorldAfterWarBase: String
+        get() = if (isSiteCom) URL[1] + URL[38].ifEmpty { URL[37] }
+        else URL[0] + URL[37]
 
     val Addition: String
         get() = if (isSiteCom) URL[1] + URL[9].ifEmpty { URL[8] }
@@ -160,12 +169,15 @@ object Urls {
         val file = Files.file(FILE)
         if (file.exists().not()) return
         val br = BufferedReader(FileReader(file))
-        var i = -1
-        br.forEachLine {
-            if (i == -1) TIME = it.toLong()
-            else URL[i] = it
-            i++
-        }
+        val t = br.readLine().toLong()
+        if (t > TIME) {
+            TIME = t
+            var i = 0
+            br.forEachLine {
+                URL[i] = it
+                i++
+            }
+        } else file.delete()
         br.close()
     }
 

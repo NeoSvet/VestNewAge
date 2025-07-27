@@ -1,5 +1,7 @@
 package ru.neosvet.vestnewage.loader
 
+import ru.neosvet.vestnewage.data.BookTab
+import ru.neosvet.vestnewage.data.Books
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.loader.basic.LoadHandlerLite
 import ru.neosvet.vestnewage.loader.basic.Loader
@@ -92,24 +94,23 @@ class BookLoader(private val client: NeoClient) : Loader {
         links.clear()
     }
 
-    fun loadBookList(isRus: Boolean) {
+    fun loadBookList(book: BookTab) {
+        //DOCTRINE(2), HOLY_RUS(3), WORLD_AFTER_WAR(4)
         isRun = true
         //list format:
         //line 1: pages
         //line 2: title
-        val m = if (isRus) arrayOf(Urls.HolyRusBase, DataBase.HOLY_RUS, Const.HOLY_RUS)
-        else arrayOf(Urls.DoctrineBase, DataBase.DOCTRINE, Const.DOCTRINE)
         val stream = InputStreamReader(
-            client.getStream("${m[0]}list.txt"),
+            client.getStream("${Books.baseUrl(book)}list.txt"),
             Const.ENCODING
         )
         val br = BufferedReader(stream, 1000)
         val storage = PageStorage()
-        storage.open(m[1])
+        storage.open(Books.baseName(book))
         var link: String? = br.readLine()
         while (link != null) {
             val title = br.readLine()
-            link = m[2] + link
+            link = Books.Prefix(book) + link
             storage.putTitle(title, link)
             if (isRun.not()) break
             link = br.readLine()
@@ -118,12 +119,11 @@ class BookLoader(private val client: NeoClient) : Loader {
         storage.close()
     }
 
-    fun loadBook(isRus: Boolean, handler: LoadHandlerLite?) {
+    fun loadBook(book: BookTab, handler: LoadHandlerLite?) {
+        //DOCTRINE(2), HOLY_RUS(3), WORLD_AFTER_WAR(4)
         isRun = true
-        val m = if (isRus) arrayOf(Urls.HolyRusBase, DataBase.HOLY_RUS, Const.HOLY_RUS)
-        else arrayOf(Urls.DoctrineBase, DataBase.DOCTRINE, Const.DOCTRINE)
         val storage = PageStorage()
-        storage.open(m[1])
+        storage.open(Books.baseName(book))
         val cursor = storage.getListAll()
         if (cursor.moveToFirst()) {
             var s: String?
@@ -133,13 +133,15 @@ class BookLoader(private val client: NeoClient) : Loader {
             val iId = cursor.getColumnIndex(DataBase.ID)
             val iLink = cursor.getColumnIndex(Const.LINK)
             val iTime = cursor.getColumnIndex(Const.TIME)
+            val len = Books.Prefix(book).length
+            val url = Books.baseUrl(book)
             while (cursor.moveToNext() && isRun) {
                 val link = cursor.getString(iLink)
-                if (!isRus && !link.isDoctrineBook) continue
+                if (book == BookTab.DOCTRINE && !link.isDoctrineBook) continue
                 val id = cursor.getInt(iId)
                 time = cursor.getLong(iTime)
-                s = link.substring(m[2].length) //pages
-                val stream = client.getStream("${m[0]}$s.txt")
+                s = link.substring(len) //pages
+                val stream = client.getStream("${url}$s.txt")
                 val br = BufferedReader(InputStreamReader(stream, Const.ENCODING), 1000)
                 s = br.readLine() //time
                 if (time != s.toLong().apply { time = this }) {

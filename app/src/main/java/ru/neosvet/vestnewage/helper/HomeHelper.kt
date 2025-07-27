@@ -84,6 +84,11 @@ class HomeHelper(private val context: Context) {
                     t = R.string.holy_rus
                 }
 
+                Section.WORLD_AFTER_WAR -> {
+                    i = R.drawable.ic_book_mv
+                    t = R.string.world_after_war
+                }
+
                 else -> { //Section.HELP, Section.NEW, Section.MENU, Section.CABINET
                     i = R.drawable.ic_help
                     t = R.string.help
@@ -98,24 +103,24 @@ class HomeHelper(private val context: Context) {
         context.getString(R.string.news), context.getString(R.string.calendar),
         context.getString(R.string.poems), context.getString(R.string.search),
         context.getString(R.string.markers), context.getString(R.string.journal),
-        context.getString(R.string.settings),
-        context.getString(R.string.epistles), context.getString(R.string.doctrine_creator),
-        context.getString(R.string.holy_rus), context.getString(R.string.help)
+        context.getString(R.string.settings), context.getString(R.string.epistles),
+        context.getString(R.string.doctrine_creator), context.getString(R.string.holy_rus),
+        context.getString(R.string.world_after_war), context.getString(R.string.help)
     )
     private val listSection: List<Section> by lazy {
         listOf(
             Section.HOME, Section.SUMMARY, Section.SITE, Section.CALENDAR,
             Section.BOOK, Section.SEARCH, Section.MARKERS, Section.JOURNAL,
-            Section.SETTINGS, Section.EPISTLES,
-            Section.DOCTRINE, Section.HOLY_RUS, Section.HELP
+            Section.SETTINGS, Section.EPISTLES, Section.DOCTRINE,
+            Section.HOLY_RUS, Section.WORLD_AFTER_WAR, Section.HELP
         )
     }
     private val listIcon: List<Int> by lazy {
         listOf(
             R.drawable.ic_edit, R.drawable.ic_summary, R.drawable.ic_site, R.drawable.ic_calendar,
             R.drawable.ic_book_k, R.drawable.ic_search, R.drawable.ic_marker, R.drawable.ic_journal,
-            R.drawable.ic_settings, R.drawable.ic_book_p,
-            R.drawable.ic_book_dc, R.drawable.ic_book_sr, R.drawable.ic_help
+            R.drawable.ic_settings, R.drawable.ic_book_p, R.drawable.ic_book_dc,
+            R.drawable.ic_book_sr, R.drawable.ic_book_mv, R.drawable.ic_help
         )
     }
     var isMain = false
@@ -148,6 +153,7 @@ class HomeHelper(private val context: Context) {
                     Section.EPISTLES.value -> Section.EPISTLES
                     Section.DOCTRINE.value -> Section.DOCTRINE
                     Section.HOLY_RUS.value -> Section.HOLY_RUS
+                    Section.WORLD_AFTER_WAR.value -> Section.WORLD_AFTER_WAR
                     else -> Section.HELP
                 }
                 menu.add(item)

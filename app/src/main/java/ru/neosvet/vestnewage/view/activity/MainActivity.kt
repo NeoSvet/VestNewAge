@@ -642,6 +642,11 @@ class MainActivity : AppCompatActivity(), ItemClicker {
                 BookFragment.newInstance(BookTab.HOLY_RUS.value, -1).also {
                     fragmentTransaction.replace(R.id.my_fragment, it)
                 }
+
+            Section.WORLD_AFTER_WAR -> curFragment =
+                BookFragment.newInstance(BookTab.WORLD_AFTER_WAR.value, -1).also {
+                    fragmentTransaction.replace(R.id.my_fragment, it)
+                }
         }
         firstTab = 0
         if (supportFragmentManager.isDestroyed.not()) fragmentTransaction.commit()
