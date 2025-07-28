@@ -108,7 +108,11 @@ class MasterLoader : Loader, LoadHandlerLite {
         handler?.postMessage(msg)
         getBookLoader().let {
             it.loadBookList(book)
-            it.loadBook(book, null)
+            it.loadBook(book, object : LoadHandlerLite {
+                override fun postPercent(value: Int) {
+                    handler?.postMessage("$msg ($value%)")
+                }
+            })
         }
         isRun = false
     }
@@ -129,8 +133,7 @@ class MasterLoader : Loader, LoadHandlerLite {
             val f = Files.dateBase(d.my)
             if (!f.exists() || f.length() <= DataBase.EMPTY_BASE_SIZE)
                 loadBase(url + d.my)
-        } else
-            loadFromSite(d)
+        } else loadFromSite(d)
         isRun = false
     }
 

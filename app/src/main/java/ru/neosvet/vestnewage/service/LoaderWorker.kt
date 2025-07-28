@@ -244,9 +244,10 @@ class LoaderWorker(
     }
 
     private fun loadOtherBooks() {
-        task = Task.LOAD_DOCTRINE
         currentLoader = loader
+        task = Task.LOAD_DOCTRINE
         loader.loadBook(BookTab.DOCTRINE)
+        upProg()
         task = Task.LOAD_HOLY_RUS
         loader.loadBook(BookTab.HOLY_RUS)
         upProg()
@@ -293,7 +294,8 @@ class LoaderWorker(
         val y = todayYear - 2000
         list.forEach {
             max += when (it) {
-                in 0..1 -> 2 //basic and other book
+                0 -> 2 //basic
+                1 -> 3 //other book
                 4 -> 5 //book 2004
                 y -> todayMonth
                 else -> 12

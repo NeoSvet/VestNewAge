@@ -8,10 +8,8 @@ import ru.neosvet.vestnewage.loader.basic.Loader
 import ru.neosvet.vestnewage.loader.page.PageParser
 import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.network.Urls
-import ru.neosvet.vestnewage.storage.DataBase
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.utils.Const
-import ru.neosvet.vestnewage.utils.isDoctrineBook
 import ru.neosvet.vestnewage.utils.isPoem
 import ru.neosvet.vestnewage.utils.percent
 import java.io.BufferedReader
@@ -107,60 +105,51 @@ class BookLoader(private val client: NeoClient) : Loader {
         val br = BufferedReader(stream, 1000)
         val storage = PageStorage()
         storage.open(Books.baseName(book))
+        val prefix = Books.Prefix(book)
         var link: String? = br.readLine()
-        while (link != null) {
-            val title = br.readLine()
-            link = Books.Prefix(book) + link
-            storage.putTitle(title, link)
-            if (isRun.not()) break
+        while (link != null && isRun) {
+            storage.putTitle(br.readLine(), prefix + link)
             link = br.readLine()
         }
         br.close()
         storage.close()
     }
 
-    fun loadBook(book: BookTab, handler: LoadHandlerLite?) {
+    fun loadBook(book: BookTab, handler: LoadHandlerLite) {
         //DOCTRINE(2), HOLY_RUS(3), WORLD_AFTER_WAR(4)
         isRun = true
         val storage = PageStorage()
         storage.open(Books.baseName(book))
-        val cursor = storage.getListAll()
-        if (cursor.moveToFirst()) {
-            var s: String?
-            var time: Long
-            val max = cursor.count - 1
-            var cur = 0
-            val iId = cursor.getColumnIndex(DataBase.ID)
-            val iLink = cursor.getColumnIndex(Const.LINK)
-            val iTime = cursor.getColumnIndex(Const.TIME)
-            val len = Books.Prefix(book).length
-            val url = Books.baseUrl(book)
-            while (cursor.moveToNext() && isRun) {
-                val link = cursor.getString(iLink)
-                if (book == BookTab.DOCTRINE && !link.isDoctrineBook) continue
-                val id = cursor.getInt(iId)
-                time = cursor.getLong(iTime)
-                s = link.substring(len) //pages
-                val stream = client.getStream("${url}$s.txt")
-                val br = BufferedReader(InputStreamReader(stream, Const.ENCODING), 1000)
-                s = br.readLine() //time
+        var time: Long
+        var cur = 0
+        val prefix = Books.Prefix(book)
+        val stream = client.getStream("${Books.baseUrl(book)}book.txt")
+        val br = BufferedReader(InputStreamReader(stream, Const.ENCODING), 1000)
+        val max = br.readLine().toInt() //count pages
+        var s: String? = br.readLine()
+        while (s != null && isRun) {
+            val link = prefix + s
+            val cursor = storage.searchLink(link)
+            if (cursor.moveToFirst()) {
+                val id = cursor.getInt(0)
+                time = cursor.getLong(1)
+                s = br.readLine()
                 if (time != s.toLong().apply { time = this }) {
                     storage.deleteParagraphs(id)
                     s = br.readLine()
-                    while (s != null) {
+                    while (s != Const.END && s != null) {
                         storage.insertParagraph(id, s)
                         s = br.readLine()
                     }
                     storage.updateTime(link, time)
                 }
-                br.close()
-                handler?.let {
-                    cur++
-                    it.postPercent(cur.percent(max))
-                }
+                cur++
+                handler.postPercent(cur.percent(max))
             }
+            cursor.close()
+            s = br.readLine()
         }
-        cursor.close()
+        br.close()
         storage.close()
     }
 }
