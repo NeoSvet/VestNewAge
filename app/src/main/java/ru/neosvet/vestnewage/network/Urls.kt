@@ -18,7 +18,7 @@ import java.io.FileWriter
 import java.io.InputStreamReader
 
 object Urls {
-    private var TIME = 1753423874000L
+    private var TIME = 1753680265000L
     private const val FILE = "/urls.txt"
     const val PRED_LINK = "/2004/predislovie.html"
     const val DOCTRINE = "https://doktrina.info/"
@@ -31,7 +31,7 @@ object Urls {
         "https://blagayavest.info/", "https://www.otkroveniya.com/", //SITE 2 3
         "https://doktrina.info/doktrina-sozdatelya/", //DOCTRINE_SITE  4
         "https://t.me/Novosti_ot_SOZDATELYA/", //TELEGRAM_URL 5
-        "doctrine/", "vna/doctrine/", //DOCTRINE_BASE 6 7
+        "vna/doctrine/", "", //DOCTRINE_BASE 6 7
         "vna/posts/", "", //ADDITION 8 9
         "ads_vna.txt", "vna/ads.txt", //DEV_ADS 10 11
         "http://neosvet.ucoz.ru/vna/", "", //WEB_PAGE 12 13
