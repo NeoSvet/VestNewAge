@@ -8,6 +8,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
+import ru.neosvet.vestnewage.data.Books
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.helper.BrowserHelper
 import ru.neosvet.vestnewage.helper.DateHelper
@@ -258,7 +259,11 @@ class BrowserToiler : NeoToiler() {
                 bw.write("<link rel='stylesheet' type='text/css' href='")
                 bw.flush()
                 bw.write(STYLE.substring(1))
-                bw.write("'>\n</head><body>\n<h1 class='page-title' id='title'>")
+                bw.write("'>\n</head><body>\n")
+                if (storage.isOtherBook) {
+                    bw.write(Books.getPromo(link))
+                }
+                bw.write("<h1 class='page-title' id='title'>")
                 bw.write(s)
                 bw.write("</h1>\n")
                 bw.flush()

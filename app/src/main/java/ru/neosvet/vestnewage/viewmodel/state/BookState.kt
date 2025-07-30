@@ -16,10 +16,6 @@ sealed class BookState: NeoState {
         val selectedTab: Int,
         val shownDwnDialog: Boolean
     ) : StatusState
-    data class Book(
-        val linkToSrc: String,
-        val list: List<BasicItem>
-    ) : PrimaryState
     data class Rnd(
         val title: String,
         val link: String,

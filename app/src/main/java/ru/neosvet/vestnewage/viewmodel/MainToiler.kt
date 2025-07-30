@@ -12,6 +12,7 @@ import okhttp3.Request
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.BasicItem
+import ru.neosvet.vestnewage.data.Books
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.helper.MainHelper
 import ru.neosvet.vestnewage.loader.SiteLoader
@@ -71,6 +72,7 @@ class MainToiler : NeoToiler() {
         postState(MainState.Ads(hasNew, loader.warnIndex, timeDiff))
         loadNew()
         loadPatch()
+        Books.loadLinks()
         postState(BasicState.Success)
     }
 

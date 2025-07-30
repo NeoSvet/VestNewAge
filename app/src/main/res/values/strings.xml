@@ -147,6 +147,7 @@
     <string name="go_to_last_place">Перейти к прошлому месту?</string>
     <string name="not_load_month">Месяц не загружен</string>
     <string name="not_found_reaction">Реакция не найдена</string>
+    <string name="promo_book">Материал предоставляется для ознакомительных целей, приобрести книгу можно здесь</string>
     <!--MarkersFragment-->
     <string name="export">Экспорт</string>
     <string name="import_">Импорт</string>

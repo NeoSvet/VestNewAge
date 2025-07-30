@@ -8,6 +8,7 @@ import android.os.Build
 import androidx.core.content.edit
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
+import ru.neosvet.vestnewage.data.Books
 import ru.neosvet.vestnewage.data.DateUnit
 import ru.neosvet.vestnewage.data.Section
 import ru.neosvet.vestnewage.helper.DateHelper
@@ -64,6 +65,10 @@ class LaunchUtils(context: Context) {
         if (previousVer < 74 && DateHelper.isLoadedOtkr())
             Thread {
                 removePrintInLinks()
+            }.start()
+        if (previousVer < 77)
+            Thread {
+                Books.loadLinks()
             }.start()
     }
 

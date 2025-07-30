@@ -14,9 +14,9 @@ import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.BasicItem
 import ru.neosvet.vestnewage.data.BookRnd
 import ru.neosvet.vestnewage.data.BookTab
+import ru.neosvet.vestnewage.data.Books
 import ru.neosvet.vestnewage.databinding.BookFragmentBinding
 import ru.neosvet.vestnewage.helper.DateHelper
-import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.service.LoaderWorker
 import ru.neosvet.vestnewage.storage.DataBase
 import ru.neosvet.vestnewage.utils.Const
@@ -32,6 +32,7 @@ import ru.neosvet.vestnewage.viewmodel.BookToiler
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
 import ru.neosvet.vestnewage.viewmodel.state.BasicState
 import ru.neosvet.vestnewage.viewmodel.state.BookState
+import ru.neosvet.vestnewage.viewmodel.state.ListState
 import ru.neosvet.vestnewage.viewmodel.state.NeoState
 
 class BookFragment : NeoFragment() {
@@ -56,7 +57,6 @@ class BookFragment : NeoFragment() {
         get() = getString(R.string.book)
     private var openedReader = false
     private var shownDwnDialog = false
-    private var linkToSrc = ""
     private val tab: Int
         get() = binding?.pTab?.selectedIndex ?: 0
     private val hasDatePicker: Boolean
@@ -179,7 +179,6 @@ class BookFragment : NeoFragment() {
 
             is BookState.Primary -> binding?.run {
                 act?.hideToast()
-                linkToSrc = ""
                 adapter.clear()
                 if (state.time == 0L) {
                     tvUpdate.text = state.label
@@ -200,8 +199,7 @@ class BookFragment : NeoFragment() {
                     tvUpdate.text = getString(R.string.link_to_src)
             }
 
-            is BookState.Book -> binding?.run {
-                linkToSrc = state.linkToSrc
+            is ListState.Primary -> binding?.run {
                 adapter.clear()
                 adapter.setItems(state.list)
                 if (state.list.isEmpty()) {
@@ -230,8 +228,11 @@ class BookFragment : NeoFragment() {
         rvBook.adapter = adapter
         setListEvents(rvBook, false)
         tvUpdate.setOnClickListener {
-            if (linkToSrc.isNotEmpty())
-                Urls.openInApps(linkToSrc)
+            if (!hasDatePicker) {
+                val p = Books.getList(toiler.selectedTab)
+                val fr = BottomListFragment.newInstance(p.first, p.second)
+                fr.show(requireActivity().supportFragmentManager, null)
+            }
         }
     }
 

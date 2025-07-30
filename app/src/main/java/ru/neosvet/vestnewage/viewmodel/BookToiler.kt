@@ -34,12 +34,14 @@ import ru.neosvet.vestnewage.viewmodel.basic.BookStrings
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
 import ru.neosvet.vestnewage.viewmodel.state.BasicState
 import ru.neosvet.vestnewage.viewmodel.state.BookState
+import ru.neosvet.vestnewage.viewmodel.state.ListState
 import java.io.BufferedInputStream
 import java.io.DataInputStream
 import java.util.Random
 
 class BookToiler : NeoToiler(), LoadHandlerLite {
-    private var selectedTab = BookTab.POEMS
+    var selectedTab = BookTab.POEMS
+        private set
     private lateinit var dPoems: DateUnit
     private lateinit var dEpistles: DateUnit
     private lateinit var strings: BookStrings
@@ -252,11 +254,10 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
         storage.open(Books.baseName(selectedTab))
         val cursor = storage.getListAll()
         cursor.moveToFirst()
-        val site = Books.siteUrl(selectedTab)
         if (cursor.count == 1) {
             cursor.close()
             storage.close()
-            postState(BookState.Book(site, listOf()))
+            postState(ListState.Primary(list = listOf()))
             reLoad()
             return
         }
@@ -273,9 +274,9 @@ class BookToiler : NeoToiler(), LoadHandlerLite {
         cursor.close()
         storage.close()
         if (list.isEmpty()) {
-            postState(BookState.Book(site, listOf()))
+            postState(ListState.Primary(list = listOf()))
             reLoad()
-        } else postState(BookState.Book(site, list))
+        } else postState(ListState.Primary(list = list))
     }
 
     @SuppressLint("Range")
