@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -13,22 +14,32 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.BasicItem
+import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.ScreenUtils
 import ru.neosvet.vestnewage.view.basic.convertToDpi
 import ru.neosvet.vestnewage.view.list.BasicAdapter
 
-class WelcomeFragment : BottomSheetDialogFragment() {
+class BottomListFragment : BottomSheetDialogFragment() {
     interface ItemClicker {
         fun onItemClick(link: String)
     }
 
     companion object {
-        fun newInstance(hasNew: Boolean, timediff: Int): WelcomeFragment {
-            val fragment = WelcomeFragment()
+        fun newInstance(hasNew: Boolean, timediff: Int): BottomListFragment {
+            val fragment = BottomListFragment()
             val args = Bundle()
             args.putBoolean(Const.ADS, hasNew)
             args.putInt(Const.TIMEDIFF, timediff)
+            fragment.arguments = args
+            return fragment
+        }
+
+        fun newInstance(titles: List<String>, links: List<String>): BottomListFragment {
+            val fragment = BottomListFragment()
+            val args = Bundle()
+            args.putStringArray(Const.TITLE, titles.toTypedArray())
+            args.putStringArray(Const.LINK, links.toTypedArray())
             fragment.arguments = args
             return fragment
         }
@@ -43,7 +54,7 @@ class WelcomeFragment : BottomSheetDialogFragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.welcome_fragment, container, false)
+        return inflater.inflate(R.layout.bottom_list_fragment, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -59,7 +70,14 @@ class WelcomeFragment : BottomSheetDialogFragment() {
         val rvBottom: RecyclerView = view.findViewById(R.id.rvBottom)
         rvBottom.layoutManager = GridLayoutManager(requireContext(), ScreenUtils.span)
         rvBottom.adapter = adapter
-        arguments?.let { parseArguments(it) }
+        arguments?.let {
+            if (it.containsKey(Const.TITLE)) {
+                val tv: TextView = view.findViewById(R.id.tvTitle)
+                tv.setText(R.string.links)
+                parseList(it)
+            } else
+                parseDiff(it)
+        }
         adapter.setItems(list)
     }
 
@@ -69,7 +87,15 @@ class WelcomeFragment : BottomSheetDialogFragment() {
             clicker = context
     }
 
-    private fun parseArguments(args: Bundle) {
+    private fun parseList(args: Bundle) {
+        val titles = args.getStringArray(Const.TITLE)
+        val links = args.getStringArray(Const.LINK)
+        if (titles == null || links == null) return
+        for (i in titles.indices)
+            list.add(BasicItem(titles[i], links[i]))
+    }
+
+    private fun parseDiff(args: Bundle) {
         val timeDiff = args.getInt(Const.TIMEDIFF)
         val item = BasicItem(getString(R.string.sync_time))
         item.des = if (timeDiff == 0)
@@ -82,6 +108,10 @@ class WelcomeFragment : BottomSheetDialogFragment() {
     }
 
     private fun onItemClick(index: Int, item: BasicItem) {
+        if (item.link.startsWith("http")) {
+            Urls.openInApps(item.link)
+            return
+        }
         clicker?.onItemClick(item.link)
         if (item.link == Const.ADS) dismiss()
     }

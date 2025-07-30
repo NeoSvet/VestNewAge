@@ -68,6 +68,8 @@ import ru.neosvet.vestnewage.view.basic.StatusButton
 import ru.neosvet.vestnewage.view.basic.defIndent
 import ru.neosvet.vestnewage.view.dialog.SetNotifDialog
 import ru.neosvet.vestnewage.view.fragment.BookFragment
+import ru.neosvet.vestnewage.view.fragment.BottomListFragment
+import ru.neosvet.vestnewage.view.fragment.BottomListFragment.ItemClicker
 import ru.neosvet.vestnewage.view.fragment.CalendarFragment
 import ru.neosvet.vestnewage.view.fragment.HelpFragment
 import ru.neosvet.vestnewage.view.fragment.HomeFragment
@@ -79,8 +81,6 @@ import ru.neosvet.vestnewage.view.fragment.SearchFragment
 import ru.neosvet.vestnewage.view.fragment.SettingsFragment
 import ru.neosvet.vestnewage.view.fragment.SiteFragment
 import ru.neosvet.vestnewage.view.fragment.SummaryFragment
-import ru.neosvet.vestnewage.view.fragment.WelcomeFragment
-import ru.neosvet.vestnewage.view.fragment.WelcomeFragment.ItemClicker
 import ru.neosvet.vestnewage.viewmodel.MainToiler
 import ru.neosvet.vestnewage.viewmodel.state.BasicState
 import ru.neosvet.vestnewage.viewmodel.state.ListState
@@ -100,7 +100,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
     private lateinit var helper: MainHelper
     private var firstSection = Section.EPISTLES
     private var curFragment: NeoFragment? = null
-    private var frWelcome: WelcomeFragment? = null
+    private var frWelcome: BottomListFragment? = null
 
     lateinit var status: StatusButton
         private set
@@ -762,7 +762,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
             is MainState.Ads -> {
                 launchUtils.updateTime()
                 if (state.timediff.absoluteValue > LIMIT_DIFF_SEC || state.hasNew) frWelcome =
-                    WelcomeFragment.newInstance(state.hasNew, state.timediff)
+                    BottomListFragment.newInstance(state.hasNew, state.timediff)
                 if (state.warnIndex > -1) showWarnAds(state.warnIndex)
             }
 
@@ -770,7 +770,7 @@ class MainActivity : AppCompatActivity(), ItemClicker {
             is MainState.FirstRun -> firstRun(state)
 
             is ListState.Primary -> {
-                if (frWelcome == null) frWelcome = WelcomeFragment.newInstance(false, 0)
+                if (frWelcome == null) frWelcome = BottomListFragment.newInstance(false, 0)
                 frWelcome?.list?.addAll(state.list)
             }
 
