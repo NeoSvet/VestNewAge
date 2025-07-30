@@ -21,15 +21,16 @@ class DownloadDialog(
         private const val BASIC_SIZE = 165000
         private const val ADDITION_DAY_SIZE = 450
         private const val ADDITION_IN_DAYS = 19078
-        private const val OTHER_BOOKS_SIZE = 1449575
+        private const val OTHER_BOOKS_SIZE = 1449528
+        //DOCTRINE:217436 HOLY_RUS:351200 WORLD_AFTER_WAR:880892
 
-        //DOCTRINE:217436 HOLY_RUS:351200 WORLD_AFTER_WAR:880939
         private val BOOK_SIZE = arrayOf(
-            1133299, 1056687, 1057064, 1010414, 972633, 484820
+            1438556, 1311586, 1146345, 1099547,
+            1025842, 1011288, 969407, 939166, 477745
         )
         private val OTRK_SIZE = arrayOf(
-            675521, 714810, 643777, 500279, 547107, 541682,
-            546371, 591472, 560708, 759755, 555979, 285863
+            671833, 712471, 643458, 500191, 546561, 541399,
+            547643, 591372, 560293, 758865, 555323, 285555
         )
         private val list = mutableListOf<CheckItem>()
         private val KOEF_INDEX = BOOK_SIZE.size + OTRK_SIZE.size + 3
@@ -197,8 +198,7 @@ class DownloadDialog(
 
     private fun calcMidSize() {
         var n = 0
-        for (i in BOOK_SIZE)
-            n += i
+        for (i in BOOK_SIZE) n += i
         midSize = n / BOOK_SIZE.size
     }
 }
