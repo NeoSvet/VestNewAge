@@ -35,16 +35,17 @@ class SummaryLoader(private val client: NeoClient) : Loader {
         val bw = BufferedWriter(FileWriter(file))
         val now = DateUnit.initNow()
         val unread = UnreadStorage()
+        s = s.substring(s.indexOf("<item>") + 6)
         val m = s.split("<item>")
         br.close()
         stream.close()
         var b: Int
         val com = Urls.isSiteCom
-        for (i in 1 until m.size) {
+        for (i in 0 until m.size) {
             a = m[i].indexOf("<link") + 6
             b = m[i].indexOf("</", a)
-            if (com)
-                s = m[i].substring(a, b).replace(".eu/", ".com/")
+            s = m[i].substring(a, b)
+            if (com) s = s.replace(".eu/", ".com/")
             if (s.contains(host))
                 s = s.substring(s.indexOf(host) + host.length + 1)
             if (s.contains("#0")) s = s.replace("#0", "#2")

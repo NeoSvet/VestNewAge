@@ -116,7 +116,7 @@ class UpdateLoader(private val client: NeoClient) : Loader {
             file.setLastModified(System.currentTimeMillis())
             return list
         }
-        val m = s.split("<item>")
+        val m = s.substring(s.indexOf("<item>") + 6).split("<item>")
         br.close()
         val bw = BufferedWriter(FileWriter(file))
         val host = Urls.Host
@@ -126,11 +126,12 @@ class UpdateLoader(private val client: NeoClient) : Loader {
         var link: String
         var b: Int
         val loader = PageLoader(client)
-
+        val com = Urls.isSiteCom
         for (i in 1 until m.size) {
             a = m[i].indexOf("<link") + 6
             b = m[i].indexOf("</", a)
             link = m[i].substring(a, b)
+            if (com) link = link.replace(".eu/", ".com/")
             if (link.contains(host))
                 link = link.substring(link.indexOf(host) + host.length + 1)
             if (link.contains("#0")) link = link.replace("#0", "#2")

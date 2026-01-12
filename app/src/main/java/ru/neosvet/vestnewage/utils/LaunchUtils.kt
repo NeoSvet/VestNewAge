@@ -70,6 +70,28 @@ class LaunchUtils(context: Context) {
             Thread {
                 Books.loadLinks()
             }.start()
+        if (previousVer < 78)
+            Thread {
+                removeIncorrectLinks()
+            }.start()
+    }
+
+    private fun removeIncorrectLinks() {
+        val d = DateUnit.putYearMonth(2025, 12)
+        val storage = PageStorage()
+        val folder = App.context.filesDir.parent?.plus("/databases/")
+        val today = DateUnit.initToday().timeInDays
+        while (d.timeInDays < today) {
+            if (File(folder + d.my).exists()) {
+                storage.open(d.my)
+                storage.getLinksList().forEach {
+                    if (it.contains("</link>"))
+                        storage.deletePage(it)
+                }
+                storage.close()
+            }
+            d.changeMonth(1)
+        }
     }
 
     private fun removePrintInLinks() {
