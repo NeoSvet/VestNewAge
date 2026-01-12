@@ -4,10 +4,10 @@ import android.animation.Animator
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
-import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import androidx.appcompat.widget.PopupMenu
+import android.widget.ArrayAdapter
+import android.widget.ListPopupWindow
 import androidx.core.view.isVisible
 import androidx.core.view.updatePadding
 import androidx.lifecycle.ViewModelProvider
@@ -20,6 +20,8 @@ import ru.neosvet.vestnewage.helper.DateHelper
 import ru.neosvet.vestnewage.service.LoaderWorker
 import ru.neosvet.vestnewage.view.activity.BrowserActivity
 import ru.neosvet.vestnewage.view.basic.NeoFragment
+import ru.neosvet.vestnewage.view.basic.convertToDpi
+import ru.neosvet.vestnewage.view.basic.fromDpi
 import ru.neosvet.vestnewage.view.dialog.DownloadDialog
 import ru.neosvet.vestnewage.view.list.CalendarAdapter
 import ru.neosvet.vestnewage.viewmodel.CalendarToiler
@@ -138,27 +140,29 @@ class CalendarFragment : NeoFragment() {
         if (isBlocked) return
         when (item.count) {
             1 -> {
-                openLink(item.getLink(0))
+                openLink(item.Links[0])
                 return
             }
 
             0 -> return
         }
-        val pMenu = PopupMenu(requireContext(), view)
-        for (i in 0 until item.count) {
-            pMenu.menu.add(item.getTitle(i))
+        val ctx = requireContext()
+        val popup = ListPopupWindow(ctx)
+        binding?.rvCalendar.let {
+            val cell = ctx.fromDpi(R.dimen.cell_size)
+            val r = if (it == null) 5 else it.height / cell - 1
+            popup.anchorView = it
+            popup.verticalOffset = -(r * cell) - ctx.convertToDpi(3)
         }
-        pMenu.setOnMenuItemClickListener { menuItem: MenuItem ->
-            val title = menuItem.title.toString()
-            for (i in 0 until item.count) {
-                if (item.getTitle(i) == title) {
-                    openLink(item.getLink(i))
-                    break
-                }
-            }
-            true
+        val adapter = ArrayAdapter(
+            ctx, R.layout.spinner_item, item.Titles
+        )
+        popup.setAdapter(adapter)
+        popup.setOnItemClickListener { _, _, position, _ ->
+            openLink(item.Links[position])
+            popup.dismiss()
         }
-        pMenu.show()
+        popup.show()
     }
 
     @SuppressLint("SetTextI18n")

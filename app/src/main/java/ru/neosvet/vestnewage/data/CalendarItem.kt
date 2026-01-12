@@ -13,9 +13,13 @@ class CalendarItem(val num: Int, idColor: Int) {
     var isBold = num < 1
     private var poem = false
     private var epistle = false
+    val Titles: List<String>
+        get() = titles
+    val Links: List<String>
+        get() = links
 
     fun clear() {
-        if (titles.size > 0) {
+        if (titles.isNotEmpty()) {
             titles.clear()
             links.clear()
             poem = false
@@ -23,19 +27,13 @@ class CalendarItem(val num: Int, idColor: Int) {
         }
     }
 
-    fun getTitle(i: Int): String {
-        return titles[i]
-    }
-
-    fun getLink(i: Int): String {
-        return links[i]
-    }
-
     val count: Int
         get() = links.size
 
     fun addTitle(title: String) {
-        titles.add(title)
+        if (title.contains("№"))
+            titles.add(title.substring(title.indexOf("№")))
+        else titles.add(title)
     }
 
     fun addLink(link: String) {
