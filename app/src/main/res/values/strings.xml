@@ -44,7 +44,6 @@
     <string name="check_out_settings">Ознакомтесь с настройками</string>
     <string name="example_periodic_check">Например, можно задать периодическую проверку наличия новых Катренов</string>
     <!--Lib-->
-    <string name="address_copied">Адрес скопирован</string>
     <string name="back">&#160;назад</string>
     <string name="loaded">Загружено&#160;</string>
     <string name="list_no_loaded">Список не загружен</string>
@@ -134,7 +133,6 @@
     <string name="tip_end_list">Достигнут конец списка</string>
     <string name="not_found_page">Страница не найдена и не может быть загружена</string>
     <string name="share">Поделиться</string>
-    <string name="copied">Скопировано</string>
     <string name="in_markers">В закладки</string>
     <string name="opt_scale">Оптимальный масштаб</string>
     <string name="src_scale">Исходный масштаб</string>

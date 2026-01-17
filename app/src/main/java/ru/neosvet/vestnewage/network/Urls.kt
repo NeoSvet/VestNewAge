@@ -5,7 +5,6 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.widget.Toast
 import androidx.core.net.toUri
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
@@ -249,10 +248,5 @@ object Urls {
         val clipboard = App.context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
         val clip = ClipData.newPlainText(App.context.getString(R.string.app_name), txt)
         clipboard.setPrimaryClip(clip)
-        Toast.makeText(
-            App.context,
-            App.context.getString(R.string.address_copied),
-            Toast.LENGTH_LONG
-        ).show()
     }
 }

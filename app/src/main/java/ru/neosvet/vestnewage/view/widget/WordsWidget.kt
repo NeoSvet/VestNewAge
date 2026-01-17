@@ -9,7 +9,6 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.widget.RemoteViews
-import android.widget.Toast
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -158,7 +157,6 @@ class WordsWidget : AppWidgetProvider() {
         val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
         val clip = ClipData.newPlainText(context.getString(R.string.app_name), text)
         clipboard.setPrimaryClip(clip)
-        Toast.makeText(context, context.getString(R.string.copied), Toast.LENGTH_LONG).show()
     }
 
     private fun getId(intent: Intent): IntArray? {

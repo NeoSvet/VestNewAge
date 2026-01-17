@@ -9,7 +9,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.recyclerview.widget.GridLayoutManager
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
@@ -100,7 +99,6 @@ class ShareDialog : BottomSheetDialogFragment() {
             val clipboard = ctx.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
             val clip = ClipData.newPlainText(getString(R.string.app_name), getContent())
             clipboard.setPrimaryClip(clip)
-            Toast.makeText(ctx, getString(R.string.copied), Toast.LENGTH_LONG).show()
             dismiss()
         }
         val enabled = options.contains(true)
@@ -110,12 +108,12 @@ class ShareDialog : BottomSheetDialogFragment() {
 
     private fun getContent(): String {
         val sb = StringBuilder()
-        if (content.isNotEmpty()) { // if(link.contains(Urls.TelegramUrl)) ?
+        if (link.startsWith(Urls.TelegramUrl)) {
             if (selectedTitle) {
                 sb.append(title)
                 sb.append(Const.N)
             }
-            if (selectedContent) {
+            if (selectedContent && content.isNotEmpty()) {
                 sb.append(content)
                 sb.append(Const.NN)
             }
