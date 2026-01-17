@@ -23,6 +23,7 @@ class PageStorage : DataBase.Parent, StorageSearchable {
             return when {
                 link.contains(Const.DOCTRINE) -> DataBase.DOCTRINE
                 link.contains(Const.HOLY_RUS) -> DataBase.HOLY_RUS
+                link.contains(Const.WORLD_AFTER_WAR) -> DataBase.WORLD_AFTER_WAR
                 !link.contains("/") || link.contains("press") -> DataBase.ARTICLES
                 link.contains("pred") || link.hasDate ->
                     link.dateFromLink.my

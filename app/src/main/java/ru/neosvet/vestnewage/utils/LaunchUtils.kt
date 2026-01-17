@@ -148,22 +148,18 @@ class LaunchUtils(context: Context) {
 
     private fun showSummaryNotif() {
         if (notifId - START_ID < 2) return  //notifications < 2, summary is not need
-        val notifBuilder = notifUtils!!.getSummaryNotif(
-            App.context.getString(R.string.tips),
-            NotificationUtils.CHANNEL_TIPS
-        )
-        notifBuilder.setGroup(NotificationUtils.GROUP_TIPS)
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) notifBuilder.setContentIntent(
-            PendingIntent.getActivity(
-                App.context, 0,
-                settingsIntent, FLAGS
+        notifUtils?.let {
+            val notifBuilder = it.getSummaryNotif(
+                App.context.getString(R.string.tips),
+                NotificationUtils.CHANNEL_TIPS
             )
-        )
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-            val piEmpty = PendingIntent.getActivity(App.context, 0, Intent(), FLAGS)
-            notifBuilder.setFullScreenIntent(piEmpty, false)
+            notifBuilder.setGroup(NotificationUtils.GROUP_TIPS)
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+                val piEmpty = PendingIntent.getActivity(App.context, 0, Intent(), FLAGS)
+                notifBuilder.setFullScreenIntent(piEmpty, false)
+            }
+            it.notify(START_ID, notifBuilder)
         }
-        notifUtils!!.notify(START_ID, notifBuilder)
     }
 
     fun openLink(intent: Intent): InputData? {

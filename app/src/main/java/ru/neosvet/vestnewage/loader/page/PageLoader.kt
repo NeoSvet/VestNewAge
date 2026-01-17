@@ -66,17 +66,17 @@ class PageLoader(private val client: NeoClient) : Loader {
             }
             if (page.isHead) {
                 if (fix && s?.contains("02.02.20") == true)
-                    s = s?.replace("20.20", "2020")
+                    s = s.replace("20.20", "2020")
                 hasNoind = false
                 s = getTitle(s, storage.name)
                 if (id > 0) {
                     if (par.isEmpty()) par = "#2"
                     storage.insertParagraph(
                         id, "<p class='noind'>" + App.context.getString(R.string.on_same_day) +
-                                "<br><a href='${adr + par}'>${s?.replace("“", "")}</a></p>"
+                                "<br><a href='${adr + par}'>${s.replace("“", "")}</a></p>"
                     )
                 }
-                id = storage.putTitle(s!!, adr + par, time)
+                id = storage.putTitle(s, adr + par, time)
                 if (exists) storage.deleteParagraphs(id)
                 s = page.nextElem
             }

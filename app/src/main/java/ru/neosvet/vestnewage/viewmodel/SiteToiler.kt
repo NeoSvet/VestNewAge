@@ -128,8 +128,8 @@ class SiteToiler : NeoToiler() {
                             BasicAdapter.LABEL_SEPARATOR + item.des
                 if (link.contains(Const.N)) {
                     link.lines().forEach { s ->
-                        if (line != null) line?.let {
-                            item.addLink(fixHead(s), it)
+                        if (line != null) {
+                            item.addLink(fixHead(s), line)
                             line = null
                         } else line = s
                     }

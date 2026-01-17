@@ -430,7 +430,7 @@ class BrowserToiler : NeoToiler() {
             dbJournal.checkLimit()
             dbJournal.close()
             return position
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             dbJournal.close()
             val file = Files.dateBase(DataBase.JOURNAL)
             file.delete()

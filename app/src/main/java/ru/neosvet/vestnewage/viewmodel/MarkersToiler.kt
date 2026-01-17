@@ -5,6 +5,7 @@ import android.content.ContentValues
 import android.content.Context
 import android.database.Cursor
 import android.net.Uri
+import androidx.core.net.toUri
 import androidx.work.Data
 import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.App
@@ -145,7 +146,7 @@ class MarkersToiler : NeoToiler() {
         task = Type.EXPORT
         isRun = true
         scope.launch {
-            doExport(Uri.parse(file))
+            doExport(file.toUri())
             postState(MarkersState.FinishExport(file))
             isRun = false
         }
@@ -155,7 +156,7 @@ class MarkersToiler : NeoToiler() {
         task = Type.IMPORT
         isRun = true
         scope.launch {
-            doImport(Uri.parse(file))
+            doImport(file.toUri())
             postState(MarkersState.FinishImport)
             isRun = false
         }

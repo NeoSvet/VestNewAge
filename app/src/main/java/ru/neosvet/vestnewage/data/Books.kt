@@ -95,7 +95,7 @@ object Books {
         val f1 = getFile(BookTab.DOCTRINE)
         val f2 = getFile(BookTab.HOLY_RUS)
         val f3 = getFile(BookTab.WORLD_AFTER_WAR)
-        var need = false
+        var need: Boolean
         if (!f1.exists() || !f2.exists() || !f3.exists())
             need = true
         else {
