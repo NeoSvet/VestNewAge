@@ -74,7 +74,7 @@ class SiteLoader(
                 if (d.hasDate) {
                     if (d.contains("<")) {
                         i = d.indexOf("<")
-                        d = d.substring(0, i)
+                        d = d.take(i)
                     }
                     date = DateUnit.parse("$d 12:00")
                 }
@@ -116,7 +116,7 @@ class SiteLoader(
         if (isSite) page.load(link, "")
         else {
             val i = link.lastIndexOf("/") + 1
-            val url = link.substring(0, i) + Const.PRINT + link.substring(i)
+            val url = link.take(i) + Const.PRINT + link.substring(i)
             page.load(url, "razdel")
         }
         var s: String? = page.currentElem

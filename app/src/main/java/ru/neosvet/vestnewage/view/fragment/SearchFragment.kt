@@ -523,7 +523,7 @@ class SearchFragment : NeoFragment(), SearchDialog.Parent, PagingAdapter.Parent,
                 val s = when {
                     helper.mode == SearchEngine.MODE_TITLES -> null
                     helper.mode == SearchEngine.MODE_LINKS -> null
-                    helper.isByWords -> item.des.substring(0, item.des.length - 4)
+                    helper.isByWords -> item.des.take(item.des.length - 4)
                         .replace("</p>", Const.NN).fromHTML
 
                     else -> helper.request

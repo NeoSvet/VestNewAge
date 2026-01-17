@@ -156,7 +156,7 @@ class SiteToiler : NeoToiler() {
                     val t = des.substring(a, b)
                     for (f in fixers) {
                         if (t.contains(f.first)) {
-                            des = des.substring(0, a) + f.second + des.substring(b)
+                            des = des.take(a) + f.second + des.substring(b)
                             b = des.indexOf("<", a)
                             break
                         }

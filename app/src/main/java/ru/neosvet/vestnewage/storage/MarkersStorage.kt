@@ -18,7 +18,7 @@ class MarkersStorage : DataBase.Parent {
             if (!list.isNullOrEmpty()) {
                 var s = list.trimStart().trimEnd()
                 if (s.lastIndexOf(Const.COMMA) == s.length - 1)
-                    s = s.substring(0, s.length - 1)
+                    s = s.take(s.length - 1)
                 if (s.indexOf(Const.COMMA) == 0)
                     s = s.substring(1)
                 return s

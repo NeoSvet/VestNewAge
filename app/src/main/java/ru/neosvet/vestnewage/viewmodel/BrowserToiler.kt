@@ -286,7 +286,7 @@ class BrowserToiler : NeoToiler() {
                             s = PAR_POEM + s.substring(s.indexOf(">") + 1)
                         if (isNumPar && !s.contains("noind")) {
                             n = s.indexOf(">") + 1
-                            s = s.substring(0, n) + "$par. " + s.substring(n)
+                            s = s.take(n) + "$par. " + s.substring(n)
                             par++
                             bw.write(s)
                         } else {

@@ -423,7 +423,7 @@ class BrowserActivity : AppCompatActivity(), ReaderClient.Parent, NeoInterface.P
     private fun findRequest() {
         val s = helper.request
         if (s.contains(Const.N))
-            binding.content.wvBrowser.findAllAsync(s.substring(0, s.indexOf(Const.N)))
+            binding.content.wvBrowser.findAllAsync(s.take(s.indexOf(Const.N)))
         else binding.content.wvBrowser.findAllAsync(s)
     }
 

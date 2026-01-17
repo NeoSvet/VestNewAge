@@ -187,7 +187,7 @@ class MarkerToiler : NeoToiler() {
         storage.close()
         helper.setContent(s)
         title = if (!s.contains(Const.NN)) ""
-        else s.substring(0, s.indexOf(Const.NN))
+        else s.take(s.indexOf(Const.NN))
     }
 
     private fun openCols() = helper.run {
@@ -240,7 +240,7 @@ class MarkerToiler : NeoToiler() {
     private fun setPlace(s: String) {
         if (s.contains("%")) {
             isPar = false
-            pos = s.substring(0, s.length - 1).replace(Const.COMMA, ".").toFloat()
+            pos = s.take(s.length - 1).replace(Const.COMMA, ".").toFloat()
             posText = helper.getPosText(pos)
             sel = strings.selectedPosition + s
         } else {

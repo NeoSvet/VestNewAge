@@ -226,13 +226,13 @@ class LaunchUtils(context: Context) {
 
             link.isPoem -> {
                 if (mLink[1] == "year.html") InputData(0, Section.BOOK)
-                else InputData(mLink[1].substring(0, 4).toInt(), Section.BOOK)
+                else InputData(mLink[1].take(4).toInt(), Section.BOOK)
             }
 
             mLink[1].contains("date") -> { //http://blagayavest.info/poems/?date=11-3-2017
                 val s = mLink[1].substring(5)
                 val m = s.substring(s.indexOf("-") + 1, s.lastIndexOf("-"))
-                link = (link.substring(1) + s.substring(0, s.indexOf("-"))
+                link = (link.substring(1) + s.take(s.indexOf("-"))
                         + "." + (if (m.length == 1) "0" else "") + m
                         + "." + s.substring(s.lastIndexOf("-") + 3) + Const.HTML)
                 openReader(link, null)

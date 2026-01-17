@@ -6,7 +6,11 @@ import ru.neosvet.vestnewage.network.NeoClient
 import ru.neosvet.vestnewage.network.NetConst
 import ru.neosvet.vestnewage.network.Urls
 import ru.neosvet.vestnewage.utils.Files
-import java.io.*
+import java.io.BufferedReader
+import java.io.BufferedWriter
+import java.io.File
+import java.io.FileOutputStream
+import java.io.OutputStreamWriter
 
 class StyleLoader {
     companion object {
@@ -68,7 +72,7 @@ class StyleLoader {
             s = if (i == 1) m[i].substring(m[i].indexOf("body")) else "#" + m[i]
             if (s.contains("P B {")) { //correct bold
                 u = s.indexOf("P B {")
-                s = s.substring(0, u) + s.substring(s.indexOf("}", u) + 1)
+                s = s.take(u) + s.substring(s.indexOf("}", u) + 1)
             }
             if (s.contains("content")) s = s.replace("15px", "5px")
             else if (s.contains("print2")) s = s.replace("8pt/9pt", "12pt")

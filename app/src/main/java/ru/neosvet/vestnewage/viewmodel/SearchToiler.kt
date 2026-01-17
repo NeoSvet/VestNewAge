@@ -264,7 +264,7 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent, SearchEngine.Parent, LoadHan
     }
 
     private fun dateFromString(date: String): DateUnit {
-        val month = date.substring(0, 2).toInt()
+        val month = date.take(2).toInt()
         val year = date.substring(3).toInt() + 2000
         return DateUnit.putYearMonth(year, month)
     }
@@ -437,7 +437,7 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent, SearchEngine.Parent, LoadHan
                     s = it.replace("</div>", "")
                     i = s.indexOf("<div")
                     while (i > -1) {
-                        s = s.substring(0, i) + s.substring(s.indexOf(">", i) + 1)
+                        s = s.take(i) + s.substring(s.indexOf(">", i) + 1)
                         i = s.indexOf("<div")
                     }
                     if (!s.contains("<p")) s = "<p>$s</p>"
@@ -480,7 +480,7 @@ class SearchToiler : NeoToiler(), NeoPaging.Parent, SearchEngine.Parent, LoadHan
 
     private fun getUrl(link: String): String {
         val s = if (link.contains("/"))
-            link.substring(0, link.lastIndexOf("/"))
+            link.take(link.lastIndexOf("/"))
         else link
         val i = if (s.isDigitsOnly()) s.toInt() else 2016
         return if (i < 2016) Urls.MainSite + link

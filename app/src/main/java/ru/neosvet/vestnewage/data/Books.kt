@@ -66,7 +66,7 @@ object Books {
         val links = getLinks(book)
         val t = mutableListOf(App.context.getString(R.string.promo_book))
         val s = mutableListOf(links[0])
-        for (i in 1..links.size - 1) {
+        for (i in 1..<links.size) {
             t.add(getTitle(links[i]))
             s.add(links[i])
         }
@@ -87,7 +87,7 @@ object Books {
             else -> getLinks(BookTab.DOCTRINE)[0]
         }
         val i = s.lastIndexOf(' ') + 1
-        s = s.substring(0, i) + "<a href='$url'>" + s.substring(i)
+        s = s.take(i) + "<a href='$url'>" + s.substring(i)
         return "<BLOCKQUOTE>$s</a>.</BLOCKQUOTE>\n"
     }
 

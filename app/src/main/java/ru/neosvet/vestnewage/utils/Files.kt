@@ -26,7 +26,7 @@ object Files {
     }
 
     fun link(link: String): File {
-        var file = file(link.substring(0, link.lastIndexOf("/")))
+        var file = file(link.take(link.lastIndexOf("/")))
         if (!file.exists()) file.mkdirs()
         file = file(link)
         return file

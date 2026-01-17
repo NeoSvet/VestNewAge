@@ -94,7 +94,7 @@ class AdditionStorage : DataBase.Parent, StorageSearchable {
 
     fun searchByDate(date: String): Cursor {
         val i = date.lastIndexOf(".")
-        val d = date.substring(0, i) + "%" + date.substring(i + 1) + "%"
+        val d = date.take(i) + "%" + date.substring(i + 1) + "%"
         return db.query(
             table = DataBase.ADDITION,
             selection = Const.DESCRIPTION + DataBase.LIKE,
@@ -112,7 +112,7 @@ class AdditionStorage : DataBase.Parent, StorageSearchable {
         val item = if (cursor.moveToFirst()) {
             var date = cursor.getString(cursor.getColumnIndex(Const.TIME))
             val title = if (withDate) {
-                date = date.substring(0, 10).replace(".20", ".")
+                date = date.take(10).replace(".20", ".")
                 cursor.getString(cursor.getColumnIndex(Const.TITLE)) + " ($date)"
             } else cursor.getString(cursor.getColumnIndex(Const.TITLE))
             val link = cursor.getInt(cursor.getColumnIndex(Const.LINK)).toString()
@@ -129,7 +129,7 @@ class AdditionStorage : DataBase.Parent, StorageSearchable {
                     n = d.indexOf(">", i) + 1
                     u = d.indexOf("</a", n)
                     s = d.substring(i, n - 2)
-                    d = d.substring(0, i - 9) + d.substring(n, u) +
+                    d = d.take(i - 9) + d.substring(n, u) +
                             ": $s" + d.substring(u + 4)
                     i = d.indexOf("<a")
                 }
@@ -186,7 +186,7 @@ class AdditionStorage : DataBase.Parent, StorageSearchable {
             if (today.timeInDays - date.timeInDays < 7)
                 return date.toTimeString() + ", " + weekDays[date.dayWeek]
             val t = date.toAlterString()
-            return t.substring(0, t.length - 5)
+            return t.take(t.length - 5)
         }
         return date.toAlterString()
     }

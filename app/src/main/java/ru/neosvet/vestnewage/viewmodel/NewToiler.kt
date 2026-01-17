@@ -6,10 +6,10 @@ import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.R
 import ru.neosvet.vestnewage.data.BasicItem
 import ru.neosvet.vestnewage.storage.DevStorage
+import ru.neosvet.vestnewage.storage.UnreadStorage
 import ru.neosvet.vestnewage.utils.AdsUtils
 import ru.neosvet.vestnewage.utils.Const
 import ru.neosvet.vestnewage.utils.NotificationUtils
-import ru.neosvet.vestnewage.storage.UnreadStorage
 import ru.neosvet.vestnewage.utils.isPoem
 import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
 import ru.neosvet.vestnewage.viewmodel.state.BasicState
@@ -65,7 +65,7 @@ class NewToiler : NeoToiler() {
                     t = s.substring(s.lastIndexOf(File.separator) + 1)
                     if (t.contains("_")) {
                         n = t.indexOf("_")
-                        t = t.substring(0, n) + " (" + t.substring(n + 1) + ")"
+                        t = t.take(n) + " (" + t.substring(n + 1) + ")"
                     }
                     if (s.isPoem)
                         t = poemFrom + t

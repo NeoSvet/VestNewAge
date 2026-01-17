@@ -54,7 +54,7 @@ class PageLoader(private val client: NeoClient) : Loader {
         var id = link.indexOf("#")
         val adr = if (id > 0) {
             par = link.substring(id)
-            link.substring(0, id)
+            link.take(id)
         } else link
         id = 0
         do {
@@ -87,7 +87,7 @@ class PageLoader(private val client: NeoClient) : Loader {
                         if (e.contains("Аминь") && !e.contains("noind")) {
                             e = "<p class='noind'>" + e.substring(e.indexOf('>') + 1)
                             page.nextElem?.let {
-                                e = e.substring(0, e.lastIndexOf("</"))
+                                e = e.take(e.lastIndexOf("</"))
                                 e += "<br>" + it.substring(it.indexOf('>') + 1)
                             }
                         }

@@ -48,7 +48,7 @@ class WordsUtils {
             dialog.setMessage(msg)
             dialog.setLeftButton(act.getString(R.string.find)) {
                 if (msg.contains(Const.N))
-                    searchFun.invoke(msg.substring(0, msg.indexOf(Const.N)).trim('.'))
+                    searchFun.invoke(msg.take(msg.indexOf(Const.N)).trim('.'))
                 else searchFun.invoke(msg.trim('.'))
                 dialog.dismiss()
             }

@@ -9,10 +9,10 @@ import androidx.work.Data
 import kotlinx.coroutines.launch
 import ru.neosvet.vestnewage.App
 import ru.neosvet.vestnewage.R
-import ru.neosvet.vestnewage.storage.DataBase
 import ru.neosvet.vestnewage.data.MarkerItem
 import ru.neosvet.vestnewage.loader.page.PageLoader
 import ru.neosvet.vestnewage.network.NeoClient
+import ru.neosvet.vestnewage.storage.DataBase
 import ru.neosvet.vestnewage.storage.MarkersStorage
 import ru.neosvet.vestnewage.storage.PageStorage
 import ru.neosvet.vestnewage.utils.Const
@@ -24,7 +24,12 @@ import ru.neosvet.vestnewage.viewmodel.basic.NeoToiler
 import ru.neosvet.vestnewage.viewmodel.state.BasicState
 import ru.neosvet.vestnewage.viewmodel.state.ListState
 import ru.neosvet.vestnewage.viewmodel.state.MarkersState
-import java.io.*
+import java.io.BufferedReader
+import java.io.BufferedWriter
+import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.io.InputStreamReader
+import java.io.OutputStreamWriter
 
 class MarkersToiler : NeoToiler() {
     enum class Type {
@@ -301,7 +306,7 @@ class MarkersToiler : NeoToiler() {
             k++
             i = b.indexOf(Const.N, i + 1)
         }
-        val f = place.substring(0, place.length - 1).replace(Const.COMMA, ".").toFloat() / 100f
+        val f = place.take(place.length - 1).replace(Const.COMMA, ".").toFloat() / 100f
         k = (k.toFloat() * f).toInt() + 1
         i = 0
         var u: Int

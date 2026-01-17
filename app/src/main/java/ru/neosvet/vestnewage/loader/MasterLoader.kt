@@ -199,7 +199,7 @@ class MasterLoader : Loader, LoadHandlerLite {
         val list = mutableListOf<String>()
         var isDelete: Boolean
         br.forEachLine {
-            name = it.substring(0, it.indexOf(" "))
+            name = it.take(it.indexOf(" "))
             isDelete = it.contains("delete")
             if (isDelete.not())
                 list.add(name)

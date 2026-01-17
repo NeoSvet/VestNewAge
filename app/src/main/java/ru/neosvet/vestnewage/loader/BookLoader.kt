@@ -67,7 +67,7 @@ class BookLoader(private val client: NeoClient) : Loader {
             }
             s = page.text
             if (s.contains("(")) //poems
-                s = s.substring(0, s.indexOf(" ("))
+                s = s.take(s.indexOf(" ("))
             title.add(s)
             links.add(a.substring(1))
         } while (page.nextItem != null)

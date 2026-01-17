@@ -85,7 +85,7 @@ class PageParser(private val client: NeoClient) {
             if (s.contains("!--")) {
                 n = s.indexOf("!--")
                 if (n == 1) n = 0
-                s = s.substring(0, n) + s.substring(s.indexOf(">", n) + 1)
+                s = s.take(n) + s.substring(s.indexOf(">", n) + 1)
             }
             if (s.isEmpty()) {
                 i++
@@ -126,7 +126,7 @@ class PageParser(private val client: NeoClient) {
             }
             elem.start = true
             elem.end = false
-            elem.tag = s.substring(0, n)
+            elem.tag = s.take(n)
             elem.html = m[i].substring(m[i].indexOf(">") + 1)
             if (elem.tag.startsWith(Const.HEAD))
                 wasNoind = false
@@ -156,7 +156,7 @@ class PageParser(private val client: NeoClient) {
                         elem.par = Urls.Site + elem.par.substring(1)
                     if (elem.html.isEmpty() && !elem.par.contains(".jpg")) {
                         s = elem.par.substring(elem.par.lastIndexOf("/") + 1)
-                        if (s.contains("?")) s = s.substring(0, s.indexOf("?"))
+                        if (s.contains("?")) s = s.take(s.indexOf("?"))
                         elem.html = s
                     }
                 }
@@ -176,7 +176,7 @@ class PageParser(private val client: NeoClient) {
 
                 Const.PAR -> {
                     if (startPar) content.add(HTMLElem(Const.PAR)) else startPar = true
-                    s = s.substring(0, s.indexOf(">")).replace("\"", "'")
+                    s = s.take(s.indexOf(">")).replace("\"", "'")
                     if (s.contains(Const.CLASS)) {
                         n = s.indexOf(Const.CLASS)
                         s = s.substring(n, s.indexOf("'", n + Const.CLASS.length + 2) + 1)
@@ -213,11 +213,11 @@ class PageParser(private val client: NeoClient) {
                         s = s.replace(";;", ";")
                         if (s.contains(Const.TEXTCOLOR)) {
                             n = s.indexOf(Const.TEXTCOLOR)
-                            s = s.substring(0, n) + s.substring(s.indexOf(";", n) + 1)
+                            s = s.take(n) + s.substring(s.indexOf(";", n) + 1)
                         }
                         if (s.contains(Const.COLOR)) {
                             n = s.indexOf(Const.COLOR)
-                            s = s.substring(0, n) + s.substring(s.indexOf(";", n) + 1)
+                            s = s.take(n) + s.substring(s.indexOf(";", n) + 1)
                         }
                         if (s.length > 3) {
                             if (elem.par.isEmpty()) elem.par = s else elem.par += " $s"

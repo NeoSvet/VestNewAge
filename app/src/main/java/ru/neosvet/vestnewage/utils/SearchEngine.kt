@@ -344,9 +344,9 @@ class SearchEngine(
         while (i < s.length) {
             if (s[i] == '"') {
                 s = if (i == 0 || s.isNotLetter(i - 1))
-                    s.substring(0, i) + "&laquo;" + s.substring(i + 1)
+                    s.take(i) + "&laquo;" + s.substring(i + 1)
                 else
-                    s.substring(0, i) + "&raquo;" + s.substring(i + 1)
+                    s.take(i) + "&raquo;" + s.substring(i + 1)
                 i += 7
             } else i++
         }
@@ -381,9 +381,9 @@ class SearchEngine(
             }
             removeDuplicateWords()
             val format = if (helper.isLetterCase)
-                DataBase.GLOB.substring(0, 6) + "'*%s*'"
+                DataBase.GLOB.take(6) + "'*%s*'"
             else
-                DataBase.LIKE.substring(0, 6) + "'%%%s%%'"
+                DataBase.LIKE.take(6) + "'%%%s%%'"
             val sb = StringBuilder()
             words.forEach {
                 sb.append(OR)
@@ -547,7 +547,7 @@ class SearchEngine(
                 for (e in arr) {
                     i = w[n].length - e.length
                     if (i > 2 && w[n].lastIndexOf(e, ignoreCase = true) == i) {
-                        w[n] = w[n].substring(0, i)
+                        w[n] = w[n].take(i)
                         break
                     }
                 }

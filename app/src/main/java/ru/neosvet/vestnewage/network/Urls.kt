@@ -124,7 +124,7 @@ object Urls {
     val Host: String
         get() {
             val s = Site.substring(8)
-            return s.substring(0, s.length - 1)
+            return s.take(s.length - 1)
         }
 
     val Page: String

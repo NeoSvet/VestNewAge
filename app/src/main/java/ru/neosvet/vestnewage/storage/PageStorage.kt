@@ -75,7 +75,7 @@ class PageStorage : DataBase.Parent, StorageSearchable {
         }
         db = DataBase(n, this, write)
         isClosed = false
-        month = n.substring(0, 2).toInt()
+        month = n.take(2).toInt()
         year = n.substring(3).toInt() + 2000
     }
 
