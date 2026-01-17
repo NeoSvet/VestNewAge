@@ -838,7 +838,8 @@ class BrowserActivity : AppCompatActivity(), ReaderClient.Parent, NeoInterface.P
                 }
 
                 R.id.nav_share ->
-                    ShareDialog.newInstance(link).show(supportFragmentManager, null)
+                    if (link.isNotBlank())
+                        ShareDialog.newInstance(link).show(supportFragmentManager, null)
 
                 R.id.nav_menu ->
                     rvMenu.isVisible = !rvMenu.isVisible

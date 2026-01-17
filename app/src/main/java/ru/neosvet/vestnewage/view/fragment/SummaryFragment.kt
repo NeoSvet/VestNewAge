@@ -180,11 +180,12 @@ class SummaryFragment : NeoFragment(), PagingAdapter.Parent, NeoScrollBar.Host {
 
             is ListState.Update<*> -> {
                 val item = state.item as BasicItem
-                ShareDialog.newInstance(
-                    link = item.link,
-                    title = item.title,
-                    content = item.des
-                ).show(childFragmentManager, null)
+                if (item.link.isNotBlank())
+                    ShareDialog.newInstance(
+                        link = item.link,
+                        title = item.title,
+                        content = item.des
+                    ).show(childFragmentManager, null)
             }
         }
     }
